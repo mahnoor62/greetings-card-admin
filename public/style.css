@@ -1,0 +1,17 @@
+.vertical-line {
+  width: 2px;
+  height: 100%;
+  background-color: black;
+}
+.vertical-line-preview {
+  width: 2px;
+  height: 100%;
+  background-color: grey;
+}
+/*body{*/
+/*  padding: 0;*/
+/*  margin: 0;*/
+/*}*/
+*, *::before, *::after {
+  box-sizing: border-box;
+}
