@@ -100,6 +100,7 @@ const Preview = () => {
                   >
                   <Box
                     component="img"
+                    loading="lazy"
                     src={`${BASE_URL}/${card.frontDesign.replace(/\\/g, '/')}`}
                     alt="Front Design"
                     sx={{
@@ -199,6 +200,7 @@ const Preview = () => {
                       {/* Inside Left Design */}
                       <Box
                         component="img"
+                        loading="lazy"
                         src={`${BASE_URL}/${card?.insideLeftDesign?.replace(/\\/g, '/')}`}
                         alt="Inside Left"
                         sx={{
@@ -224,6 +226,7 @@ const Preview = () => {
                       {/* Inside Right Design */}
                       <Box
                         component="img"
+                        loading="lazy"
                         src={`${BASE_URL}/${card?.insideRightDesign?.replace(/\\/g, '/')}`}
                         alt="Inside Right"
                         sx={{
@@ -284,6 +287,7 @@ const Preview = () => {
                 card?.backDesign ? (
                   <Box
                     component="img"
+                    loading="lazy"
                     src={`${BASE_URL}/${card.backDesign.replace(/\\/g, '/')}`}
                     alt="Front Design"
                     sx={{

@@ -50,6 +50,27 @@ const Page = () => {
   };
 
   const processImage = (file) => {
+
+    const sizeInBytes = file.size;
+    const sizeInKB = sizeInBytes / 1024;
+    const sizeInMB = sizeInKB / 1024;
+
+// Format size string for user-friendly display
+    const sizeString = sizeInMB >= 1
+      ? `${sizeInMB.toFixed(2)} MB`
+      : `${sizeInKB.toFixed(2)} KB`;
+
+// Set maximum size to 1MB (in bytes)
+    const maxSizeInBytes = 1 * 1024 * 1024;
+
+    if (sizeInBytes > maxSizeInBytes) {
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+        {
+          duration: 3000,
+        });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -62,8 +83,11 @@ const Page = () => {
         // const expectedRatio = 1.414;
         // const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 1480 || img.height !== 2100) {
-          toast.error('Please upload an image of  1480 × 2100 pixels');
+        if (img.width !== 148 || img.height !== 210) {
+          toast.error('Please upload an image of  148 × 210 pixels',
+            {
+              duration: 3000,
+            });
           return;
         }
 
@@ -135,6 +159,25 @@ const Page = () => {
   };
 
   const processImageBackDesign = (file) => {
+    const sizeInBytes = file.size;
+    const sizeInKB = sizeInBytes / 1024;
+    const sizeInMB = sizeInKB / 1024;
+
+// Format size string for user-friendly display
+    const sizeString = sizeInMB >= 1
+      ? `${sizeInMB.toFixed(2)} MB`
+      : `${sizeInKB.toFixed(2)} KB`;
+
+// Set maximum size to 1MB (in bytes)
+    const maxSizeInBytes = 1 * 1024 * 1024;
+
+    if (sizeInBytes > maxSizeInBytes) {
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+        {
+          duration: 3000,
+        });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -147,8 +190,10 @@ const Page = () => {
         // const expectedRatio = 1.414;
         // const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 1480 || img.height !== 2100) {
-          toast.error('Please upload an image of  1480 × 2100 pixels');
+        if (img.width !== 148 || img.height !== 210) {
+          toast.error('Please upload an image of  148 × 210 pixels', {
+            duration: 3000,
+          });
           return;
         }
 
@@ -222,6 +267,24 @@ const Page = () => {
   };
 
   const processImageInsideLeftDesign = (file) => {
+    const sizeInBytes = file.size;
+    const sizeInKB = sizeInBytes / 1024;
+    const sizeInMB = sizeInKB / 1024;
+
+// Format size string for user-friendly display
+    const sizeString = sizeInMB >= 1
+      ? `${sizeInMB.toFixed(2)} MB`
+      : `${sizeInKB.toFixed(2)} KB`;
+
+// Set maximum size to 1MB (in bytes)
+    const maxSizeInBytes = 1 * 1024 * 1024;
+
+    if (sizeInBytes > maxSizeInBytes) {
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`, {
+        duration: 3000,
+      });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -234,8 +297,10 @@ const Page = () => {
         // const expectedRatio = 1.414;
         // const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 1480 || img.height !== 2100) {
-          toast.error('Please upload an image of  1480 × 2100 pixels');
+        if (img.width !== 148 || img.height !== 210) {
+          toast.error('Please upload an image of  148 × 210 pixels', {
+            duration: 3000,
+          });
           return;
         }
 
@@ -310,6 +375,24 @@ const Page = () => {
   };
 
   const processImageInsideRightDesign = (file) => {
+    const sizeInBytes = file.size;
+    const sizeInKB = sizeInBytes / 1024;
+    const sizeInMB = sizeInKB / 1024;
+
+// Format size string for user-friendly display
+    const sizeString = sizeInMB >= 1
+      ? `${sizeInMB.toFixed(2)} MB`
+      : `${sizeInKB.toFixed(2)} KB`;
+
+// Set maximum size to 1MB (in bytes)
+    const maxSizeInBytes = 1 * 1024 * 1024;
+
+    if (sizeInBytes > maxSizeInBytes) {
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`, {
+        duration: 3000,
+      });
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
@@ -322,8 +405,10 @@ const Page = () => {
         // const expectedRatio = 1.414;
         // const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 1480 || img.height !== 2100) {
-          toast.error('Please upload an image of  1480 × 2100 pixels');
+        if (img.width !== 148 || img.height !== 210) {
+          toast.error('Please upload an image of  148 × 210 pixels', {
+            duration: 3000,
+          });
           return;
         }
 
@@ -383,7 +468,10 @@ const Page = () => {
 
   const handleNextClick = () => {
     if (!image || !backImage || !insideLeftImage || !insideRightImage) {
-      toast.error('Please upload all required card images before proceeding.');
+      toast.error('Please upload all required card images before proceeding.',
+        {
+          duration: 3000,
+        });
       return;
     }
 
@@ -426,10 +514,7 @@ const Page = () => {
     /\\/g,
     '/')}` : null;
 
-
-
-
-  console.log("card", card)
+  console.log("selectedCardId",selectedCardId);
 
   return (
     <>

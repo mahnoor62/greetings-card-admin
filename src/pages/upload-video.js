@@ -37,15 +37,86 @@ const UploadVideo = () => {
     inputRef.current.click();
   };
 
+  // const handleVideoSelect = (e) => {
+  //   // const file = e.target.files[0];
+  //
+  //   // if (!file.type.startsWith('video/')) {
+  //   //   toast.error('Please select a valid video file');
+  //   //   return;
+  //   // }
+  //   //
+  //   // const sizeInMB = file.size / (1024 * 1024);
+  //   //
+  //   // if (sizeInMB > 1) {
+  //   //   toast.error(`Video too large. Selected file is ${sizeInMB.toFixed(2)} MB. Max allowed is 1 MB.`);
+  //   //   return;
+  //   // }
+  //   //
+  //   // setVideo(file);
+  //   // const preview = URL.createObjectURL(file);
+  //   // setPreviewURL(preview);
+  //
+  //   const file = e.target.files[0];
+  //   const sizeInMB = file.size / (1024 * 1024);
+  //
+  //   if (sizeInMB > 1) {
+  //     toast.error(`Video size is too large. Selected file is ${sizeInMB.toFixed(2)} MB. Max allowed size is 1 MB.`,{
+  //       duration: 3000,
+  //     });
+  //     return;
+  //   }
+  //
+  //   if (file && file.type.startsWith('video/')) {
+  //     setVideo(file);
+  //     const preview = URL.createObjectURL(file);
+  //     setPreviewURL(preview);
+  //   } else {
+  //     toast.error('Please select a valid video file');
+  //   }
+  // };
   const handleVideoSelect = (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith('video/')) {
-      setVideo(file);
-      const preview = URL.createObjectURL(file);
-      setPreviewURL(preview);
-    } else {
+
+    if (!file || !file.type.startsWith('video/')) {
       toast.error('Please select a valid video file');
+      return;
     }
+
+    const sizeInMB = file.size / (1024 * 1024);
+    if (sizeInMB > 1) {
+      toast.error(
+        `Video size is too large. Selected file is ${sizeInMB.toFixed(2)} MB. Max allowed size is 1 MB.`,
+        { duration: 3000 }
+      );
+      return;
+    }
+
+    const videoElement = document.createElement('video');
+    videoElement.preload = 'metadata';
+
+    videoElement.onloadedmetadata = () => {
+      const width = videoElement.videoWidth;
+      const height = videoElement.videoHeight;
+
+      URL.revokeObjectURL(videoElement.src); // Clean up object URL
+
+      if (width === 148 && height === 210) {
+        setVideo(file);
+        const preview = URL.createObjectURL(file);
+        setPreviewURL(preview);
+      } else {
+        toast.error(
+          `Invalid video dimensions. Required: 148x210. Selected: ${width}x${height}`,
+          { duration: 3000 }
+        );
+      }
+    };
+
+    videoElement.onerror = () => {
+      toast.error('Failed to load video metadata. Please try a different file.');
+    };
+
+    videoElement.src = URL.createObjectURL(file);
   };
 
   useEffect(() => {
@@ -56,6 +127,7 @@ const UploadVideo = () => {
     };
   }, [previewURL]);
 
+  
 
   const handleSave = async () => {
     if (!video) {
@@ -160,6 +232,7 @@ const UploadVideo = () => {
 
           <Box
             component="img"
+            loading="lazy"
             src={frontDesignPath}
             alt="Card Image"
             sx={{

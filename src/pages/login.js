@@ -69,7 +69,7 @@ const Page = () => {
       </Head>
       <Box
         sx={{
-          backgroundImage: `url(${WEB_URL}/bg.png)`,
+          backgroundImage: `url(${WEB_URL}/bg1.png)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
