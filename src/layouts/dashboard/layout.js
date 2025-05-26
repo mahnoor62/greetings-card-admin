@@ -57,7 +57,7 @@ export const Layout = withAuthGuard((props) => {
       {/*  onClose={() => setOpenNav(false)}*/}
       {/*  open={openNav}*/}
       {/*/>*/}
-      <LayoutRoot>
+      <LayoutRoot class={"hellooo"}>
         <LayoutContainer >
           {children}
         </LayoutContainer>

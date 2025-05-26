@@ -48,11 +48,19 @@ export const TopNav = (props) => {
           // overflowY:'hidden',
           // backdropFilter: 'blur(6px)',
           // backgroundColor: isCardCustomization ? 'white' : '#e9e9e9',
-          backgroundColor: '#1a1d25',
-          // position: 'sticky',
-          // top: 0,
-          paddingTop: 1,
-          paddingBottom: 1
+          backgroundColor: '#1a1d25 !important',
+          // boxShadow: 'none',
+          zIndex: (theme) => theme.zIndex.appBar,
+          width: '100% !important',
+          position: 'fixed',
+          pt: 0,
+          top: 0
+          // backgroundColor: '#1a1d25',
+          // position: 'fixed',
+          // width: "100%",
+          // // top: 0,
+          // paddingTop: 1,
+          // paddingBottom: 1
           // zIndex: (theme) => theme.zIndex.appBar
         }}
       >
@@ -64,7 +72,8 @@ export const TopNav = (props) => {
             justifyContent="space-between"
             spacing={2}
             sx={{
-              minHeight: TOP_NAV_HEIGHT,
+              p:2,
+              // minHeight: TOP_NAV_HEIGHT,
               px: 2
             }}
           >
@@ -116,11 +125,22 @@ export const TopNav = (props) => {
                   />
                 </Stack>) :
                 (
-                  <IconButton onClick={() => setOpen(!open)} sx={{ p: 0 }}>
-                    <SvgIcon fontSize="large">
-                      <Bars3Icon/>
-                    </SvgIcon>
-                  </IconButton>
+                  <Avatar
+                    onClick={accountPopover.handleOpen}
+                    ref={accountPopover.anchorRef}
+                    sx={{
+                      display: isCardCustomization || isDashboard || isPreview  || isUploadCards ? 'block' : 'none',
+                      cursor: 'pointer',
+                      height: 40,
+                      width: 40
+                    }}
+                    src={`${WEB_URL}/blank-profile.webp`}
+                  />
+                  // <IconButton onClick={() => setOpen(!open)} sx={{ p: 0 }}>
+                  //   <SvgIcon fontSize="large">
+                  //     <Bars3Icon/>
+                  //   </SvgIcon>
+                  // </IconButton>
                 )
             }
           </Stack>
@@ -145,17 +165,17 @@ export const TopNav = (props) => {
               </Button>
             </NextLink>
 
-            <Avatar
-              onClick={accountPopover.handleOpen}
-              ref={accountPopover.anchorRef}
-              sx={{
-                display: isCardCustomization || isDashboard || isPreview  || isUploadCards ? 'block' : 'none',
-                cursor: 'pointer',
-                height: 40,
-                width: 40
-              }}
-              src={`${WEB_URL}/blank-profile.webp`}
-            />
+            {/*<Avatar*/}
+            {/*  onClick={accountPopover.handleOpen}*/}
+            {/*  ref={accountPopover.anchorRef}*/}
+            {/*  sx={{*/}
+            {/*    display: isCardCustomization || isDashboard || isPreview  || isUploadCards ? 'block' : 'none',*/}
+            {/*    cursor: 'pointer',*/}
+            {/*    height: 40,*/}
+            {/*    width: 40*/}
+            {/*  }}*/}
+            {/*  src={`${WEB_URL}/blank-profile.webp`}*/}
+            {/*/>*/}
           </Box>
         </Collapse>
       </Box>

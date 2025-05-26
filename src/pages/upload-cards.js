@@ -24,6 +24,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const Page = () => {
   const router = useRouter();
+  const [card, setCard] = useState(null);
   const { selectedCardId } = useCardContext();
   const { user } = useAuth();
   const token = user?.token;
@@ -54,7 +55,22 @@ const Page = () => {
       const img = new Image();
       img.src = e.target.result;
       img.onload = () => {
-        // if (img.width !== 1920 || img.height !== 1080) { ... }
+        const width = img.width;
+        const height = img.height;
+
+        // const aspectRatio = height / width; // A5 is ~1.414
+        // const expectedRatio = 1.414;
+        // const tolerance = 0.05; // Allow slight margin for error
+
+        if (img.width !== 1480 || img.height !== 2100) {
+          toast.error('Please upload an image of  1480 × 2100 pixels');
+          return;
+        }
+
+        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        //   return;
+        // }
 
         formik.setFieldValue('frontDesign', file);
         setImage(file);
@@ -124,7 +140,22 @@ const Page = () => {
       const img = new Image();
       img.src = e.target.result;
       img.onload = () => {
-        // if (img.width !== 1920 || img.height !== 1080) { ... }
+        const width = img.width;
+        const height = img.height;
+
+        // const aspectRatio = height / width; // A5 is ~1.414
+        // const expectedRatio = 1.414;
+        // const tolerance = 0.05; // Allow slight margin for error
+
+        if (img.width !== 1480 || img.height !== 2100) {
+          toast.error('Please upload an image of  1480 × 2100 pixels');
+          return;
+        }
+
+        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        //   return;
+        // }
 
         formik.setFieldValue('backDesign', file);
         setBackImage(file);
@@ -196,7 +227,22 @@ const Page = () => {
       const img = new Image();
       img.src = e.target.result;
       img.onload = () => {
-        // if (img.width !== 1920 || img.height !== 1080) { ... }
+        const width = img.width;
+        const height = img.height;
+
+        // const aspectRatio = height / width; // A5 is ~1.414
+        // const expectedRatio = 1.414;
+        // const tolerance = 0.05; // Allow slight margin for error
+
+        if (img.width !== 1480 || img.height !== 2100) {
+          toast.error('Please upload an image of  1480 × 2100 pixels');
+          return;
+        }
+
+        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        //   return;
+        // }
 
         formik.setFieldValue('insideLeftDesign', file);
         setInsideLeftImage(file);
@@ -269,7 +315,22 @@ const Page = () => {
       const img = new Image();
       img.src = e.target.result;
       img.onload = () => {
-        // if (img.width !== 1920 || img.height !== 1080) { ... }
+        const width = img.width;
+        const height = img.height;
+
+        // const aspectRatio = height / width; // A5 is ~1.414
+        // const expectedRatio = 1.414;
+        // const tolerance = 0.05; // Allow slight margin for error
+
+        if (img.width !== 1480 || img.height !== 2100) {
+          toast.error('Please upload an image of  1480 × 2100 pixels');
+          return;
+        }
+
+        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        //   return;
+        // }
 
         formik.setFieldValue('insideRightDesign', file);
         setInsideRightImage(file);
@@ -329,6 +390,47 @@ const Page = () => {
     router.push('/upload-video');
   };
 
+  const handleUpdateNextClick = () => {
+    router.push('/upload-video');
+  };
+
+  const getCardData = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/api/cards/get/${selectedCardId}`, {
+        headers: {
+          'x-access-token': token
+        }
+      });
+      setCard(res.data.data);
+    } catch (error) {
+      console.log(error);
+
+    }
+
+  };
+
+  useEffect(() => {
+    getCardData();
+  }, [selectedCardId]);
+
+  const existingImageUrl = card?.frontDesign
+    ? `${BASE_URL}/${card.frontDesign.replace(/\\/g, '/')}`
+    : null;
+  const existingBackUrl = card?.backDesign
+    ? `${BASE_URL}/${card.backDesign.replace(/\\/g, '/')}`
+    : null;
+  const existingInsideLeftUrl = card?.insideLeftDesign ? `${BASE_URL}/${card.insideLeftDesign.replace(
+    /\\/g,
+    '/')}` : null;
+  const existingInsideRightUrl = card?.insideRightDesign ? `${BASE_URL}/${card.insideRightDesign.replace(
+    /\\/g,
+    '/')}` : null;
+
+
+
+
+  console.log("card", card)
+
   return (
     <>
       <Head>
@@ -337,8 +439,12 @@ const Page = () => {
         </title>
       </Head>
       <Box sx={{
+        pt: { xs: 15, md: 5 },
+        height: { md: '100vh !important', xs: '100% !important' },
+        // pt:60,
         width: '100%',
-        height: '100%',
+
+        // height: '100vh !important'
         // minHeight:'100vh',
         // bgcolor: 'pink',
         // backgroundImage: `url(${WEB_URL}/bg.png)`,
@@ -356,9 +462,11 @@ const Page = () => {
         <Container sx={{
           pt: { xs: 5 }, pb: { xs: 5, md: 2 },
           display: 'flex',
+          // bgcolor:'red',
           justifyContent: 'center',
+          flexDirection: 'column',
           alignItems: 'center'
-          // height: '100vh'
+          // height: '100%'
         }}>
           <Grid container spacing={2}>
             <Grid item xs={6} md={3}>
@@ -384,7 +492,12 @@ const Page = () => {
                     onDragOver={(e) => e.preventDefault()}
                     onDragLeave={(e) => e.preventDefault()}
                     component="img"
-                    src={image ? URL.createObjectURL(image) : `${WEB_URL}/drag.png`}
+                    src={
+                      image
+                        ? URL.createObjectURL(image)
+                        : existingImageUrl || `${WEB_URL}/drag.png`
+                    }
+                    // src={image ? URL.createObjectURL(image) : `${WEB_URL}/drag.png`}
                     alt="Drag Icon"
                     sx={{ width: 100, height: 100 }}
                   />
@@ -402,7 +515,7 @@ const Page = () => {
                       variant="contained"
                       onClick={() => document.getElementById('frontDesign').click()}
                       sx={{
-                        minWidth: {md: 150, xs:100 },
+                        minWidth: { md: 150, xs: 100 },
                         backgroundColor: '#c09b9b !important',
                         color: '#1a1d25',
                         fontWeight: 700,
@@ -457,7 +570,12 @@ const Page = () => {
                     onDrop={handleDropForBack}
                     onDragOver={(e) => e.preventDefault()}
                     onDragLeave={(e) => e.preventDefault()}
-                    src={backImage ? URL.createObjectURL(backImage) : `${WEB_URL}/drag.png`}
+                    src={
+                      backImage
+                        ? URL.createObjectURL(backImage)
+                        : existingBackUrl || `${WEB_URL}/drag.png`
+                    }
+                    // src={backImage ? URL.createObjectURL(backImage) : `${WEB_URL}/drag.png`}
                     // src={`${WEB_URL}/drag.png`}
                     alt="Drag Icon"
                     sx={{ width: 100, height: 100 }}
@@ -476,7 +594,7 @@ const Page = () => {
                       onClick={() => document.getElementById('backDesign').click()}
                       variant="contained"
                       sx={{
-                        minWidth: {md: 150, xs:100 },
+                        minWidth: { md: 150, xs: 100 },
                         backgroundColor: '#c09b9b !important',
                         color: '#1a1d25',
                         fontWeight: 700,
@@ -536,9 +654,14 @@ const Page = () => {
                       onDragOver={(e) => e.preventDefault()}
                       onDragLeave={(e) => e.preventDefault()}
                       component="img"
-                      src={insideLeftImage
-                        ? URL.createObjectURL(insideLeftImage)
-                        : `${WEB_URL}/drag.png`}
+                      src={
+                        insideLeftImage
+                          ? URL.createObjectURL(insideLeftImage)
+                          : existingInsideLeftUrl || `${WEB_URL}/drag.png`
+                      // insideLeftImage
+                      //   ? URL.createObjectURL(insideLeftImage)
+                      //   : `${WEB_URL}/drag.png`
+                    }
                       // src={`${WEB_URL}/drag.png`}
                       alt="Drag Icon"
                       sx={{ width: 100, height: 100 }}
@@ -557,7 +680,7 @@ const Page = () => {
                         onClick={() => document.getElementById('insideLeftDesign').click()}
                         variant="contained"
                         sx={{
-                          minWidth: {md: 150, xs:100 },
+                          minWidth: { md: 150, xs: 100 },
                           backgroundColor: '#c09b9b !important',
                           color: '#1a1d25',
                           fontWeight: 700,
@@ -590,9 +713,14 @@ const Page = () => {
                       onDragOver={(e) => e.preventDefault()}
                       onDragLeave={(e) => e.preventDefault()}
                       component="img"
-                      src={insideRightImage
-                        ? URL.createObjectURL(insideRightImage)
-                        : `${WEB_URL}/drag.png`}
+                      src={
+                        insideRightImage
+                          ? URL.createObjectURL(insideRightImage)
+                          : existingInsideRightUrl || `${WEB_URL}/drag.png`
+                      // insideRightImage
+                      //   ? URL.createObjectURL(insideRightImage)
+                      //   : `${WEB_URL}/drag.png`
+                    }
                       // src={`${WEB_URL}/drag.png`}
                       alt="Drag Icon"
                       sx={{ width: 100, height: 100 }}
@@ -611,7 +739,7 @@ const Page = () => {
                         onClick={() => document.getElementById('insideRightDesign').click()}
                         variant="contained"
                         sx={{
-                          minWidth: {md: 150, xs:100 },
+                          minWidth: { md: 150, xs: 100 },
                           backgroundColor: '#c09b9b !important',
                           color: '#1a1d25',
                           fontWeight: 700,
@@ -669,22 +797,43 @@ const Page = () => {
               </Box>
             </Grid>
           </Grid>
-        </Container>
-        <Box
-          sx={{
-            // pt:{xs:0, md:0, lg:0,xl:10},
-            width: '100%',
-            display: 'flex',
-            justifyContent: { xs: 'center', md: 'flex-end' },
-            alignItems: 'center',
-            pr: {md: 5 , xs:0},
-            pb:{xs:5,md:0}
-          }}
-        >
+          <Box
+            sx={{
+              pt: { lg: 5, xl: 5, xs: 5 },
+              // pt:{xs:0, md:0, lg:0,xl:10},
+              width: '100%',
+              display: 'flex',
+              // bgcolor:'red',
+              justifyContent: { xs: 'center', md: 'flex-end' },
+              alignItems: 'center',
+              // pr: {md: 5 , xs:0},
+              pb: { xs: 5, md: 0 }
+            }}
+          >
 
-          {/*<NextLink href="/upload-video" passHref legacyBehavior>*/}
-          <Button
-            onClick={handleNextClick}
+
+            {
+              card?.frontDesign  && card?.backDesign && card?.insideLeftDesign && card?.insideRightDesign ? (
+                <Button
+                  onClick={handleUpdateNextClick}
+                  sx={{
+                    textAlign: 'center',
+                    backgroundColor: '#c09b9b !important',
+                    color: '#1a1d25',
+                    // display: isUploadCards?  'block' : 'none',
+                    minWidth: 120, '&:hover': {
+                      backgroundColor: '#c09b9b !important'
+                      // color: '#1a1d25',
+                    }
+                  }}
+                  variant="contained"
+                >
+                  Next
+                </Button>
+              ) :(
+
+              <Button
+              onClick={handleNextClick}
             sx={{
               textAlign: 'center',
               backgroundColor: '#c09b9b !important',
@@ -699,8 +848,12 @@ const Page = () => {
           >
             Next
           </Button>
-          {/*</NextLink>*/}
-        </Box>
+
+              )
+            }
+
+          </Box>
+        </Container>
 
 
         <input

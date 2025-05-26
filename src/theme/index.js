@@ -17,7 +17,26 @@ export function createTheme() {
         sm: 600,
         md: 900,
         lg: 1200,
-        xl: 1440
+        xl: 1900,
+
+        //
+        // tablet: 768,
+        // custom: 790,
+        // // surfaceDuo: 540,
+        // mobileCover: 800,
+        // // ipad: 1025,
+        // mobile: 767,
+        // laptop: 1280,
+        // large: 1540,
+        // xxl: 2560,
+        // xxxl: 3000,
+        // '4k': 3840,
+        // '5k': 5120,
+        //
+        ipad: 768,
+        // ipadPro: 1024,
+        // surfacePro:912,
+
       }
     },
     components,

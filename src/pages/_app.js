@@ -53,7 +53,7 @@ const App = (props) => {
                     width: '100%',
                     height: '100%',
                     minHeight:'100vh',
-                    backgroundImage: `url(${WEB_URL}/bg.png)`,
+                    backgroundImage: `url(${WEB_URL}/bg1.png)`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat',

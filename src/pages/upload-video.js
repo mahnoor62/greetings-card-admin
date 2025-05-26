@@ -25,6 +25,8 @@ const UploadVideo = () => {
   const { user } = useAuth();
   const token = user?.token;
   const [video, setVideo] = useState(null);
+  const [previewURL, setPreviewURL] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [card, setCard] = useState();
   const inputRef = useRef();
@@ -39,10 +41,21 @@ const UploadVideo = () => {
     const file = e.target.files[0];
     if (file && file.type.startsWith('video/')) {
       setVideo(file);
+      const preview = URL.createObjectURL(file);
+      setPreviewURL(preview);
     } else {
       toast.error('Please select a valid video file');
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (previewURL) {
+        URL.revokeObjectURL(previewURL);
+      }
+    };
+  }, [previewURL]);
+
 
   const handleSave = async () => {
     if (!video) {
@@ -101,6 +114,8 @@ const UploadVideo = () => {
     : null;
 
 
+
+
   return (
     <>
       <Head>
@@ -110,8 +125,12 @@ const UploadVideo = () => {
       </Head>
       <Box
         sx={{
+          pt: {xs: 15, md:5 },
+          height: {md: '100vh !important',xs:'100% !important'},
           width: '100%',
-          height: '100%',
+          // height: {md: '100%', lg:'100%', xl:'100vh' },
+
+          // bgcolor:'red',
           // minHeight:'100vh',
           // backgroundImage: `url(${WEB_URL}/bg.png)`,
           // backgroundSize: 'cover',
@@ -131,6 +150,7 @@ const UploadVideo = () => {
             // bgcolor:'red',
             position:'relative',
             display: 'flex',
+            flexDirection:'column',
             // height: '100%',
             justifyContent: 'center',
             alignItems: 'center',
@@ -153,10 +173,11 @@ const UploadVideo = () => {
             }}
           />
 
-          {videoPath ? (
+          {previewURL || videoPath ? (
+            <>
             <Box
               component="video"
-              src={videoPath}
+              src={previewURL || videoPath}
               controls
               sx={{
                 position: 'absolute',
@@ -169,7 +190,23 @@ const UploadVideo = () => {
                 borderRadius: 2
               }}
             />
+            <Box
+              onClick={handleVideoClick}
+              component="img"
+              src={`${WEB_URL}/videoIcon.png`}
+              alt="video icon"
+              sx={{
+                position: 'absolute',
+                top: '70%',
+                left: '50%',
+                transform: 'translate(-70%, -70%)',
+                width: 50,
+                height: 50
+              }}
+            />
+            </>
           ) : (
+
             <Box
               onClick={handleVideoClick}
               component="img"
@@ -206,11 +243,13 @@ const UploadVideo = () => {
           }
 
           {/*</Box>*/}
-        </Container>
 
-        {/* BUTTONS - OUTSIDE CONTAINER, INSIDE BOX */}
+
+        </Container>
         <Box
           sx={{
+            pt:{xl:15},
+            // bgcolor:'red',
             width: '100%',
             display: 'flex',
             justifyContent: { xs: 'center', md: 'flex-end' },
@@ -272,6 +311,8 @@ const UploadVideo = () => {
           </Button>
           {/*</NextLink>*/}
         </Box>
+        {/* BUTTONS - OUTSIDE CONTAINER, INSIDE BOX */}
+
       </Box>
 
     </>

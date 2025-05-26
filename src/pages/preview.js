@@ -33,7 +33,6 @@ const Preview = () => {
       const res = await axios.get(`${BASE_URL}/api/cards/get/${id}`, {
         headers: {
           'x-access-token': token,
-          'Content-Type': 'multipart/form-data'
         }
       });
       setCard(res.data.data);
@@ -48,7 +47,7 @@ const Preview = () => {
     getCard();
   }, [id]);
 
-  console.log('card', card);
+
   const videoPath = card?.video
     ? `${BASE_URL}/${card?.video.replace(/\\/g, '/')}`
     : null;
@@ -61,7 +60,9 @@ const Preview = () => {
         </title>
       </Head>
       <Box sx={{
-        height:'100%',
+        pt: {xs: 10, md:5 },
+        pb:{xs:10},
+        height: {md: '100vh !important',xs:'100% !important'},
         // minHeight:"100vh"
       }}>
         <Container sx={{
@@ -73,8 +74,9 @@ const Preview = () => {
           // pb: 10
         }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={3} sx={{
+            <Grid item xs={12} md={3} lg={3} sx={{
               display: 'flex',
+              width:'100%',
               justifyContent: 'center',
               flexDirection: 'column',
               alignItems: 'center',
@@ -86,8 +88,11 @@ const Preview = () => {
                   <Box
                     sx={{
                       position: 'relative',
-                      width: { md: '100%', xs: '100%' },
-                      height: {md: 450 , xs:400},
+                      width: { lg: '100%', xs: '80%' , md:'100%', ipad : '55%'},
+                      // height: {md: 450 , xs:'100%'},
+                      height: {lg: 450 , xs:400, md:400, ipad:500},
+                      // width: { md: '100%', xs: '100%' },
+                      // height: {md: 450 , xs:400},
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center'
@@ -136,7 +141,7 @@ const Preview = () => {
                 ) : (
                   <Box
                     sx={{
-                      width: { md: 320, xs: '100%' },
+                      width: { lg: 320, xs: '100%' , md:250},
                       height: 450,
                       bgcolor: '#f0f3f8',
                       boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
@@ -161,7 +166,9 @@ const Preview = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} md={6} sx={{
+            <Grid item xs={12} md={6} lg={6} sx={{
+              // bgcolor:'red',
+              width:'100%',
               display: 'flex',
               justifyContent: 'center',
               flexDirection: 'column',
@@ -173,7 +180,7 @@ const Preview = () => {
                   <Box
                     sx={{
                       // bgcolor: '#f0f3f8',
-                      width: { md: '100%', xs: '100%' },
+                      width: { md: '100%', xs: '100%', ipad : '90%'},
                       // height: '100%',
                       borderRadius: 0,
                       overflow: 'hidden'
@@ -205,11 +212,11 @@ const Preview = () => {
                       <Box
                         sx={{
                           width: '2px',
-                          height: '96%',
+                          height: '100%',
                           bgcolor: 'grey',
                           position: 'absolute',
                           left: '50%',
-                          top:3,
+                          top:1,
                           transform: 'translateX(-1px)'
                         }}
                       />
@@ -230,7 +237,7 @@ const Preview = () => {
                 ) : (
                   <Card sx={{
                     bgcolor: '#f0f3f8',
-                    width: { md: 530, xs: '100%' },
+                    width: { lg: 530, xs: '100%' , md:450},
                     height: 450,
                     // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.06), 0px 0px 0px rgba(0, 0, 0, 0)',
                     borderRadius: 0
@@ -263,8 +270,10 @@ const Preview = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={12} md={3} sx={{
+            <Grid item xs={12} md={3} lg={3} sx={{
+              // bgcolor:'grey',
               display: 'flex',
+              width:'100%',
               justifyContent: 'center',
               flexDirection: 'column',
               alignItems: 'center',
@@ -278,9 +287,9 @@ const Preview = () => {
                     src={`${BASE_URL}/${card.backDesign.replace(/\\/g, '/')}`}
                     alt="Front Design"
                     sx={{
-                      width: { md: '100%', xs: '100%' },
+                      width: { lg: '100%', xs: '80%' , md:'100%', ipad : '55%'},
                       // height: {md: 450 , xs:'100%'},
-                      height: {md: 450 , xs:400},
+                      height: {lg: 450 , xs:400, md:400,ipad:500},
                       // objectFit: 'cover',
                       borderRadius: 0
                     }}
@@ -288,7 +297,10 @@ const Preview = () => {
                 ) : (
                   <Box
                     sx={{
-                      width: { md: 320, xs: '100%' },
+                      display:'flex',
+                      jusitfyContent:'center',
+                      alignItems:'center',
+                      width: { lg: 320, xs: '100%', md:250 },
                       height: 450,
                       bgcolor: '#f0f3f8',
                       boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
