@@ -520,10 +520,6 @@ const Page = () => {
       '/')}`
     : null;
 
-  console.log('backImage', backImage);
-  console.log('selectedCardId', selectedCardId);
-  console.log('selectedCardId', selectedCardId);
-  console.log('selectedCardId', selectedCardId);
 
   return (
     <>
@@ -534,7 +530,7 @@ const Page = () => {
       </Head>
       <Box sx={{
         pt: { xs: 15, md: 5 },
-        height: { md: '100vh !important', xs: '100% !important' },
+        height: { md: '100% !important', lg:'100vh !important', xs: '100% !important' },
         // pt:60,
         width: '100%',
         // height: '100vh !important'
@@ -547,18 +543,19 @@ const Page = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
         // , overflowY: 'hidden',
         // backgroundColor: '#f0f0f0'
         // , height: { md: '100vh', xs: '100%' }
+        // bgcolor:'pink'
       }}>
         <Container sx={{
-          pt: { xs: 5 }, pb: { xs: 5, md: 2 },
+          pt: { xs: 5 }, pb: { xs: 5, md: 0 },
           display: 'flex',
           // bgcolor:'red',
-          // justifyContent: 'center',
+          justifyContent: 'center',
           flexDirection: 'column',
-          // alignItems: 'center',
+          alignItems: 'center',
           height: '100%'
         }}>
           <Grid container spacing={2} sx={{
@@ -901,7 +898,7 @@ const Page = () => {
         </Container>
         <Box
           sx={{
-            mb:5,
+            mb:3,
             // pt: { lg: 5, xl: 5, xs: 5 },
             // pt:{xs:0, md:0, lg:0,xl:10},
             width: '100%',

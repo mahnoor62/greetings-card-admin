@@ -50,6 +50,8 @@ const UplaodCards = () => {
   const { user } = useAuth();
   const token = user?.token;
 
+  console.log(":Card", card);
+
 //upload pop up
   const [open, setOpen] = React.useState(false);
 
@@ -64,6 +66,8 @@ const UplaodCards = () => {
 
   const handleClose = () => {
     setOpen(false);
+    formik.resetForm();
+    // setCard(null);
   };
 
   const handleDeleteConfirm = () => {
@@ -124,26 +128,16 @@ const UplaodCards = () => {
     setPage(0);
   };
 
-  const getCardData = async (id) => {
-    try {
-      const res = await axios.get(`${BASE_URL}/api/cards/get/${id}`, {
-        headers: {
-          'x-access-token': token
-        }
-      });
-      const fetchedCard = res.data.data;
-      setCard(fetchedCard);
+  const getCardData = (id) => {
 
-      // Update formik values manually
+    const selectedCard = cards.find((cardItem) => cardItem._id === id);
+      setCard(selectedCard);
+
       formik.setValues({
-        title: fetchedCard?.title || '',
-        cardType: fetchedCard?.cardType || [],
-        price: fetchedCard?.price || ''
+        title: selectedCard?.title || '',
+        cardType: selectedCard?.cardType || [],
+        price: selectedCard?.price || ''
       });
-    } catch (error) {
-      console.log(error);
-
-    }
   };
 
   const filteredCards = FilterHelper(cards, searchQuery, ['title']);
@@ -230,8 +224,6 @@ const UplaodCards = () => {
     }
   });
 
-
-
   return (
     <>
       <Head>
@@ -240,6 +232,7 @@ const UplaodCards = () => {
         </title>
       </Head>
       <Box sx={{
+        // bgcolor:'red',
         display: 'flex', justifyContent: 'center', alignItems: 'center',
         pt: { xs: 15, md: 10 },
         height: { md: '100vh !important', xs: '100% !important' }
@@ -346,15 +339,15 @@ const UplaodCards = () => {
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{ textAlign: 'left' }}>
                           <Tooltip title="Delete Card">
-                          <IconButton>
-                            <DeleteIcon
-                              disabled={destroyCard.isSubmitting}
-                              onClick={() => {
-                                setItemToDelete(data._id);
-                                setDialogOpen(true);
-                              }}
-                            />
-                          </IconButton>
+                            <IconButton>
+                              <DeleteIcon
+                                disabled={destroyCard.isSubmitting}
+                                onClick={() => {
+                                  setItemToDelete(data._id);
+                                  setDialogOpen(true);
+                                }}
+                              />
+                            </IconButton>
                           </Tooltip>
 
                           {/*<NextLink*/}
@@ -366,9 +359,9 @@ const UplaodCards = () => {
                           {/*>*/}
                           {/*  <IconButton onClick={() => setSelectedCardId(data._id)}>*/}
                           <Tooltip title="Update Card">
-                          <IconButton onClick={() => handleClickEditOpen(data._id)}>
-                            <EditIcon/>
-                          </IconButton>
+                            <IconButton onClick={() => handleClickEditOpen(data._id)}>
+                              <EditIcon/>
+                            </IconButton>
                           </Tooltip>
                           {/*</NextLink>*/}
                         </TableCell>
@@ -473,7 +466,17 @@ const UplaodCards = () => {
                           <Grid container spacing={0}>
                             {cardTypes.map((type) => (
                               <Grid item xs={12} md={6} key={type}>
+
                                 <FormControlLabel
+                                  sx={{
+                                    '& .MuiFormLabel-root': {
+                                      color: 'black',
+                                      // fontWeight: 900,
+                                    },
+                                    '& .MuiFormLabel-root.Mui-focused': {
+                                      color: 'black !important', // keep label black on focus
+                                    },
+                                  }}
                                   control={
                                     <Checkbox
                                       size="small"

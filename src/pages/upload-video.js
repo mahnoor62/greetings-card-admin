@@ -199,7 +199,7 @@ const UploadVideo = () => {
       <Box
         sx={{
           pt: {xs: 15, md:5 },
-          height: {md: '100vh !important',xs:'100% !important'},
+          height: {md: '100vh !important', lg:'100vh !important',xs:'100vh !important'},
           width: '100%',
           // height: {md: '100%', lg:'100%', xl:'100vh' },
 
@@ -220,13 +220,13 @@ const UploadVideo = () => {
         <Container
           sx={{
             mt:3,
-            // bgcolor:'red',
+            // bgcolor:'blue',
             position:'relative',
             display: 'flex',
             flexDirection:'column',
             height: '100%',
-            // justifyContent: 'center',
-            // alignItems: 'center',
+            justifyContent: 'center',
+            alignItems: 'center',
             // flex: '1 0 auto'
           }}
         >
@@ -246,7 +246,7 @@ const UploadVideo = () => {
             sx={{
               position: 'relative',
               width: {md: 430, xs:300 },
-              height: 530,
+              height: {md: 500, xs:400 },
               objectFit: 'contain',
               // position: 'absolute',
               // top: 0,
@@ -257,18 +257,24 @@ const UploadVideo = () => {
           {previewURL || videoPath ? (
             <>
             <Box
+              // controls
+              autoPlay
+              muted
+              loop
+              playsInline
               component="video"
               src={previewURL || videoPath}
-              controls
               sx={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
-                width: 120,
-                height: 120,
-                // objectFit: 'cover',
-                borderRadius: 2
+                width: {md: 400, xs:300 },
+                height: {md: 500, xs:400 },
+                // width: 120,
+                // height: 120,
+                objectFit: 'cover',
+                // borderRadius: 2
               }}
             />
             <Box
@@ -278,7 +284,7 @@ const UploadVideo = () => {
               alt="video icon"
               sx={{
                 position: 'absolute',
-                top: '70%',
+                top: '50%',
                 left: '50%',
                 transform: 'translate(-70%, -70%)',
                 width: 50,
@@ -335,15 +341,15 @@ const UploadVideo = () => {
 
         <Box
           sx={{
-            pt:{xl:15},
+            pt:{xl:15,md:0, xs:5},
             mb:5,
             // bgcolor:'red',
             width: '100%',
             display: 'flex',
-            justifyContent: { xs: 'center', md: 'flex-end' },
+            justifyContent: { xs: 'flex-end', md: 'flex-end' },
             alignItems: 'center',
             gap: 2,
-            pr: {md: 5 , xs:0}
+            pr: {md: 5 , xs:5}
           }}
         >
           <NextLink href={`/preview?id=${selectedCardId}`} passHref legacyBehavior>

@@ -62,11 +62,11 @@ const Preview = () => {
       <Box sx={{
         pt: {xs: 10, md:5 },
         pb:{xs:10},
-        height: {md: '100vh !important',xs:'100% !important'},
+        height: {md: '100vh !important', lg:'100vh !important',xs:'100% !important'},
         // minHeight:"100vh"
       }}>
         <Container sx={{
-
+// bgcolor:'red',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
@@ -189,6 +189,7 @@ const Preview = () => {
                     sx={{
                       // bgcolor: '#f0f3f8',
                       width: { md: '100%', xs: '100%', ipad : '90%'},
+                      height: {lg: 450 , xs:'100%', md:400, ipad:500},
                       // height: '100%',
                       borderRadius: 0,
                       overflow: 'hidden'
