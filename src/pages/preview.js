@@ -66,14 +66,21 @@ const Preview = () => {
         // minHeight:"100vh"
       }}>
         <Container sx={{
+
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '100%',
+          flexDirection:{xs:'column'},
+          height: {md: '100%' },
           pt: 5,
           // pb: 10
         }}>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: {md: '100%' },
+          }}>
             <Grid item xs={12} md={3} lg={3} sx={{
               display: 'flex',
               width:'100%',
@@ -330,33 +337,37 @@ const Preview = () => {
           </Grid>
         </Container>
 
-        {/*<Box*/}
-        {/*  sx={{*/}
-        {/*    width: '100%',*/}
-        {/*    display: 'flex',*/}
-        {/*    justifyContent: { xs: 'center', md: 'flex-end' },*/}
-        {/*    // alignItems: 'center',*/}
-        {/*    p: 3*/}
-        {/*  }}*/}
-        {/*>*/}
-        {/*  <NextLink href='/dashboard' passHref legacyBehavior>*/}
-        {/*    <Button*/}
-        {/*      // onClick={handleSkip}*/}
-        {/*      sx={{*/}
-        {/*        textAlign: 'center',*/}
-        {/*        color: 'black',*/}
-        {/*        bgcolor: '#d9d9d9',*/}
-        {/*        minWidth: { md: 150, xs: 100 },*/}
-        {/*        '&:hover': {*/}
-        {/*          bgcolor: '#d9d9d9'*/}
-        {/*        }*/}
-        {/*      }}*/}
-        {/*      variant="contained"*/}
-        {/*    >*/}
-        {/*      Dashboard*/}
-        {/*    </Button>*/}
-        {/*  </NextLink>*/}
-        {/*</Box>*/}
+        <Box
+          sx={{
+            width: '100%',
+            mb:5,
+            display: 'flex',
+            justifyContent: { xs: 'flex-end', md: 'flex-end' },
+            // alignItems: 'center',
+            pr: 3
+          }}
+        >
+          <NextLink href='/dashboard' passHref legacyBehavior>
+            <Button
+              // onClick={handleSkip}
+              sx={{
+                mt:{xs:10, md:0},
+                textAlign: 'center',
+                backgroundColor: '#c09b9b !important',
+                color: '#1a1d25',
+                minWidth: { md: 150, xs: 100 },
+                '&:hover': {
+                  backgroundColor: '#c09b9b !important',
+                  color: '#1a1d25'
+                }
+              }}
+              variant="contained"
+            >
+              Dashboard
+            </Button>
+          </NextLink>
+        </Box>
+
       </Box>
     </>
   );

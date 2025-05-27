@@ -127,7 +127,7 @@ const UploadVideo = () => {
     };
   }, [previewURL]);
 
-  
+
 
   const handleSave = async () => {
     if (!video) {
@@ -159,17 +159,18 @@ const UploadVideo = () => {
   };
 
   const getCardDetails = async () => {
+    setLoading(true);
     try {
-
       const card = await axios.get(`${BASE_URL}/api/cards/get/${selectedCardId}`, {
         headers: {
           'x-access-token': token
         }
       });
       setCard(card.data.data);
-
+      setLoading(false);
     } catch (error) {
       console.log(error);
+      // setLoading(true);
     }
   };
 
@@ -223,12 +224,19 @@ const UploadVideo = () => {
             position:'relative',
             display: 'flex',
             flexDirection:'column',
-            // height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
+            height: '100%',
+            // justifyContent: 'center',
+            // alignItems: 'center',
             // flex: '1 0 auto'
           }}
         >
+          <Box sx={{
+            display: 'flex',
+            flexDirection:'column',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
 
           <Box
             component="img"
@@ -317,11 +325,18 @@ const UploadVideo = () => {
 
           {/*</Box>*/}
 
+          </Box>
 
-        </Container>
+          {/* BUTTONS - OUTSIDE CONTAINER, INSIDE BOX */}
+
+
+
+    </Container>
+
         <Box
           sx={{
             pt:{xl:15},
+            mb:5,
             // bgcolor:'red',
             width: '100%',
             display: 'flex',
@@ -384,8 +399,6 @@ const UploadVideo = () => {
           </Button>
           {/*</NextLink>*/}
         </Box>
-        {/* BUTTONS - OUTSIDE CONTAINER, INSIDE BOX */}
-
       </Box>
 
     </>

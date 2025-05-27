@@ -66,7 +66,7 @@ const Page = () => {
     if (sizeInBytes > maxSizeInBytes) {
       toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
         {
-          duration: 3000,
+          duration: 3000
         });
       return;
     }
@@ -86,7 +86,7 @@ const Page = () => {
         if (img.width !== 148 || img.height !== 210) {
           toast.error('Please upload an image of  148 × 210 pixels',
             {
-              duration: 3000,
+              duration: 3000
             });
           return;
         }
@@ -174,7 +174,7 @@ const Page = () => {
     if (sizeInBytes > maxSizeInBytes) {
       toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
         {
-          duration: 3000,
+          duration: 3000
         });
       return;
     }
@@ -192,7 +192,7 @@ const Page = () => {
 
         if (img.width !== 148 || img.height !== 210) {
           toast.error('Please upload an image of  148 × 210 pixels', {
-            duration: 3000,
+            duration: 3000
           });
           return;
         }
@@ -280,9 +280,10 @@ const Page = () => {
     const maxSizeInBytes = 1 * 1024 * 1024;
 
     if (sizeInBytes > maxSizeInBytes) {
-      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`, {
-        duration: 3000,
-      });
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+        {
+          duration: 3000
+        });
       return;
     }
     const reader = new FileReader();
@@ -299,7 +300,7 @@ const Page = () => {
 
         if (img.width !== 148 || img.height !== 210) {
           toast.error('Please upload an image of  148 × 210 pixels', {
-            duration: 3000,
+            duration: 3000
           });
           return;
         }
@@ -388,9 +389,10 @@ const Page = () => {
     const maxSizeInBytes = 1 * 1024 * 1024;
 
     if (sizeInBytes > maxSizeInBytes) {
-      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`, {
-        duration: 3000,
-      });
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+        {
+          duration: 3000
+        });
       return;
     }
     const reader = new FileReader();
@@ -407,7 +409,7 @@ const Page = () => {
 
         if (img.width !== 148 || img.height !== 210) {
           toast.error('Please upload an image of  148 × 210 pixels', {
-            duration: 3000,
+            duration: 3000
           });
           return;
         }
@@ -470,7 +472,7 @@ const Page = () => {
     if (!image || !backImage || !insideLeftImage || !insideRightImage) {
       toast.error('Please upload all required card images before proceeding.',
         {
-          duration: 3000,
+          duration: 3000
         });
       return;
     }
@@ -507,14 +509,21 @@ const Page = () => {
   const existingBackUrl = card?.backDesign
     ? `${BASE_URL}/${card.backDesign.replace(/\\/g, '/')}`
     : null;
-  const existingInsideLeftUrl = card?.insideLeftDesign ? `${BASE_URL}/${card.insideLeftDesign.replace(
-    /\\/g,
-    '/')}` : null;
-  const existingInsideRightUrl = card?.insideRightDesign ? `${BASE_URL}/${card.insideRightDesign.replace(
-    /\\/g,
-    '/')}` : null;
+  const existingInsideLeftUrl = card?.insideLeftDesign
+    ? `${BASE_URL}/${card.insideLeftDesign.replace(
+      /\\/g,
+      '/')}`
+    : null;
+  const existingInsideRightUrl = card?.insideRightDesign
+    ? `${BASE_URL}/${card.insideRightDesign.replace(
+      /\\/g,
+      '/')}`
+    : null;
 
-  console.log("selectedCardId",selectedCardId);
+  console.log('backImage', backImage);
+  console.log('selectedCardId', selectedCardId);
+  console.log('selectedCardId', selectedCardId);
+  console.log('selectedCardId', selectedCardId);
 
   return (
     <>
@@ -528,7 +537,6 @@ const Page = () => {
         height: { md: '100vh !important', xs: '100% !important' },
         // pt:60,
         width: '100%',
-
         // height: '100vh !important'
         // minHeight:'100vh',
         // bgcolor: 'pink',
@@ -548,12 +556,19 @@ const Page = () => {
           pt: { xs: 5 }, pb: { xs: 5, md: 2 },
           display: 'flex',
           // bgcolor:'red',
-          justifyContent: 'center',
+          // justifyContent: 'center',
           flexDirection: 'column',
-          alignItems: 'center'
-          // height: '100%'
+          // alignItems: 'center',
+          height: '100%'
         }}>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} sx={{
+            display: 'flex',
+            // bgcolor:'blue',
+            height: '100%',
+            justifyContent: 'center',
+            // flexDirection: 'column',
+            alignItems: 'center',
+          }}>
             <Grid item xs={6} md={3}>
               <Card sx={{
                 bgcolor: '#f0f3f8',
@@ -584,7 +599,7 @@ const Page = () => {
                     }
                     // src={image ? URL.createObjectURL(image) : `${WEB_URL}/drag.png`}
                     alt="Drag Icon"
-                    sx={{ width: 100, height: 100 }}
+                    sx={{ width: image || existingImageUrl ? 150 : 100, height: image || existingImageUrl? 200:100 }}
                   />
 
                   {/* Text in Center */}
@@ -663,7 +678,7 @@ const Page = () => {
                     // src={backImage ? URL.createObjectURL(backImage) : `${WEB_URL}/drag.png`}
                     // src={`${WEB_URL}/drag.png`}
                     alt="Drag Icon"
-                    sx={{ width: 100, height: 100 }}
+                    sx={{ width: backImage || existingBackUrl ? 150 : 100, height: backImage || existingBackUrl  ? 200:100 }}
                   />
 
                   {/* Text in Center */}
@@ -743,13 +758,13 @@ const Page = () => {
                         insideLeftImage
                           ? URL.createObjectURL(insideLeftImage)
                           : existingInsideLeftUrl || `${WEB_URL}/drag.png`
-                      // insideLeftImage
-                      //   ? URL.createObjectURL(insideLeftImage)
-                      //   : `${WEB_URL}/drag.png`
-                    }
+                        // insideLeftImage
+                        //   ? URL.createObjectURL(insideLeftImage)
+                        //   : `${WEB_URL}/drag.png`
+                      }
                       // src={`${WEB_URL}/drag.png`}
                       alt="Drag Icon"
-                      sx={{ width: 100, height: 100 }}
+                      sx={{ width: insideLeftImage || existingInsideLeftUrl ? 150 : 100, height: insideLeftImage || existingInsideLeftUrl? 200:100 }}
                     />
 
                     {/* Text in Center */}
@@ -802,13 +817,13 @@ const Page = () => {
                         insideRightImage
                           ? URL.createObjectURL(insideRightImage)
                           : existingInsideRightUrl || `${WEB_URL}/drag.png`
-                      // insideRightImage
-                      //   ? URL.createObjectURL(insideRightImage)
-                      //   : `${WEB_URL}/drag.png`
-                    }
+                        // insideRightImage
+                        //   ? URL.createObjectURL(insideRightImage)
+                        //   : `${WEB_URL}/drag.png`
+                      }
                       // src={`${WEB_URL}/drag.png`}
                       alt="Drag Icon"
-                      sx={{ width: 100, height: 100 }}
+                      sx={{ width: insideRightImage || existingInsideRightUrl? 150 : 100, height: insideRightImage || existingInsideRightUrl ? 200:100 }}
                     />
 
                     {/* Text in Center */}
@@ -882,64 +897,68 @@ const Page = () => {
               </Box>
             </Grid>
           </Grid>
-          <Box
-            sx={{
-              pt: { lg: 5, xl: 5, xs: 5 },
-              // pt:{xs:0, md:0, lg:0,xl:10},
-              width: '100%',
-              display: 'flex',
-              // bgcolor:'red',
-              justifyContent: { xs: 'center', md: 'flex-end' },
-              alignItems: 'center',
-              // pr: {md: 5 , xs:0},
-              pb: { xs: 5, md: 0 }
-            }}
-          >
+
+        </Container>
+        <Box
+          sx={{
+            mb:5,
+            // pt: { lg: 5, xl: 5, xs: 5 },
+            // pt:{xs:0, md:0, lg:0,xl:10},
+            width: '100%',
+            display: 'flex',
+            // bgcolor:'red',
+            justifyContent: { xs: 'center', md: 'flex-end' },
+            alignItems: 'center',
+            pr: {md: 5 , xs:0},
+            pb: { xs: 5, md: 0 }
+          }}
+        >
 
 
-            {
-              card?.frontDesign  && card?.backDesign && card?.insideLeftDesign && card?.insideRightDesign ? (
-                <Button
-                  onClick={handleUpdateNextClick}
-                  sx={{
-                    textAlign: 'center',
-                    backgroundColor: '#c09b9b !important',
-                    color: '#1a1d25',
-                    // display: isUploadCards?  'block' : 'none',
-                    minWidth: 120, '&:hover': {
-                      backgroundColor: '#c09b9b !important'
-                      // color: '#1a1d25',
-                    }
-                  }}
-                  variant="contained"
-                >
-                  Next
-                </Button>
-              ) :(
+          {
+            card?.frontDesign
+            && card?.backDesign
+            && card?.insideLeftDesign
+            && card?.insideRightDesign ? (
+              <Button
+                onClick={handleUpdateNextClick}
+                sx={{
+                  textAlign: 'center',
+                  backgroundColor: '#c09b9b !important',
+                  color: '#1a1d25',
+                  // display: isUploadCards?  'block' : 'none',
+                  minWidth: 120, '&:hover': {
+                    backgroundColor: '#c09b9b !important'
+                    // color: '#1a1d25',
+                  }
+                }}
+                variant="contained"
+              >
+                Next
+              </Button>
+            ) : (
 
               <Button
-              onClick={handleNextClick}
-            sx={{
-              textAlign: 'center',
-              backgroundColor: '#c09b9b !important',
-              color: '#1a1d25',
-              // display: isUploadCards?  'block' : 'none',
-              minWidth: 120, '&:hover': {
-                backgroundColor: '#c09b9b !important'
-                // color: '#1a1d25',
-              }
-            }}
-            variant="contained"
-          >
-            Next
-          </Button>
+                onClick={handleNextClick}
+                sx={{
+                  textAlign: 'center',
+                  backgroundColor: '#c09b9b !important',
+                  color: '#1a1d25',
+                  // display: isUploadCards?  'block' : 'none',
+                  minWidth: 120, '&:hover': {
+                    backgroundColor: '#c09b9b !important'
+                    // color: '#1a1d25',
+                  }
+                }}
+                variant="contained"
+              >
+                Next
+              </Button>
 
-              )
-            }
+            )
+          }
 
-          </Box>
-        </Container>
-
+        </Box>
 
         <input
           accept="image/*"
