@@ -530,7 +530,8 @@ const Page = () => {
       </Head>
       <Box sx={{
         pt: { xs: 15, md: 5 },
-        height: { md: '100% !important', lg:'100vh !important', xs: '100% !important' },
+
+        height: { md: '100vh !important', lg:'100vh !important', xs: '100% !important' },
         // pt:60,
         width: '100%',
         // height: '100vh !important'
