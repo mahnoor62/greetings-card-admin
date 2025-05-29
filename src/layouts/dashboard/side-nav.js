@@ -171,7 +171,7 @@ export const SideNav = (props) => {
       {/*      target="_blank"*/}
       {/*      variant="contained"*/}
       {/*    >*/}
-      {/*      Pro Live Preview*/}
+      {/*      Pro Live Id*/}
       {/*    </Button>*/}
       {/*  </Box>*/}
       </Box>

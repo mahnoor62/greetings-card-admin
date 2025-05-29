@@ -3,7 +3,7 @@ import {
   Card, Box,
   CardContent, CardActions, CardMedia, CardActionArea,
   Container,
-  Typography, Grid, Button
+  Typography, Grid, Button, CircularProgress
 } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useRouter } from 'next/router';
@@ -14,8 +14,8 @@ import axios from 'axios';
 import * as React from 'react';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import toast from 'react-hot-toast';
-import { useAuth } from '../hooks/use-auth';
-import { useCardContext } from '../contexts/cardIdContext';
+import { useAuth } from '../../hooks/use-auth';
+import { useCardContext } from '../../contexts/cardIdContext';
 import NextLink from 'next/link';
 
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL;
@@ -25,14 +25,20 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const Page = () => {
   const router = useRouter();
   const [card, setCard] = useState(null);
-  const { selectedCardId } = useCardContext();
+  // const { selectedCardId } = useCardContext();
   const { user } = useAuth();
   const token = user?.token;
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [backLoading, setBackLoading] = useState(false);
+  const [insideLeftLoading, setInsideLeftLoading] = useState(false);
+  const [insideRightLoading, setInsideRightLoading] = useState(false);
+
   const [backImage, setBackImage] = useState(false);
   const [insideLeftImage, setInsideLeftImage] = useState(false);
   const [insideRightImage, setInsideRightImage] = useState(false);
-  // const { id } = router.query;
+  const { id } = router.query;
+
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -112,13 +118,13 @@ const Page = () => {
       // image: yup.string().required('Image of gallery is required'),
     }),
     onSubmit: async (values, { resetForm }) => {
-
+      setLoading(true);
       try {
         const formData = new FormData();
-        formData.append('id', selectedCardId);
+        formData.append('id', id);
         formData.append('frontDesign', image);
 
-        const response = await axios.post(`${BASE_URL}/api/cards/upload-front-design`, formData, {
+        await axios.post(`${BASE_URL}/api/cards/upload-front-design`, formData, {
           headers: {
             'x-access-token': token,
             'Content-Type': 'multipart/form-data'
@@ -127,12 +133,14 @@ const Page = () => {
 
         toast.success('Front Card design uploaded successfully.');
         formik.resetForm();
-
+        setLoading(false);
         document.getElementById('frontDesign').value = '';
         // setImage(null);
       } catch (error) {
         console.log('error in uploaded front card design', error);
         toast.error(error.response.data.msg);
+        setLoading(false);
+
       }
     }
   });
@@ -218,10 +226,10 @@ const Page = () => {
       // image: yup.string().required('Image of gallery is required'),
     }),
     onSubmit: async (values, { resetForm }) => {
-
+      setBackLoading(true);
       try {
         const formData = new FormData();
-        formData.append('id', selectedCardId);
+        formData.append('id', id);
         formData.append('backDesign', backImage);
 
         const response = await axios.post(`${BASE_URL}/api/cards/upload-back-design`, formData, {
@@ -233,12 +241,13 @@ const Page = () => {
 
         toast.success('Back Card design uploaded successfully.');
         formik.resetForm();
-
+        setBackLoading(false);
         document.getElementById('backDesign').value = '';
         // setImage(null);
       } catch (error) {
         console.log('error in uploaded back card design', error);
         toast.error(error.response.data.msg);
+        setBackLoading(false);
       }
     }
   });
@@ -326,10 +335,10 @@ const Page = () => {
       // image: yup.string().required('Image of gallery is required'),
     }),
     onSubmit: async (values, { resetForm }) => {
-
+      setInsideLeftLoading(true);
       try {
         const formData = new FormData();
-        formData.append('id', selectedCardId);
+        formData.append('id', id);
         formData.append('insideLeftDesign', insideLeftImage);
 
         const response = await axios.post(`${BASE_URL}/api/cards/upload-inside-left-design`,
@@ -343,12 +352,13 @@ const Page = () => {
 
         toast.success('Inside left card uploaded successfully.');
         formik.resetForm();
-
+        setInsideLeftLoading(false);
         document.getElementById('insideLeftDesign').value = '';
         // setImage(null);
       } catch (error) {
         console.log('error in uploaded inside left card design', error);
         toast.error(error.response.data.msg);
+        setInsideLeftLoading(false);
       }
     }
   });
@@ -435,10 +445,10 @@ const Page = () => {
       // image: yup.string().required('Image of gallery is required'),
     }),
     onSubmit: async (values, { resetForm }) => {
-
+      setInsideRightLoading(true);
       try {
         const formData = new FormData();
-        formData.append('id', selectedCardId);
+        formData.append('id', id);
         formData.append('insideRightDesign', insideRightImage);
 
         const response = await axios.post(`${BASE_URL}/api/cards/upload-inside-right-design`,
@@ -452,12 +462,13 @@ const Page = () => {
 
         toast.success('Inside right card uploaded successfully.');
         formik.resetForm();
-
+        setInsideRightLoading(false);
         document.getElementById('insideRightDesign').value = '';
         // setImage(null);
       } catch (error) {
         console.log('error in uploaded inside right card design', error);
         toast.error(error.response.data.msg);
+        setInsideRightLoading(false);
       }
     }
   });
@@ -477,16 +488,16 @@ const Page = () => {
       return;
     }
 
-    router.push('/upload-video');
+    router.push(`/upload-video/${id}`);
   };
 
   const handleUpdateNextClick = () => {
-    router.push('/upload-video');
+    router.push(`/upload-video/${id}`);
   };
 
   const getCardData = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/api/cards/get/${selectedCardId}`, {
+      const res = await axios.get(`${BASE_URL}/api/cards/get/${id}`, {
         headers: {
           'x-access-token': token
         }
@@ -501,7 +512,7 @@ const Page = () => {
 
   useEffect(() => {
     getCardData();
-  }, [selectedCardId]);
+  }, [id]);
 
   const existingImageUrl = card?.frontDesign
     ? `${BASE_URL}/${card.frontDesign.replace(/\\/g, '/')}`
@@ -531,7 +542,7 @@ const Page = () => {
       <Box sx={{
         pt: { xs: 15, md: 5 },
 
-        height: { md: '100vh !important', lg:'100vh !important', xs: '100% !important' },
+        height: { md: '100vh !important', lg: '100vh !important', xs: '100% !important' },
         // pt:60,
         width: '100%',
         // height: '100vh !important'
@@ -544,7 +555,7 @@ const Page = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'center'
         // , overflowY: 'hidden',
         // backgroundColor: '#f0f0f0'
         // , height: { md: '100vh', xs: '100%' }
@@ -565,7 +576,7 @@ const Page = () => {
             height: '100%',
             justifyContent: 'center',
             // flexDirection: 'column',
-            alignItems: 'center',
+            alignItems: 'center'
           }}>
             <Grid item xs={6} md={3}>
               <Card sx={{
@@ -597,7 +608,10 @@ const Page = () => {
                     }
                     // src={image ? URL.createObjectURL(image) : `${WEB_URL}/drag.png`}
                     alt="Drag Icon"
-                    sx={{ width: image || existingImageUrl ? 150 : 100, height: image || existingImageUrl? 200:100 }}
+                    sx={{
+                      width: image || existingImageUrl ? 150 : 100,
+                      height: image || existingImageUrl ? 200 : 100
+                    }}
                   />
 
                   {/* Text in Center */}
@@ -611,6 +625,7 @@ const Page = () => {
                   <CardActions>
                     <Button
                       variant="contained"
+                      disabled={loading}
                       onClick={() => document.getElementById('frontDesign').click()}
                       sx={{
                         minWidth: { md: 150, xs: 100 },
@@ -624,7 +639,7 @@ const Page = () => {
                         }
                       }}
                     >
-                      Upload
+                      {loading ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/> : 'Upload'}
                     </Button>
                   </CardActions>
                 </Box>
@@ -676,7 +691,10 @@ const Page = () => {
                     // src={backImage ? URL.createObjectURL(backImage) : `${WEB_URL}/drag.png`}
                     // src={`${WEB_URL}/drag.png`}
                     alt="Drag Icon"
-                    sx={{ width: backImage || existingBackUrl ? 150 : 100, height: backImage || existingBackUrl  ? 200:100 }}
+                    sx={{
+                      width: backImage || existingBackUrl ? 150 : 100,
+                      height: backImage || existingBackUrl ? 200 : 100
+                    }}
                   />
 
                   {/* Text in Center */}
@@ -689,6 +707,7 @@ const Page = () => {
                   {/* Button at Bottom */}
                   <CardActions>
                     <Button
+                      disabled={backLoading}
                       onClick={() => document.getElementById('backDesign').click()}
                       variant="contained"
                       sx={{
@@ -702,7 +721,7 @@ const Page = () => {
                         }
                       }}
                     >
-                      Upload
+                      {backLoading ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/> : 'Upload'}
                     </Button>
                   </CardActions>
                 </Box>
@@ -762,7 +781,10 @@ const Page = () => {
                       }
                       // src={`${WEB_URL}/drag.png`}
                       alt="Drag Icon"
-                      sx={{ width: insideLeftImage || existingInsideLeftUrl ? 150 : 100, height: insideLeftImage || existingInsideLeftUrl? 200:100 }}
+                      sx={{
+                        width: insideLeftImage || existingInsideLeftUrl ? 150 : 100,
+                        height: insideLeftImage || existingInsideLeftUrl ? 200 : 100
+                      }}
                     />
 
                     {/* Text in Center */}
@@ -775,6 +797,7 @@ const Page = () => {
                     {/* Button at Bottom */}
                     <CardActions>
                       <Button
+                        disbaled={insideLeftLoading}
                         onClick={() => document.getElementById('insideLeftDesign').click()}
                         variant="contained"
                         sx={{
@@ -788,7 +811,7 @@ const Page = () => {
                           }
                         }}
                       >
-                        Upload
+                        {insideLeftLoading ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/> : 'Upload'}
                       </Button>
                     </CardActions>
 
@@ -821,7 +844,10 @@ const Page = () => {
                       }
                       // src={`${WEB_URL}/drag.png`}
                       alt="Drag Icon"
-                      sx={{ width: insideRightImage || existingInsideRightUrl? 150 : 100, height: insideRightImage || existingInsideRightUrl ? 200:100 }}
+                      sx={{
+                        width: insideRightImage || existingInsideRightUrl ? 150 : 100,
+                        height: insideRightImage || existingInsideRightUrl ? 200 : 100
+                      }}
                     />
 
                     {/* Text in Center */}
@@ -835,6 +861,7 @@ const Page = () => {
                     <CardActions>
                       <Button
                         onClick={() => document.getElementById('insideRightDesign').click()}
+                        disabled={insideRightLoading}
                         variant="contained"
                         sx={{
                           minWidth: { md: 150, xs: 100 },
@@ -847,7 +874,9 @@ const Page = () => {
                           }
                         }}
                       >
-                        Upload
+                        {insideRightLoading
+                          ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/>
+                          : 'Upload'}
                       </Button>
                     </CardActions>
                   </Box>
@@ -899,7 +928,7 @@ const Page = () => {
         </Container>
         <Box
           sx={{
-            mb:3,
+            mb: 3,
             // pt: { lg: 5, xl: 5, xs: 5 },
             // pt:{xs:0, md:0, lg:0,xl:10},
             width: '100%',
@@ -907,7 +936,7 @@ const Page = () => {
             // bgcolor:'red',
             justifyContent: { xs: 'center', md: 'flex-end' },
             alignItems: 'center',
-            pr: {md: 5 , xs:0},
+            pr: { md: 5, xs: 0 },
             pb: { xs: 5, md: 0 }
           }}
         >

@@ -11,16 +11,16 @@ import axios from 'axios';
 import * as React from 'react';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import NextLink from 'next/link';
-import { useCardContext } from '../contexts/cardIdContext';
+import { useCardContext } from '../../contexts/cardIdContext';
 import { useRouter } from 'next/router';
-import { useAuth } from '../hooks/use-auth';
+import { useAuth } from '../../hooks/use-auth';
 import toast from 'react-hot-toast';
 
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const Preview = () => {
+const Id = () => {
   const [card, setCard] = useState(null);
   const { user } = useAuth();
   const token = user?.token;
@@ -374,10 +374,10 @@ const Preview = () => {
   );
 };
 
-Preview.getLayout = (page) => (
+Id.getLayout = (page) => (
   <DashboardLayout>
     {page}
   </DashboardLayout>
 );
 
-export default Preview;
+export default Id;

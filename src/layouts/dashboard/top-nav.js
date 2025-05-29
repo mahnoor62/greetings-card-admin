@@ -30,10 +30,10 @@ export const TopNav = (props) => {
   const { onNavOpen } = props;
   const router = useRouter();
   const pathname = router.pathname;
-  const isCardCustomization = pathname === '/upload-video';
-  const isAllCards = pathname === '/cards';
-  const isUploadCards = pathname === '/upload-cards';
-  const isPreview = pathname === '/preview';
+  const isCardCustomization = pathname.startsWith('/upload-video');
+  const isAllCards = pathname.startsWith('/cards');
+  const isUploadCards = pathname.startsWith('/upload-cards');
+  const isPreview = pathname.startsWith('/preview');
   const isDashboard = pathname === '/dashboard';
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const accountPopover = usePopover();
@@ -82,11 +82,12 @@ export const TopNav = (props) => {
               direction="row"
               spacing={2}
             >
+              <NextLink href="/dashboard"  passHref legacyBehavior>
               <Typography variant="h5" sx={{ fontWeight: 900 , color:'#c09b9b'}}>{isCardCustomization
                 ? 'Front Card Customization'
-                : isPreview ? 'Preview AR Experience' : isAllCards
+                : isPreview ? 'Id AR Experience' : isAllCards
                   ? 'Upload Greetings Card'
-                  : 'AR Greetings Card'}</Typography>
+                  : 'AR Greetings Card'}</Typography></NextLink>
             </Stack>
             {
               lgUp ? (<Stack
@@ -96,21 +97,21 @@ export const TopNav = (props) => {
                 >
 
                   {/*Dashboard*/}
-                  <NextLink href="/preview" passHref legacyBehavior>
-                    <Button
-                      sx={{
-                        textAlign: 'center',
-                        color:'white',
-                        display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block',
-                        minWidth: 120, '&:hover': {
-                          bgcolor: '#e79552'
-                        }
-                      }}
-                      variant="contained"
-                    >
-                      Preview
-                    </Button>
-                  </NextLink>
+                  {/*<NextLink href="/preview" passHref legacyBehavior>*/}
+                  {/*  <Button*/}
+                  {/*    sx={{*/}
+                  {/*      textAlign: 'center',*/}
+                  {/*      color:'white',*/}
+                  {/*      display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block',*/}
+                  {/*      minWidth: 120, '&:hover': {*/}
+                  {/*        bgcolor: '#e79552'*/}
+                  {/*      }*/}
+                  {/*    }}*/}
+                  {/*    variant="contained"*/}
+                  {/*  >*/}
+                  {/*    Preview*/}
+                  {/*  </Button>*/}
+                  {/*</NextLink>*/}
 
                   <Avatar
                     onClick={accountPopover.handleOpen}

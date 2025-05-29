@@ -11,17 +11,20 @@ import axios from 'axios';
 import * as React from 'react';
 import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
 import NextLink from 'next/link';
-import { useCardContext } from '../contexts/cardIdContext';
+import { useCardContext } from '../../contexts/cardIdContext';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import toast from 'react-hot-toast';
-import { useAuth } from '../hooks/use-auth';
+import { useAuth } from '../../hooks/use-auth';
+import { useRouter } from 'next/router';
 
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-const UploadVideo = () => {
+const Id = () => {
+  const router = useRouter();
+  const { id } = router.query;
   const { user } = useAuth();
   const token = user?.token;
   const [video, setVideo] = useState(null);
@@ -30,50 +33,12 @@ const UploadVideo = () => {
   const [loading, setLoading] = useState(false);
   const [card, setCard] = useState();
   const inputRef = useRef();
-  const { selectedCardId } = useCardContext();
-
+  // const { selectedCardId } = useCardContext();
 
   const handleVideoClick = () => {
     inputRef.current.click();
   };
 
-  // const handleVideoSelect = (e) => {
-  //   // const file = e.target.files[0];
-  //
-  //   // if (!file.type.startsWith('video/')) {
-  //   //   toast.error('Please select a valid video file');
-  //   //   return;
-  //   // }
-  //   //
-  //   // const sizeInMB = file.size / (1024 * 1024);
-  //   //
-  //   // if (sizeInMB > 1) {
-  //   //   toast.error(`Video too large. Selected file is ${sizeInMB.toFixed(2)} MB. Max allowed is 1 MB.`);
-  //   //   return;
-  //   // }
-  //   //
-  //   // setVideo(file);
-  //   // const preview = URL.createObjectURL(file);
-  //   // setPreviewURL(preview);
-  //
-  //   const file = e.target.files[0];
-  //   const sizeInMB = file.size / (1024 * 1024);
-  //
-  //   if (sizeInMB > 1) {
-  //     toast.error(`Video size is too large. Selected file is ${sizeInMB.toFixed(2)} MB. Max allowed size is 1 MB.`,{
-  //       duration: 3000,
-  //     });
-  //     return;
-  //   }
-  //
-  //   if (file && file.type.startsWith('video/')) {
-  //     setVideo(file);
-  //     const preview = URL.createObjectURL(file);
-  //     setPreviewURL(preview);
-  //   } else {
-  //     toast.error('Please select a valid video file');
-  //   }
-  // };
   const handleVideoSelect = (e) => {
     const file = e.target.files[0];
 
@@ -127,8 +92,6 @@ const UploadVideo = () => {
     };
   }, [previewURL]);
 
-
-
   const handleSave = async () => {
     if (!video) {
       toast.error('Please select a video');
@@ -139,7 +102,7 @@ const UploadVideo = () => {
       setLoading(true);
       const formData = new FormData();
 
-      formData.append('id', selectedCardId);
+      formData.append('id', id);
       formData.append('video', video);
 
       await axios.post(`${BASE_URL}/api/cards/upload-video-design`, formData, {
@@ -161,7 +124,7 @@ const UploadVideo = () => {
   const getCardDetails = async () => {
     setLoading(true);
     try {
-      const card = await axios.get(`${BASE_URL}/api/cards/get/${selectedCardId}`, {
+      const card = await axios.get(`${BASE_URL}/api/cards/get/${id}`, {
         headers: {
           'x-access-token': token
         }
@@ -176,7 +139,7 @@ const UploadVideo = () => {
 
   useEffect(() => {
     getCardDetails();
-  }, [selectedCardId]);
+  }, [id]);
 
   const frontDesignPath = card?.frontDesign
     ? `${BASE_URL}/${card?.frontDesign.replace(/\\/g, '/')}`
@@ -185,9 +148,6 @@ const UploadVideo = () => {
   const videoPath = card?.video
     ? `${BASE_URL}/${card?.video.replace(/\\/g, '/')}`
     : null;
-
-
-
 
   return (
     <>
@@ -198,8 +158,8 @@ const UploadVideo = () => {
       </Head>
       <Box
         sx={{
-          pt: {xs: 15, md:5 },
-          height: {md: '100vh !important', lg:'100vh !important',xs:'100vh !important'},
+          pt: { xs: 15, md: 5 },
+          height: { md: '100vh !important', lg: '100vh !important', xs: '100vh !important' },
           width: '100%',
           // height: {md: '100%', lg:'100%', xl:'100vh' },
 
@@ -219,140 +179,139 @@ const UploadVideo = () => {
       >
         <Container
           sx={{
-            mt:3,
+            mt: 3,
             // bgcolor:'blue',
-            position:'relative',
+            position: 'relative',
             display: 'flex',
-            flexDirection:'column',
+            flexDirection: 'column',
             height: '100%',
             justifyContent: 'center',
-            alignItems: 'center',
+            alignItems: 'center'
             // flex: '1 0 auto'
           }}
         >
           <Box sx={{
             display: 'flex',
-            flexDirection:'column',
+            flexDirection: 'column',
             height: '100%',
             justifyContent: 'center',
             alignItems: 'center'
           }}>
 
-          <Box
-            component="img"
-            loading="lazy"
-            src={frontDesignPath}
-            alt="Card Image"
-            sx={{
-              position: 'relative',
-              width: {md: 430, xs:300 },
-              height: {md: 500, xs:400 },
-              objectFit: 'contain',
-              // position: 'absolute',
-              // top: 0,
-              // left: 0
-            }}
-          />
-
-          {previewURL || videoPath ? (
-            <>
             <Box
-              // controls
-              autoPlay
-              muted
-              loop
-              playsInline
-              component="video"
-              src={previewURL || videoPath}
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: {md: 400, xs:300 },
-                height: {md: 500, xs:400 },
-                // width: 120,
-                // height: 120,
-                objectFit: 'cover',
-                // borderRadius: 2
-              }}
-            />
-            <Box
-              onClick={handleVideoClick}
               component="img"
-              src={`${WEB_URL}/videoIcon.png`}
-              alt="video icon"
+              loading="lazy"
+              src={frontDesignPath}
+              alt="Card Image"
               sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-70%, -70%)',
-                width: 50,
-                height: 50
+                position: 'relative',
+                width: { md: 430, xs: 300 },
+                height: { md: 500, xs: 400 },
+                objectFit: 'contain'
+                // position: 'absolute',
+                // top: 0,
+                // left: 0
               }}
             />
-            </>
-          ) : (
 
-            <Box
-              onClick={handleVideoClick}
-              component="img"
-              src={`${WEB_URL}/videoIcon.png`}
-              alt="video icon"
-              sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 50,
-                height: 50
-              }}
+            {previewURL || videoPath ? (
+              <>
+                <Box
+                  // controls
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  component="video"
+                  src={previewURL || videoPath}
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: { md: 400, xs: 300 },
+                    height: { md: 500, xs: 400 },
+                    // width: 120,
+                    // height: 120,
+                    objectFit: 'cover'
+                    // borderRadius: 2
+                  }}
+                />
+                <Box
+                  onClick={handleVideoClick}
+                  component="img"
+                  src={`${WEB_URL}/videoIcon.png`}
+                  alt="video icon"
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-70%, -70%)',
+                    width: 50,
+                    height: 50
+                  }}
+                />
+              </>
+            ) : (
+
+              <Box
+                onClick={handleVideoClick}
+                component="img"
+                src={`${WEB_URL}/videoIcon.png`}
+                alt="video icon"
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 50,
+                  height: 50
+                }}
+              />
+            )}
+            <input
+              type="file"
+              accept="video/*"
+              hidden
+              ref={inputRef}
+              onChange={handleVideoSelect}
             />
-          )}
-          <input
-            type="file"
-            accept="video/*"
-            hidden
-            ref={inputRef}
-            onChange={handleVideoSelect}
-          />
-          {
-            loading && (
-              <Box sx={{
-                display: 'flex', position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-              }}>
-                <CircularProgress/>
-              </Box>
-            )
-          }
+            {
+              loading && (
+                <Box sx={{
+                  display: 'flex', position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)'
+                }}>
+                  <CircularProgress/>
+                </Box>
+              )
+            }
 
-          {/*</Box>*/}
+            {/*</Box>*/}
 
           </Box>
 
           {/* BUTTONS - OUTSIDE CONTAINER, INSIDE BOX */}
 
 
-
-    </Container>
+        </Container>
 
         <Box
           sx={{
-            pt:{xl:15,md:0, xs:5},
-            mb:5,
+            pt: { xl: 15, md: 0, xs: 5 },
+            mb: 5,
             // bgcolor:'red',
             width: '100%',
             display: 'flex',
             justifyContent: { xs: 'flex-end', md: 'flex-end' },
             alignItems: 'center',
             gap: 2,
-            pr: {md: 5 , xs:5}
+            pr: { md: 5, xs: 5 }
           }}
         >
-          <NextLink href={`/preview?id=${selectedCardId}`} passHref legacyBehavior>
+          <NextLink href={`/preview/${id}`} passHref legacyBehavior>
             <Button
               // onClick={handleSkip}
               sx={{
@@ -369,7 +328,7 @@ const UploadVideo = () => {
               Skip
             </Button>
           </NextLink>
-          <NextLink href={`/preview?id=${selectedCardId}`} passHref legacyBehavior>
+          <NextLink href={`/preview/${id}`} passHref legacyBehavior>
             <Button
               // onClick={handleSkip}
               sx={{
@@ -389,6 +348,7 @@ const UploadVideo = () => {
           {/*<NextLink href="/dashboard" passHref legacyBehavior>*/}
           <Button
             onClick={handleSave}
+            disabled={loading}
             sx={{
               textAlign: 'center',
               backgroundColor: '#c09b9b !important',
@@ -401,7 +361,7 @@ const UploadVideo = () => {
             }}
             variant="contained"
           >
-            Save
+            {loading ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/> : 'Save'}
           </Button>
           {/*</NextLink>*/}
         </Box>
@@ -411,10 +371,10 @@ const UploadVideo = () => {
   );
 };
 
-UploadVideo.getLayout = (page) => (
+Id.getLayout = (page) => (
   <DashboardLayout>
     {page}
   </DashboardLayout>
 );
 
-export default UploadVideo;
+export default Id;

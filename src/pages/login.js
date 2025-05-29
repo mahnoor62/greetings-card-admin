@@ -88,7 +88,7 @@ const Page = () => {
             ml:1, mr:1,
             maxWidth: 400,
             px: 3,
-            py: '100px',
+            py: '50px',
             width: '100%'
           }}
         >

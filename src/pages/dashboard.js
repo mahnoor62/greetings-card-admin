@@ -27,7 +27,6 @@ import * as Yup from 'yup';
 import ConfirmationDialog from '../components/confirmationDialogue';
 import Switch from '@mui/material/Switch';
 import { Layout as DashboardLayout } from '../layouts/dashboard/layout';
-import Page from './upload-cards';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Head from 'next/head';
 import { useAuth } from '../hooks/use-auth';
@@ -38,6 +37,7 @@ const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 
 const UplaodCards = () => {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { setSelectedCardId } = useCardContext();
   const [cards, setCards] = useState([]);
   const [card, setCard] = useState(null);
@@ -49,8 +49,6 @@ const UplaodCards = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const { user } = useAuth();
   const token = user?.token;
-
-  console.log(":Card", card);
 
 //upload pop up
   const [open, setOpen] = React.useState(false);
@@ -66,6 +64,7 @@ const UplaodCards = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setCard(null);
     formik.resetForm();
     // setCard(null);
   };
@@ -178,6 +177,7 @@ const UplaodCards = () => {
     ),
     onSubmit: async (values, helpers) => {
       try {
+        setIsSubmitting(true);
         if (card?._id) {
           const res = await axios.post(`${BASE_URL}/api/cards/edit`, {
             id: card._id,
@@ -194,7 +194,8 @@ const UplaodCards = () => {
           formik.resetForm();
           const newCardId = res.data?.data?._id;
           setSelectedCardId(newCardId);
-          router.push('/upload-cards');
+          router.push(`/upload-cards/${newCardId}`);
+          // router.push('/upload-cards');
         } else {
           const response = await axios.post(BASE_URL
             + '/api/cards/create',
@@ -214,7 +215,9 @@ const UplaodCards = () => {
           formik.resetForm();
           const newCardId = response.data?.data?._id;
           setSelectedCardId(newCardId);
-          router.push('/upload-cards');
+          // router.push('/upload-cards');
+          router.push(`/upload-cards/${newCardId}`);
+
         }
 
       } catch (error) {
@@ -223,6 +226,8 @@ const UplaodCards = () => {
       }
     }
   });
+
+  console.log("card", card);
 
   return (
     <>
@@ -511,12 +516,14 @@ const UplaodCards = () => {
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={handleClose}>Cancel</Button>
-                  <Button type="submit" variant="contained" sx={{
+                  <Button type="submit" variant="contained"
+                          disabled={isSubmitting}
+                          sx={{
                     '&:hover': {
                       backgroundColor: '#c09b9b !important',
                       color: '#1a1d25'
                     }
-                  }} color="primary">Submit</Button>
+                  }} color="primary">{card ? 'Upload':'Add'}</Button>
                 </DialogActions>
               </form>
             </Dialog>
