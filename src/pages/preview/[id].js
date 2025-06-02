@@ -233,7 +233,7 @@ const Id = () => {
                     <Box
                       sx={{
                         width: '2px',
-                        height: '98.5%',
+                        height: '98%',
                         bgcolor: 'grey',
                         position: 'absolute',
                         left: '50%',
