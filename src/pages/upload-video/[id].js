@@ -217,6 +217,7 @@ const Id = () => {
               // bgcolor:'red',
               top: 8,
               left: 8,
+              cursor:'pointer',
               zIndex: 10}}>
               <Tooltip sx={{fontWeight:900}}  title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
                 <ErrorOutlineIcon/>

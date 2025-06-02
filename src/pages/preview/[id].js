@@ -74,7 +74,7 @@ const Id = () => {
           pt: 5
           // pb: 10
         }}>
-          <Grid container spacing={2} sx={{
+          <Grid container spacing={2}  sx={{
             display: 'flex',
             // bgcolor:'blue',
             justifyContent: 'center',
@@ -87,9 +87,9 @@ const Id = () => {
               order:1,
               // width: '100%',
               // bgcolor:'yellow',
-              // justifyContent: 'center',
+              justifyContent: 'center',
               flexDirection: 'column',
-              // alignItems: 'center',
+              alignItems: 'center',
               position: 'relative'
               // height: '100%'
             }}>
@@ -181,11 +181,11 @@ const Id = () => {
               // bgcolor:'red',
               width: '100%',
               order:{md:2, xs:3},
-              // p:1,
+              // p:'0 !important',
               display: 'flex',
-              // justifyContent: 'center',
+              justifyContent: 'center',
               flexDirection: 'column',
-              // alignItems: 'center',
+              alignItems: 'center',
               // height: '100%',
 
             }}>
@@ -202,7 +202,7 @@ const Id = () => {
                   //   overflow: 'hidden'
                   //   }}
                   // >
-                  <Box className="121212"
+                  <Box
                        sx={{
                          width: '100%',
                          // aspectRatio: '2 / 1.414',
@@ -212,7 +212,7 @@ const Id = () => {
                          // width: '100%',
                          // height: '100%',
                          position: 'relative',
-                         px: '8px'
+                         px: {md: '8px' }
                        }}
                   >
                     {/* Inside Left Design */}
@@ -233,7 +233,7 @@ const Id = () => {
                     <Box
                       sx={{
                         width: '2px',
-                        height: '98%',
+                        height: {xs: '97%', md:'98%' },
                         bgcolor: 'grey',
                         position: 'absolute',
                         left: '50%',

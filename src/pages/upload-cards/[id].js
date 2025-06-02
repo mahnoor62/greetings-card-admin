@@ -588,7 +588,7 @@ const Page = () => {
                 // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.06), 0px 0px 0px rgba(0, 0, 0, 0)',
                 borderRadius: 0
               }}>
-                <Box sx={{display:'flex', justifyContent:'flex-start', alignItems:'center',position:'absolute', mt:{md:1, xs:0.2}, ml:{md:1, xs:0.5}}}>
+                <Box sx={{display:'flex', justifyContent:'flex-start', alignItems:'center',position:'absolute',cursor:'pointer', mt:{md:1, xs:0.2}, ml:{md:1, xs:0.5}}}>
                   <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
                     <ErrorOutlineIcon/>
                   </Tooltip>
