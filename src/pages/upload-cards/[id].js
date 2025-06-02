@@ -3,7 +3,7 @@ import {
   Card, Box,
   CardContent, CardActions, CardMedia, CardActionArea,
   Container,
-  Typography, Grid, Button, CircularProgress
+  Typography, Grid, Button, CircularProgress,Tooltip
 } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useRouter } from 'next/router';
@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/use-auth';
 import { useCardContext } from '../../contexts/cardIdContext';
 import NextLink from 'next/link';
-
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -85,22 +85,22 @@ const Page = () => {
         const width = img.width;
         const height = img.height;
 
-        // const aspectRatio = height / width; // A5 is ~1.414
-        // const expectedRatio = 1.414;
-        // const tolerance = 0.05; // Allow slight margin for error
+        const aspectRatio = height / width; // A5 is ~1.414
+        const expectedRatio = 1.414;
+        const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 148 || img.height !== 210) {
-          toast.error('Please upload an image of  148 × 210 pixels',
-            {
-              duration: 3000
-            });
-          return;
-        }
-
-        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
-        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        // if (img.width !== 148 || img.height !== 210) {
+        //   toast.error('Please upload an image of  148 × 210 pixels',
+        //     {
+        //       duration: 3000
+        //     });
         //   return;
         // }
+
+        if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+          toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+          return;
+        }
 
         formik.setFieldValue('frontDesign', file);
         setImage(file);
@@ -194,21 +194,21 @@ const Page = () => {
         const width = img.width;
         const height = img.height;
 
-        // const aspectRatio = height / width; // A5 is ~1.414
-        // const expectedRatio = 1.414;
-        // const tolerance = 0.05; // Allow slight margin for error
+        const aspectRatio = height / width; // A5 is ~1.414
+        const expectedRatio = 1.414;
+        const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 148 || img.height !== 210) {
-          toast.error('Please upload an image of  148 × 210 pixels', {
-            duration: 3000
-          });
-          return;
-        }
-
-        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
-        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        // if (img.width !== 148 || img.height !== 210) {
+        //   toast.error('Please upload an image of  148 × 210 pixels', {
+        //     duration: 3000
+        //   });
         //   return;
         // }
+
+        if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+          toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+          return;
+        }
 
         formik.setFieldValue('backDesign', file);
         setBackImage(file);
@@ -303,21 +303,21 @@ const Page = () => {
         const width = img.width;
         const height = img.height;
 
-        // const aspectRatio = height / width; // A5 is ~1.414
-        // const expectedRatio = 1.414;
-        // const tolerance = 0.05; // Allow slight margin for error
+        const aspectRatio = height / width; // A5 is ~1.414
+        const expectedRatio = 1.414;
+        const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 148 || img.height !== 210) {
-          toast.error('Please upload an image of  148 × 210 pixels', {
-            duration: 3000
-          });
-          return;
-        }
-
-        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
-        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        // if (img.width !== 148 || img.height !== 210) {
+        //   toast.error('Please upload an image of  148 × 210 pixels', {
+        //     duration: 3000
+        //   });
         //   return;
         // }
+
+        if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+          toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+          return;
+        }
 
         formik.setFieldValue('insideLeftDesign', file);
         setInsideLeftImage(file);
@@ -413,21 +413,21 @@ const Page = () => {
         const width = img.width;
         const height = img.height;
 
-        // const aspectRatio = height / width; // A5 is ~1.414
-        // const expectedRatio = 1.414;
-        // const tolerance = 0.05; // Allow slight margin for error
+        const aspectRatio = height / width; // A5 is ~1.414
+        const expectedRatio = 1.414;
+        const tolerance = 0.05; // Allow slight margin for error
 
-        if (img.width !== 148 || img.height !== 210) {
-          toast.error('Please upload an image of  148 × 210 pixels', {
-            duration: 3000
-          });
-          return;
-        }
-
-        // if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
-        //   toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+        // if (img.width !== 148 || img.height !== 210) {
+        //   toast.error('Please upload an image of  148 × 210 pixels', {
+        //     duration: 3000
+        //   });
         //   return;
         // }
+
+        if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+          toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+          return;
+        }
 
         formik.setFieldValue('insideRightDesign', file);
         setInsideRightImage(file);
@@ -570,6 +570,7 @@ const Page = () => {
           alignItems: 'center',
           height: '100%'
         }}>
+
           <Grid container spacing={2} sx={{
             display: 'flex',
             // bgcolor:'blue',
@@ -579,12 +580,19 @@ const Page = () => {
             alignItems: 'center'
           }}>
             <Grid item xs={6} md={3}>
+
               <Card sx={{
                 bgcolor: '#f0f3f8',
                 height: 400,
+                position:'relative',
                 // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.06), 0px 0px 0px rgba(0, 0, 0, 0)',
                 borderRadius: 0
               }}>
+                <Box sx={{display:'flex', justifyContent:'flex-start', alignItems:'center',position:'absolute', mt:{md:1, xs:0.2}, ml:{md:1, xs:0.5}}}>
+                  <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
+                    <ErrorOutlineIcon/>
+                  </Tooltip>
+                </Box>
                 <Box
                   sx={{
                     display: 'flex',
@@ -596,6 +604,7 @@ const Page = () => {
                   }}
                 >
                   {/* Image at Top */}
+
                   <Box
                     onDrop={handleDrop}
                     onDragOver={(e) => e.preventDefault()}
@@ -677,6 +686,7 @@ const Page = () => {
                     py: 3
                   }}
                 >
+
                   {/* Image at Top */}
                   <Box
                     component="img"
@@ -745,11 +755,15 @@ const Page = () => {
               <Card sx={{
                 bgcolor: '#f0f3f8',
                 height: 400,
+                // display:'flex',
+                // justifyContent: 'center',
+                // alignItems: 'center',
                 // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.06), 0px 0px 0px rgba(0, 0, 0, 0)',
                 borderRadius: 0
               }}>
                 <Box sx={{
                   display: 'flex',
+                  // bgcolor:'red',
                   justifyContent: 'space-around',
                   alignItems: 'center',
                   width: '100%',
@@ -759,6 +773,8 @@ const Page = () => {
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
+                       // bgcolor:'pink',
+                      width:'100%',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       height: '100%',
@@ -822,6 +838,8 @@ const Page = () => {
                     sx={{
                       display: 'flex',
                       flexDirection: 'column',
+                      // bgcolor:'pink',
+                      width:'100%',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       height: '100%',

@@ -15,6 +15,7 @@ import {
   CircularProgress, Typography
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+
 import EditIcon from '@mui/icons-material/Edit';
 import SearchIcon from '@mui/icons-material/Search';
 import toast from 'react-hot-toast';
@@ -31,7 +32,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Head from 'next/head';
 import { useAuth } from '../hooks/use-auth';
 import { useCardContext } from '../contexts/cardIdContext';
-
+import CategoryIcon from '@mui/icons-material/Category';
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 
@@ -40,6 +41,7 @@ const UplaodCards = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setSelectedCardId } = useCardContext();
   const [cards, setCards] = useState([]);
+  const [category, setCategories] = useState([]);
   const [card, setCard] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -143,16 +145,32 @@ const UplaodCards = () => {
   const paginatedCards = PaginationHelper(filteredCards, page, rowsPerPage);
   const totalCount = filteredCards.length;
 
-  const cardTypes = [
-    'Birthday',
-    'Wedding',
-    'Mothers Day',
-    'Fathers Day',
-    'Sister Day',
-    'Anniversary',
-    'Valentines Day',
-    'Marry Christmas'
-  ];
+
+  //
+  const getAllCategories = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/admin/category/get/all`, {
+        // headers: {
+        //   'x-access-token': token
+        // }
+      });
+      const data = response.data.data;
+      setCategories(data);
+
+      setLoadingComplete(false);
+
+    } catch (error) {
+      console.log('error in get all categories', error);
+      toast.error(error.response.data.msg);
+    }
+  };
+
+  useEffect(() => {
+    getAllCategories();
+  }, []);
+
+
+
 
   const formik = useFormik({
     initialValues: {
@@ -227,7 +245,6 @@ const UplaodCards = () => {
     }
   });
 
-  console.log("card", card);
 
   return (
     <>
@@ -240,11 +257,14 @@ const UplaodCards = () => {
         // bgcolor:'red',
         display: 'flex', justifyContent: 'center', alignItems: 'center',
         pt: { xs: 15, md: 10 },
-        height: { md: '100vh !important', xs: '100% !important' }
+        height: { md: '100% !important', xs: '100% !important' },
+        minHeight:'100vh !important'
       }}>
         <Container sx={{ mt: 5 }}>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+          <Typography variant='h2' sx={{ mb:3, display:'flex', justifyContent:'flex-start', alignItems:'center'}}>Cards</Typography>
+          {/*<TableContainer component={Paper} sx={{ width: 600 }}>*/}
+          <TableContainer component={Paper} >
+            <Table  aria-label="simple table">
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
                   <TableCell colSpan={5} sx={{ width: '100%' }}>
@@ -294,19 +314,28 @@ const UplaodCards = () => {
                       <Box
                         sx={{
                           ml: 2,
-                          width: 60, // Increased width
-                          height: 55,
+
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          // bgcolor: 'white',
+                          // bgcolor: 'red',
                           borderRadius: 1,
                           cursor: 'pointer'
                         }}
                       >
+
+                        <Tooltip title="Category">
+                          <NextLink href='/category'>
+                          <IconButton>
+                            <CategoryIcon sx={{ fontSize: 50 ,     width: 60, // Increased width
+                              height: 55, color: '#c165a0' }}/>
+                          </IconButton>
+                          </NextLink>
+                        </Tooltip>
                         <Tooltip title="Upload Card">
                           <IconButton onClick={handleClickOpen}>
-                            <CloudUploadIcon sx={{ fontSize: 50, color: 'rgba(71, 85, 105, 1)' }}/>
+                            <CloudUploadIcon sx={{ fontSize: 50,      width: 60, // Increased width
+                              height: 55,color: 'rgba(71, 85, 105, 1)' }}/>
                           </IconButton>
                         </Tooltip>
 
@@ -399,7 +428,7 @@ const UplaodCards = () => {
           <React.Fragment>
             <Dialog open={open} onClose={handleClose} sx={{ width: '100%' }}>
               <form onSubmit={formik.handleSubmit} sx={{ width: '100%' }}>
-                <DialogTitle>{card ? 'Edit Card' : 'Upload Card'}</DialogTitle>
+                <DialogTitle>{card ? 'Update Card' : 'Upload Card'}</DialogTitle>
                 <DialogContent>
                   <Grid container columnSpacing={2} sx={{ mt: 1 }}>
                     <Grid item md={6} xs={12}>
@@ -415,24 +444,6 @@ const UplaodCards = () => {
                       />
                     </Grid>
 
-
-                    {/*<Grid item md={6} xs={12}>*/}
-                    {/*  <FormControl fullWidth sx={{ my: 1 }}>*/}
-                    {/*    <InputLabel>Card Type</InputLabel>*/}
-                    {/*    <Select*/}
-                    {/*      sx={{ borderRadius: 2, height: 55 }}*/}
-                    {/*      name="cardType"*/}
-                    {/*      value={formik.values.cardType}*/}
-                    {/*      onChange={formik.handleChange}*/}
-                    {/*    >*/}
-                    {/*      {cardTypes.map((type) => (*/}
-                    {/*        <MenuItem key={type} value={type}>*/}
-                    {/*          {type}*/}
-                    {/*        </MenuItem>*/}
-                    {/*      ))}*/}
-                    {/*    </Select>*/}
-                    {/*  </FormControl>*/}
-                    {/*</Grid>*/}
                     <Grid item md={6} xs={12}>
                       <TextField
                         // placeholder='The price should be stored in (AUD)'
@@ -457,11 +468,6 @@ const UplaodCards = () => {
                         }}
                       />
                     </Grid>
-                    {/*<Grid item xs={12}>*/}
-                    {/*  <Typography sx={{ mt: 2, fontWeight: 'bold', ml: 1, fontSize: '13px' }}>*/}
-                    {/*    The price should be stored in (AUD)*/}
-                    {/*  </Typography>*/}
-                    {/*</Grid>*/}
                     <Grid item md={12} xs={12}>
                       <FormControl fullWidth component="fieldset" sx={{ my: 1 }}>
                         <FormLabel component="legend" sx={{ color: 'black', fontWeight: 900 }}>
@@ -469,7 +475,7 @@ const UplaodCards = () => {
                         </FormLabel>
                         <FormGroup>
                           <Grid container spacing={0}>
-                            {cardTypes.map((type) => (
+                            {category.map((type) => (
                               <Grid item xs={12} md={6} key={type}>
 
                                 <FormControlLabel
@@ -485,11 +491,11 @@ const UplaodCards = () => {
                                   control={
                                     <Checkbox
                                       size="small"
-                                      checked={formik.values.cardType.includes(type)}
+                                      checked={formik.values.cardType.includes(type.name)}
                                       onChange={(e) => {
                                         const selected = formik.values.cardType;
                                         if (e.target.checked) {
-                                          formik.setFieldValue('cardType', [...selected, type]);
+                                          formik.setFieldValue('cardType', [...selected, type.name]);
                                         } else {
                                           formik.setFieldValue(
                                             'cardType',
@@ -500,7 +506,7 @@ const UplaodCards = () => {
                                       name="cardType"
                                     />
                                   }
-                                  label={type}
+                                  label={type.name}
                                 />
                               </Grid>
                             ))}
@@ -523,7 +529,7 @@ const UplaodCards = () => {
                       backgroundColor: '#c09b9b !important',
                       color: '#1a1d25'
                     }
-                  }} color="primary">{card ? 'Upload':'Add'}</Button>
+                  }} color="primary">{card ? 'Update':'Add'}</Button>
                 </DialogActions>
               </form>
             </Dialog>

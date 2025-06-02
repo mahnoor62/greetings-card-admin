@@ -3,8 +3,9 @@ import {
   Card, Box,
   CardContent, CardActions, CardMedia, CardActionArea, CircularProgress,
   Container,
-  Typography, Grid, Button
+  Typography, Grid, Button, Tooltip
 } from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
@@ -17,6 +18,7 @@ import * as yup from 'yup';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../hooks/use-auth';
 import { useRouter } from 'next/router';
+
 
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
@@ -58,23 +60,42 @@ const Id = () => {
 
     const videoElement = document.createElement('video');
     videoElement.preload = 'metadata';
-
     videoElement.onloadedmetadata = () => {
       const width = videoElement.videoWidth;
       const height = videoElement.videoHeight;
 
       URL.revokeObjectURL(videoElement.src); // Clean up object URL
 
-      if (width === 148 && height === 210) {
-        setVideo(file);
-        const preview = URL.createObjectURL(file);
-        setPreviewURL(preview);
-      } else {
+      const aspectRatio = height / width;
+      const expectedRatio = 1.414; // A5
+      const tolerance = 0.05;
+
+      if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
         toast.error(
-          `Invalid video dimensions. Required: 148x210. Selected: ${width}x${height}`,
+          `Invalid video aspect ratio. Expected ~1:1.414 (A5). Selected: ${(aspectRatio).toFixed(3)}`,
           { duration: 3000 }
         );
+        return;
       }
+      setVideo(file);
+      const preview = URL.createObjectURL(file);
+      setPreviewURL(preview);
+    // videoElement.onloadedmetadata = () => {
+    //   const width = videoElement.videoWidth;
+    //   const height = videoElement.videoHeight;
+    //
+    //   URL.revokeObjectURL(videoElement.src); // Clean up object URL
+    //
+    //   if (width === 148 && height === 210) {
+    //     setVideo(file);
+    //     const preview = URL.createObjectURL(file);
+    //     setPreviewURL(preview);
+    //   } else {
+    //     toast.error(
+    //       `Invalid video dimensions. Required: 148x210. Selected: ${width}x${height}`,
+    //       { duration: 3000 }
+    //     );
+    //   }
     };
 
     videoElement.onerror = () => {
@@ -161,14 +182,8 @@ const Id = () => {
           pt: { xs: 15, md: 5 },
           height: { md: '100vh !important', lg: '100vh !important', xs: '100vh !important' },
           width: '100%',
-          // height: {md: '100%', lg:'100%', xl:'100vh' },
-
-          // bgcolor:'red',
           // minHeight:'100vh',
-          // backgroundImage: `url(${WEB_URL}/bg.png)`,
-          // backgroundSize: 'cover',
-          // backgroundPosition: 'center',
-          // backgroundRepeat: 'no-repeat',
+     // bgcolor:'yellow',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -191,13 +206,22 @@ const Id = () => {
           }}
         >
           <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center'
+            position: 'relative',
+            // display: 'flex',
+            // flexDirection: 'column',
+            height: { md: 500, xs: 400 },
+            // justifyContent: 'center',
+            // alignItems: 'center'
           }}>
-
+            <Box sx={{ position: 'absolute',
+              // bgcolor:'red',
+              top: 8,
+              left: 8,
+              zIndex: 10}}>
+              <Tooltip sx={{fontWeight:900}}  title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
+                <ErrorOutlineIcon/>
+              </Tooltip>
+            </Box>
             <Box
               component="img"
               loading="lazy"
@@ -205,14 +229,17 @@ const Id = () => {
               alt="Card Image"
               sx={{
                 position: 'relative',
-                width: { md: 430, xs: 300 },
+                // width: { md: 430, xs: 300 },
+                aspectRatio: '1 / 1.414',
+                // width: { md: 430, xs: 300 },
                 height: { md: 500, xs: 400 },
-                objectFit: 'contain'
+                // objectFit: 'contain'
                 // position: 'absolute',
                 // top: 0,
                 // left: 0
               }}
             />
+
 
             {previewURL || videoPath ? (
               <>
@@ -229,11 +256,12 @@ const Id = () => {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: { md: 400, xs: 300 },
+                    // width: { md: 400, xs: 300 },
+                    aspectRatio: '1 / 1.414',
                     height: { md: 500, xs: 400 },
                     // width: 120,
                     // height: 120,
-                    objectFit: 'cover'
+                    objectFit: 'contain'
                     // borderRadius: 2
                   }}
                 />
@@ -247,6 +275,7 @@ const Id = () => {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-70%, -70%)',
+                    // aspectRatio: '1 / 1.414',
                     width: 50,
                     height: 50
                   }}
@@ -289,9 +318,9 @@ const Id = () => {
               )
             }
 
-            {/*</Box>*/}
+            </Box>
 
-          </Box>
+          {/*</Box>*/}
 
           {/* BUTTONS - OUTSIDE CONTAINER, INSIDE BOX */}
 
@@ -305,10 +334,10 @@ const Id = () => {
             // bgcolor:'red',
             width: '100%',
             display: 'flex',
-            justifyContent: { xs: 'flex-end', md: 'flex-end' },
+            justifyContent: { xs: 'center', md: 'flex-end' },
             alignItems: 'center',
             gap: 2,
-            pr: { md: 5, xs: 5 }
+            pr: { md: 5, xs: 0}
           }}
         >
           <NextLink href={`/preview/${id}`} passHref legacyBehavior>
