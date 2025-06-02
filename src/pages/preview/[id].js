@@ -114,31 +114,32 @@ const Id = () => {
                     />
 
 
-                    {/*{*/}
-                    {/*  videoPath && (*/}
-                    {/*    <Box*/}
+                    {
+                      videoPath && (
+                        <Box
                     
-                    {/*      autoPlay*/}
-                    {/*      muted*/}
-                    {/*      loop*/}
-                    {/*      playsInline*/}
-                    {/*      component="video"*/}
-                    {/*      src={videoPath}*/}
-                    {/*      sx={{*/}
-                    {/*        position: 'absolute',*/}
-                    {/*        top: 0,*/}
-                    {/*        left: 0,*/}
-                    {/*        // transform: 'translate(-50%, -50%)',*/}
-                    {/*        width: '100%',*/}
-                    {/*        aspectRatio: '1 / 1.414',*/}
-                    {/*        // height: '100%',*/}
-                    {/*        objectFit: 'cover',*/}
-                    {/*        zIndex: 2*/}
-                    {/*        // borderRadius: 2*/}
-                    {/*      }}*/}
-                    {/*    />*/}
-                    {/*  )*/}
-                    {/*}*/}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          component="video"
+                          src={videoPath}
+                          sx={{
+                            position: 'absolute',
+                            top: -3.5,
+                            left: 0,
+                            // mb:1.1,
+                            // transform: 'translate(-50%, -50%)',
+                            width: '100%',
+                            aspectRatio: '1 / 1.414',
+                            // height: '100%',
+                            objectFit: 'cover',
+                            zIndex: 2
+                            // borderRadius: 2
+                          }}
+                        />
+                      )
+                    }
 
                   </>
 
