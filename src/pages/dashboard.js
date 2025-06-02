@@ -262,15 +262,16 @@ const UplaodCards = () => {
       }}>
         <Container sx={{ mt: 5 }}>
           <Typography variant='h2' sx={{ mb:3, display:'flex', justifyContent:'flex-start', alignItems:'center'}}>Cards</Typography>
-          {/*<TableContainer component={Paper} sx={{ width: 600 }}>*/}
-          <TableContainer component={Paper} >
-            <Table  aria-label="simple table">
+          <TableContainer component={Paper} sx={{ width:'100%' }}>
+          {/*<TableContainer component={Paper} sx={{width: '100%'}} >*/}
+            <Table  aria-label="simple table"  sx={{width:'100%'}}>
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
                   <TableCell colSpan={5} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
                       alignItems: 'center',
+                      flexDirection:{md:'row', xs:'column'},
                       justifyContent: 'space-between',
                       width: '100%'
                     }}>
@@ -314,10 +315,10 @@ const UplaodCards = () => {
                       <Box
                         sx={{
                           ml: 2,
-
+                          width:'100%',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
+                          justifyContent:  'flex-end' ,
                           // bgcolor: 'red',
                           borderRadius: 1,
                           cursor: 'pointer'

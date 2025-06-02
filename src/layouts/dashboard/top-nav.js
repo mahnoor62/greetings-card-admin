@@ -35,6 +35,7 @@ export const TopNav = (props) => {
   const isUploadCards = pathname.startsWith('/upload-cards');
   const isPreview = pathname.startsWith('/preview');
   const isDashboard = pathname === '/dashboard';
+  const isCategory = pathname === '/category';
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const accountPopover = usePopover();
   const [open, setOpen] = React.useState(false);
@@ -96,22 +97,28 @@ export const TopNav = (props) => {
                   spacing={2}
                 >
 
-                  {/*Dashboard*/}
-                  {/*<NextLink href="/preview" passHref legacyBehavior>*/}
-                  {/*  <Button*/}
-                  {/*    sx={{*/}
-                  {/*      textAlign: 'center',*/}
-                  {/*      color:'white',*/}
-                  {/*      display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block',*/}
-                  {/*      minWidth: 120, '&:hover': {*/}
-                  {/*        bgcolor: '#e79552'*/}
-                  {/*      }*/}
-                  {/*    }}*/}
-                  {/*    variant="contained"*/}
-                  {/*  >*/}
-                  {/*    Preview*/}
-                  {/*  </Button>*/}
-                  {/*</NextLink>*/}
+                {
+                  isCategory && (
+                    <NextLink href="/dashboard" passHref legacyBehavior>
+                      <Button
+                        sx={{
+                          textAlign: 'center',
+                          color:'black',
+                          // display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block',
+                          minWidth: 120, '&:hover': {
+                            backgroundColor: '#c09b9b !important',
+                            color: 'black'
+                          }
+                        }}
+                        variant="contained"
+                      >
+                        Dashboard
+                      </Button>
+                    </NextLink>
+
+                  )
+                }
+
 
                   <Avatar
                     onClick={accountPopover.handleOpen}
@@ -126,17 +133,43 @@ export const TopNav = (props) => {
                   />
                 </Stack>) :
                 (
+                  <>
                   <Avatar
                     onClick={accountPopover.handleOpen}
                     ref={accountPopover.anchorRef}
                     sx={{
-                      display: isCardCustomization || isDashboard || isPreview  || isUploadCards ? 'block' : 'none',
+                      display: isCardCustomization || isDashboard || isPreview  || isUploadCards  ? 'block' : 'none',
                       cursor: 'pointer',
                       height: 40,
                       width: 40
                     }}
                     src={`${WEB_URL}/blank-profile.webp`}
                   />
+
+            {
+              isCategory && (
+              <NextLink href="/dashboard" passHref legacyBehavior>
+              <Button
+              sx={{
+              textAlign: 'center',
+              color:'black',
+              // display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block',
+              minWidth: 120, '&:hover': {
+              backgroundColor: '#c09b9b !important',
+              color: 'black'
+            }
+            }}
+            variant="contained"
+          >
+            Dashboard
+          </Button>
+        </NextLink>
+
+        )
+        }
+
+                  </>
+
                   // <IconButton onClick={() => setOpen(!open)} sx={{ p: 0 }}>
                   //   <SvgIcon fontSize="large">
                   //     <Bars3Icon/>
@@ -157,7 +190,7 @@ export const TopNav = (props) => {
             <NextLink href="/dashboard">
               <Button
                 sx={{
-                  display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block'
+                  display: isCardCustomization || isPreview || isDashboard || isCategory?  'none' : 'block'
 
                 }}
                 variant="contained"

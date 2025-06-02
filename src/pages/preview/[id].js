@@ -85,7 +85,7 @@ const Id = () => {
             <Grid item xs={6} md={3} lg={3} sx={{
               display: 'flex',
               order:1,
-              width: '100%',
+              // width: '100%',
               // bgcolor:'yellow',
               // justifyContent: 'center',
               flexDirection: 'column',
@@ -117,7 +117,6 @@ const Id = () => {
                     {
                       videoPath && (
                         <Box
-                    
                           autoPlay
                           muted
                           loop
@@ -127,7 +126,7 @@ const Id = () => {
                           sx={{
                             position: 'absolute',
                             top: -3.5,
-                            left: 0,
+                            // left: 0,
                             // mb:1.1,
                             // transform: 'translate(-50%, -50%)',
                             width: '100%',
@@ -357,7 +356,7 @@ const Id = () => {
             width: '100%',
             // mb:5,
             display: 'flex',
-            justifyContent: { xs: 'flex-end', md: 'flex-end' },
+            justifyContent: { xs: 'center', md: 'flex-end' },
             // alignItems: 'center',
             pr: 3
           }}

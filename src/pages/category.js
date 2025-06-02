@@ -190,7 +190,7 @@ const Category = () => {
             }
           );
           const newCategory = response.data.data;
-          setCategories(prev => [newCategory , ...prev ]);
+          setCategories(prev => [newCategory, ...prev]);
           toast.success('Category Created Successfully');
           formik.resetForm();
           setOpen(false);
@@ -215,24 +215,33 @@ const Category = () => {
       </Head>
       <Box sx={{
         // bgcolor:'red',
-        display: 'flex', justifyContent: 'center', alignItems: 'center',
+
         pt: { xs: 15, md: 10 },
-        height: { md: '100% !important', xs: '100% !important' },
-        minHeight: '100vh !important'
+         display: 'flex', justifyContent: 'center',flexDirection:'column', alignItems: 'center',
+        height: { md: '100% !important', lg: '100% !important', xs: '100% !important' },
+        minHeight: '100vh !important',
+        // height: { md: '100% !important', xs: '100% !important' },
+        // minHeight: '100vh !important'
       }}>
-        <Container sx={{ mt: 5 }}>
+        <Container sx={{ mt: 5}}>
 
           <Box
-            sx={{ display: 'flex', justifyContent: 'center', flexDirection:'column', alignItems: 'center', width: '100%' }}>
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              alignItems: 'center',
+              width: '100%'
+            }}>
             <Typography variant="h2" sx={{
               mb: 3,
               display: 'flex',
-              width: { lg:500, xs:'100%' } ,
+              width: { lg: 500, xs: '100%' },
               justifyContent: 'flex-start',
               alignItems: 'center'
             }}>Categories</Typography>
-            <TableContainer component={Paper}  sx={{ width: {lg: 500 , xs:'100%'} }}>
-              <Table aria-label="simple table" sx={{width:'100%'}}>
+            <TableContainer component={Paper} sx={{ width: { lg: 500, xs: '100%' } }}>
+              <Table aria-label="simple table" sx={{ width: '100%' }}>
                 <TableHead>
                   <TableRow sx={{ width: '100%' }}>
                     <TableCell colSpan={5} sx={{ width: '100%' }}>
@@ -358,7 +367,7 @@ const Category = () => {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <TablePagination
-              sx={{ mb: 5, width: {lg: 500, xs:'100%' } }}
+              sx={{ mb: 5, width: { lg: 500, xs: '100%' } }}
               rowsPerPageOptions={[5, 10, 25, 50, 100]}
               component="div"
               count={totalCount}
@@ -369,48 +378,70 @@ const Category = () => {
             />
           </Box>
 
-          <React.Fragment>
-            <Dialog open={open} onClose={handleClose} sx={{ width: '100% !important' }}>
-              <form onSubmit={formik.handleSubmit} sx={{ width: '100%' }}>
-                <DialogTitle>{category ? 'Update Category' : 'Add Category'}</DialogTitle>
-                <DialogContent sx={{ pb: 1, pl: 1, pr: 1, width: 350 }}>
-                  <TextField
-                    fullWidth
-                    label="Name"
-                    name="name"
-                    value={formik.values.name}
-                    onChange={formik.handleChange}
-                    error={formik.touched.name && Boolean(formik.errors.name)}
-                    helperText={formik.touched.name && formik.errors.name}
-                    sx={{ my: 1 }}
-                  />
-                </DialogContent>
-                <DialogActions sx={{ pt: 0 }}>
-                  <Button onClick={handleClose}>Cancel</Button>
-                  <Button type="submit" variant="contained"
-                          disabled={isSubmitting}
-                          sx={{
-                            '&:hover': {
-                              backgroundColor: '#c09b9b !important',
-                              color: '#1a1d25'
-                            }
-                          }} color="primary">{category ? 'Update' : 'Add'}</Button>
-                </DialogActions>
-              </form>
-            </Dialog>
-
-          </React.Fragment>
-
-
-          <ConfirmationDialog
-            open={isDialogOpen}
-            onClose={() => setDialogOpen(false)}
-            onConfirm={handleDeleteConfirm}
-            title="Confirm Delete"
-            message="Are you sure you want to delete this Category?"
-          />
-
         </Container>
+        {/*<Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center',   pr: 3 }}>*/}
+        {/*  <NextLink href="/dashboard" passHref legacyBehavior>*/}
+        {/*    <Button*/}
+        {/*      sx={{*/}
+        {/*        textAlign: 'center',*/}
+        {/*        color: 'black',*/}
+        {/*        // display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block',*/}
+        {/*        minWidth: 120, '&:hover': {*/}
+        {/*          backgroundColor: '#c09b9b !important',*/}
+        {/*          color: 'black'*/}
+        {/*        }*/}
+        {/*      }}*/}
+        {/*      variant="contained"*/}
+        {/*    >*/}
+        {/*      Dashboard*/}
+        {/*    </Button>*/}
+        {/*  </NextLink>*/}
+        {/*</Box>*/}
+
+        {/*pop up*/}
+
+        <React.Fragment>
+          <Dialog open={open} onClose={handleClose} sx={{ width: '100% !important' }}>
+            <form onSubmit={formik.handleSubmit} sx={{ width: '100%' }}>
+              <DialogTitle>{category ? 'Update Category' : 'Add Category'}</DialogTitle>
+              <DialogContent sx={{ pb: 1, pl: 1, pr: 1, width: 350 }}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  name="name"
+                  value={formik.values.name}
+                  onChange={formik.handleChange}
+                  error={formik.touched.name && Boolean(formik.errors.name)}
+                  helperText={formik.touched.name && formik.errors.name}
+                  sx={{ my: 1 }}
+                />
+              </DialogContent>
+              <DialogActions sx={{ pt: 0 }}>
+                <Button onClick={handleClose}>Cancel</Button>
+                <Button type="submit" variant="contained"
+                        disabled={isSubmitting}
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: '#c09b9b !important',
+                            color: '#1a1d25'
+                          }
+                        }} color="primary">{category ? 'Update' : 'Add'}</Button>
+              </DialogActions>
+            </form>
+          </Dialog>
+
+        </React.Fragment>
+
+
+        <ConfirmationDialog
+          open={isDialogOpen}
+          onClose={() => setDialogOpen(false)}
+          onConfirm={handleDeleteConfirm}
+          title="Confirm Delete"
+          message="Are you sure you want to delete this Category?"
+        />
+
+
       </Box>
     </>
   );
