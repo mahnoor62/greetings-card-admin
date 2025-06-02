@@ -95,7 +95,14 @@ const Id = () => {
             }}>
               {
                 card?.frontDesign ? (
-                  <>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      aspectRatio: '1 / 1.414',
+                      position: 'relative',
+                      mb: 1.1
+                    }}
+                  >
                     <Box
                       component="img"
                       loading="lazy"
@@ -103,10 +110,10 @@ const Id = () => {
                       alt="Front Design"
                       sx={{
                         mb:1.1,
-                        position: 'relative',
+                        position: 'absolute',
                         width: '100%',
-                        // height: '100%',
-                        aspectRatio: '1 / 1.414',
+                        height: '100%',
+                        // aspectRatio: '1 / 1.414',
                         objectFit: 'contain',
                         borderRadius: 0,
                         zIndex: 1
@@ -125,23 +132,23 @@ const Id = () => {
                           src={videoPath}
                           sx={{
                             position: 'absolute',
-                            top: -3.5,
+                            // top: 0,
                             // left: 0,
                             // mb:1.1,
                             // transform: 'translate(-50%, -50%)',
                             width: '100%',
-                            aspectRatio: '1 / 1.414',
-                            // height: '100%',
+                            // aspectRatio: '1 / 1.414',
+                            height: '100%',
                             objectFit: 'cover',
                             zIndex: 2
                             // borderRadius: 2
                           }}
                         />
+
                       )
                     }
 
-                  </>
-
+                  </Box>
                 ) : (
                   <Box
                     sx={{
@@ -226,7 +233,7 @@ const Id = () => {
                     <Box
                       sx={{
                         width: '2px',
-                        height: '98%',
+                        height: '98.5%',
                         bgcolor: 'grey',
                         position: 'absolute',
                         left: '50%',
