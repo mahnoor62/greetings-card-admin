@@ -27,6 +27,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const Id = () => {
   const router = useRouter();
   const { id } = router.query;
+
+
   const { user } = useAuth();
   const token = user?.token;
   const [video, setVideo] = useState(null);
@@ -216,7 +218,7 @@ const Id = () => {
             <Box sx={{ position: 'absolute',
               // bgcolor:'red',
               top: 8,
-              left: 8,
+              left: 10,
               cursor:'pointer',
               zIndex: 10}}>
               <Tooltip sx={{fontWeight:900}}  title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >

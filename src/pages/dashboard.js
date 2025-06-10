@@ -210,7 +210,7 @@ const UplaodCards = () => {
           });
           toast.success('Card Updated Successfully');
           formik.resetForm();
-          const newCardId = res.data?.data?._id;
+          const newCardId = res.data?.data?.uuid;
           setSelectedCardId(newCardId);
           router.push(`/upload-cards/${newCardId}`);
           // router.push('/upload-cards');
@@ -231,7 +231,7 @@ const UplaodCards = () => {
           );
           toast.success('Card Created Successfully');
           formik.resetForm();
-          const newCardId = response.data?.data?._id;
+          const newCardId = response.data?.data?.uuid;
           setSelectedCardId(newCardId);
           // router.push('/upload-cards');
           router.push(`/upload-cards/${newCardId}`);
@@ -254,13 +254,14 @@ const UplaodCards = () => {
         </title>
       </Head>
       <Box sx={{
-        // bgcolor:'red',
+        overflowY:'hidden',
         display: 'flex', justifyContent: 'center', alignItems: 'center',
+        // pt: { xs: 15, md: 10 },
         pt: { xs: 15, md: 10 },
         height: { md: '100% !important', xs: '100% !important' },
         minHeight:'100vh !important'
       }}>
-        <Container sx={{ mt: 5 }}>
+        <Container sx={{ mt: 5}}>
           <Typography variant='h2' sx={{ mb:3, display:'flex', justifyContent:'flex-start', alignItems:'center'}}>Cards</Typography>
           <TableContainer component={Paper} sx={{ width:'100%' }}>
           {/*<TableContainer component={Paper} sx={{width: '100%'}} >*/}
@@ -474,49 +475,95 @@ const UplaodCards = () => {
                         <FormLabel component="legend" sx={{ color: 'black', fontWeight: 900 }}>
                           Select Card Category
                         </FormLabel>
-                        <FormGroup>
-                          <Grid container spacing={0}>
-                            {category.map((type) => (
-                              <Grid item xs={12} md={6} key={type}>
+                        <FormControl component="fieldset" fullWidth>
+                          <FormGroup>
+                            <Grid container spacing={0}>
+                              {category.map((type) => (
+                                <Grid item xs={12} md={6} key={type._id || type.name}>
+                                  <FormControlLabel
+                                    sx={{
+                                      '& .MuiFormLabel-root': {
+                                        color: 'black',
+                                      },
+                                      '& .MuiFormLabel-root.Mui-focused': {
+                                        color: 'black !important',
+                                      },
+                                    }}
+                                    control={
+                                      <Checkbox
+                                        size="small"
+                                        checked={formik.values.cardType.includes(type.name)}
+                                        onChange={(e) => {
+                                          const selected = formik.values.cardType;
+                                          if (e.target.checked) {
+                                            formik.setFieldValue('cardType', [...selected, type.name]);
+                                          } else {
+                                            formik.setFieldValue(
+                                              'cardType',
+                                              selected.filter((item) => item !== type.name)
+                                            );
+                                          }
+                                        }}
+                                        name="cardType"
+                                      />
+                                    }
+                                    label={type.name}
+                                  />
+                                </Grid>
+                              ))}
+                            </Grid>
+                          </FormGroup>
+                          {formik.touched.cardType && formik.errors.cardType && (
+                            <FormHelperText error>{formik.errors.cardType}</FormHelperText>
+                          )}
+                        </FormControl>
 
-                                <FormControlLabel
-                                  sx={{
-                                    '& .MuiFormLabel-root': {
-                                      color: 'black',
-                                      // fontWeight: 900,
-                                    },
-                                    '& .MuiFormLabel-root.Mui-focused': {
-                                      color: 'black !important', // keep label black on focus
-                                    },
-                                  }}
-                                  control={
-                                    <Checkbox
-                                      size="small"
-                                      checked={formik.values.cardType.includes(type.name)}
-                                      onChange={(e) => {
-                                        const selected = formik.values.cardType;
-                                        if (e.target.checked) {
-                                          formik.setFieldValue('cardType', [...selected, type.name]);
-                                        } else {
-                                          formik.setFieldValue(
-                                            'cardType',
-                                            selected.filter((item) => item !== type)
-                                          );
-                                        }
-                                      }}
-                                      name="cardType"
-                                    />
-                                  }
-                                  label={type.name}
-                                />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </FormGroup>
+
+                        {/*<FormGroup>*/}
+                        {/*  <Grid container spacing={0}>*/}
+                        {/*    {category.map((type) => (*/}
+                        {/*      <Grid item xs={12} md={6} key={type}>*/}
+
+                        {/*        <FormControlLabel*/}
+                        {/*          sx={{*/}
+                        {/*            '& .MuiFormLabel-root': {*/}
+                        {/*              color: 'black',*/}
+                        {/*              // fontWeight: 900,*/}
+                        {/*            },*/}
+                        {/*            '& .MuiFormLabel-root.Mui-focused': {*/}
+                        {/*              color: 'black !important', // keep label black on focus*/}
+                        {/*            },*/}
+                        {/*          }}*/}
+                        {/*          control={*/}
+                        {/*            <Checkbox*/}
+                        {/*              size="small"*/}
+                        {/*              checked={formik.values.cardType.includes(type.name)}*/}
+                        {/*              onChange={(e) => {*/}
+                        {/*                const selected = formik.values.cardType;*/}
+                        {/*                if (e.target.checked) {*/}
+                        {/*                  formik.setFieldValue('cardType', [...selected, type.name]);*/}
+                        {/*                } else {*/}
+                        {/*                  formik.setFieldValue(*/}
+                        {/*                    'cardType',*/}
+                        {/*                    selected.filter((item) => item !== type)*/}
+                        {/*                  );*/}
+                        {/*                }*/}
+                        {/*              }}*/}
+                        {/*              name="cardType"*/}
+                        {/*            />*/}
+                        {/*          }*/}
+                        {/*          label={type.name}*/}
+                        {/*        />*/}
+                        {/*      </Grid>*/}
+                        {/*    ))}*/}
+                        {/*  </Grid>*/}
+                        {/*</FormGroup>*/}
+
                         {formik.touched.cardType && formik.errors.cardType && (
                           <FormHelperText error>{formik.errors.cardType}</FormHelperText>
                         )}
                       </FormControl>
+
                     </Grid>
 
                   </Grid>
