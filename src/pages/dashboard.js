@@ -170,8 +170,6 @@ const UplaodCards = () => {
   }, []);
 
 
-
-
   const formik = useFormik({
     initialValues: {
       title: card?.title || '',
@@ -241,11 +239,10 @@ const UplaodCards = () => {
       } catch (error) {
         console.log(error);
         toast.error(error.response.data.msg);
+        // setIsSubmitting(false);
       }
     }
   });
-
-
   return (
     <>
       <Head>
