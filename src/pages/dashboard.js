@@ -33,6 +33,7 @@ import Head from 'next/head';
 import { useAuth } from '../hooks/use-auth';
 import { useCardContext } from '../contexts/cardIdContext';
 import CategoryIcon from '@mui/icons-material/Category';
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 
@@ -41,6 +42,8 @@ const UplaodCards = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setSelectedCardId } = useCardContext();
   const [cards, setCards] = useState([]);
+  //upload pop up
+  const [open, setOpen] = React.useState(false);
   const [category, setCategories] = useState([]);
   const [card, setCard] = useState(null);
   const [page, setPage] = useState(0);
@@ -51,9 +54,6 @@ const UplaodCards = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const { user } = useAuth();
   const token = user?.token;
-
-//upload pop up
-  const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -132,19 +132,18 @@ const UplaodCards = () => {
   const getCardData = (id) => {
 
     const selectedCard = cards.find((cardItem) => cardItem._id === id);
-      setCard(selectedCard);
+    setCard(selectedCard);
 
-      formik.setValues({
-        title: selectedCard?.title || '',
-        cardType: selectedCard?.cardType || [],
-        price: selectedCard?.price || ''
-      });
+    formik.setValues({
+      title: selectedCard?.title || '',
+      cardType: selectedCard?.cardType || [],
+      price: selectedCard?.price || ''
+    });
   };
 
   const filteredCards = FilterHelper(cards, searchQuery, ['title']);
   const paginatedCards = PaginationHelper(filteredCards, page, rowsPerPage);
   const totalCount = filteredCards.length;
-
 
   //
   const getAllCategories = async () => {
@@ -169,7 +168,6 @@ const UplaodCards = () => {
     getAllCategories();
   }, []);
 
-
   const formik = useFormik({
     initialValues: {
       title: card?.title || '',
@@ -178,20 +176,23 @@ const UplaodCards = () => {
       submit: null
     },
     validationSchema: Yup.object({
-        title: Yup
-          .string()
-          .max(255)
-          .required('Title  is required')
-      },
-      {
-        cardType: Yup.array().min(1, 'At least one card type must be selected')
-      },
-      {
-        price: Yup
-          .number().required('Price is required')
-      }
-    ),
+      title: Yup
+        .string()
+        .max(255)
+        .required('Title is required'),
+
+      cardType: Yup
+        .array()
+        .min(1, 'Please select at least one category'),
+
+      price: Yup
+        .number()
+        .typeError('Price must be a number')
+        .required('Price is required')
+    }),
+
     onSubmit: async (values, helpers) => {
+
       try {
         setIsSubmitting(true);
         if (card?._id) {
@@ -251,25 +252,30 @@ const UplaodCards = () => {
         </title>
       </Head>
       <Box sx={{
-        overflowY:'hidden',
+        overflowY: 'hidden',
         display: 'flex', justifyContent: 'center', alignItems: 'center',
         // pt: { xs: 15, md: 10 },
         pt: { xs: 15, md: 10 },
         height: { md: '100% !important', xs: '100% !important' },
-        minHeight:'100vh !important'
+        minHeight: '100vh !important'
       }}>
-        <Container sx={{ mt: 5}}>
-          <Typography variant='h2' sx={{ mb:3, display:'flex', justifyContent:'flex-start', alignItems:'center'}}>Cards</Typography>
-          <TableContainer component={Paper} sx={{ width:'100%' }}>
-          {/*<TableContainer component={Paper} sx={{width: '100%'}} >*/}
-            <Table  aria-label="simple table"  sx={{width:'100%'}}>
+        <Container sx={{ mt: 5 }}>
+          <Typography variant="h2" sx={{
+            mb: 3,
+            display: 'flex',
+            justifyContent: 'flex-start',
+            alignItems: 'center'
+          }}>Cards</Typography>
+          <TableContainer component={Paper} sx={{ width: '100%' }}>
+            {/*<TableContainer component={Paper} sx={{width: '100%'}} >*/}
+            <Table aria-label="simple table" sx={{ width: '100%' }}>
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
                   <TableCell colSpan={5} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
                       alignItems: 'center',
-                      flexDirection:{md:'row', xs:'column'},
+                      flexDirection: { md: 'row', xs: 'column' },
                       justifyContent: 'space-between',
                       width: '100%'
                     }}>
@@ -313,10 +319,10 @@ const UplaodCards = () => {
                       <Box
                         sx={{
                           ml: 2,
-                          width:'100%',
+                          width: '100%',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent:  'flex-end' ,
+                          justifyContent: 'flex-end',
                           // bgcolor: 'red',
                           borderRadius: 1,
                           cursor: 'pointer'
@@ -324,17 +330,21 @@ const UplaodCards = () => {
                       >
 
                         <Tooltip title="Category">
-                          <NextLink href='/category'>
-                          <IconButton>
-                            <CategoryIcon sx={{ fontSize: 50 ,     width: 60, // Increased width
-                              height: 55, color: '#c165a0' }}/>
-                          </IconButton>
+                          <NextLink href="/category">
+                            <IconButton>
+                              <CategoryIcon sx={{
+                                fontSize: 50, width: 60, // Increased width
+                                height: 55, color: '#c165a0'
+                              }}/>
+                            </IconButton>
                           </NextLink>
                         </Tooltip>
                         <Tooltip title="Upload Card">
                           <IconButton onClick={handleClickOpen}>
-                            <CloudUploadIcon sx={{ fontSize: 50,      width: 60, // Increased width
-                              height: 55,color: 'rgba(71, 85, 105, 1)' }}/>
+                            <CloudUploadIcon sx={{
+                              fontSize: 50, width: 60, // Increased width
+                              height: 55, color: 'rgba(71, 85, 105, 1)'
+                            }}/>
                           </IconButton>
                         </Tooltip>
 
@@ -480,11 +490,11 @@ const UplaodCards = () => {
                                   <FormControlLabel
                                     sx={{
                                       '& .MuiFormLabel-root': {
-                                        color: 'black',
+                                        color: 'black'
                                       },
                                       '& .MuiFormLabel-root.Mui-focused': {
-                                        color: 'black !important',
-                                      },
+                                        color: 'black !important'
+                                      }
                                     }}
                                     control={
                                       <Checkbox
@@ -493,7 +503,8 @@ const UplaodCards = () => {
                                         onChange={(e) => {
                                           const selected = formik.values.cardType;
                                           if (e.target.checked) {
-                                            formik.setFieldValue('cardType', [...selected, type.name]);
+                                            formik.setFieldValue('cardType',
+                                              [...selected, type.name]);
                                           } else {
                                             formik.setFieldValue(
                                               'cardType',
@@ -556,9 +567,9 @@ const UplaodCards = () => {
                         {/*  </Grid>*/}
                         {/*</FormGroup>*/}
 
-                        {formik.touched.cardType && formik.errors.cardType && (
-                          <FormHelperText error>{formik.errors.cardType}</FormHelperText>
-                        )}
+                        {/*{formik.touched.cardType && formik.errors.cardType && (*/}
+                        {/*  <FormHelperText error>{formik.errors.cardType}</FormHelperText>*/}
+                        {/*)}*/}
                       </FormControl>
 
                     </Grid>
@@ -570,11 +581,11 @@ const UplaodCards = () => {
                   <Button type="submit" variant="contained"
                           disabled={isSubmitting}
                           sx={{
-                    '&:hover': {
-                      backgroundColor: '#c09b9b !important',
-                      color: '#1a1d25'
-                    }
-                  }} color="primary">{card ? 'Update':'Add'}</Button>
+                            '&:hover': {
+                              backgroundColor: '#c09b9b !important',
+                              color: '#1a1d25'
+                            }
+                          }} color="primary">{card ? 'Update' : 'Add'}</Button>
                 </DialogActions>
               </form>
             </Dialog>
