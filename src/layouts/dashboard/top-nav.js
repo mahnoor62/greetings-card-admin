@@ -36,6 +36,7 @@ export const TopNav = (props) => {
   const isPreview = pathname.startsWith('/preview');
   const isDashboard = pathname === '/dashboard';
   const isCategory = pathname === '/category';
+  const isView = pathname.startsWith('/view');
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const accountPopover = usePopover();
   const [open, setOpen] = React.useState(false);
@@ -84,7 +85,7 @@ export const TopNav = (props) => {
               spacing={2}
             >
               <NextLink href="/dashboard"  passHref legacyBehavior>
-              <Typography variant="h5" sx={{ fontWeight: 900 , color:'#c09b9b', fontSize:{md:'20px', xs:'17px'}}}>{isCardCustomization
+              <Typography variant="h5" sx={{ fontWeight: 900 , color:'#c09b9b', fontSize:{md:'20px', xs:'17px'}, cursor:'pointer'}}>{isCardCustomization
                 ? 'Front Card Customization'
                 : isPreview ? 'AR Experience' : isAllCards
                   ? 'Upload Greetings Card'
@@ -147,7 +148,7 @@ export const TopNav = (props) => {
                   />
 
             {
-              isCategory && (
+              isCategory &&  (
               <NextLink href="/dashboard" passHref legacyBehavior>
               <Button
               sx={{

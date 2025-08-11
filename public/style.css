@@ -15,3 +15,11 @@
 *, *::before, *::after {
   box-sizing: border-box;
 }
+.print-card {
+  display: none;
+}
+@media print {
+  .print-card {
+    display: block !important;
+  }
+}
