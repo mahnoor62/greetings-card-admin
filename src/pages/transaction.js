@@ -303,7 +303,7 @@ const Transaction = () => {
           justifyContent: 'center'
         }}
       >
-        <Container>
+        <Container sx={{mt: {xs: 5 , md:0}}}>
           <Typography variant="h2" sx={{
             mb: 3,
             display: 'flex',

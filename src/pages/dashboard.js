@@ -54,7 +54,8 @@ const Dashboard = () => {
           display: 'flex',
           flexDirection: 'column',
           overflowY: 'auto',
-          p: 2,
+          pt:10,
+          pb:5
         }}
       >
         <UplaodCards />
