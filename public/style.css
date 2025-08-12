@@ -18,8 +18,30 @@
 .print-card {
   display: none;
 }
+/*@media print {*/
+/*  .print-card {*/
+/*    display: block !important;*/
+/*  }*/
+
 @media print {
   .print-card {
     display: block !important;
+  }
+  @page {
+    size: A4; /* ya A5 */
+    margin: 0;
+  }
+  .card-page {
+    width: 210mm;   /* A4 width */
+    height: 297mm;  /* A4 height */
+    page-break-after: always;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-page img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 }

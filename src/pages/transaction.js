@@ -57,10 +57,10 @@ const Transaction = () => {
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [printing, setPrinting] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(0);
-
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [printingWindow, setPrintingWindow] = useState(null);
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [loadingComplete, setLoadingComplete] = useState(true);
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [transactions, setTransactions] = useState([]);
   // search bar stats
@@ -233,21 +233,32 @@ const Transaction = () => {
   // };
 
   const handlePrintClick = (transaction) => {
+    // Open window here — inside the click event to avoid popup blocking
+    const newWindow = window.open('', '_blank');
+    if (!newWindow) {
+      console.log('Please allow popups for this site.');
+      return;
+    }
+
     setPrinting(true);
     setImagesLoaded(0);
     setSelectedTransaction(transaction);
+    setPrintingWindow(newWindow); // store window reference
   };
 
-
   useEffect(() => {
-    if (!selectedTransaction) return;
+    if (!selectedTransaction) {
+      return;
+    }
 
     const imageUrls = [
       selectedTransaction?.cardCustomizationId?.cardId?.frontDesign,
       selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign,
       selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign,
       selectedTransaction?.cardCustomizationId?.cardId?.backDesign
-    ].filter(Boolean).map(url => `${BASE_URL}/${url.replace(/\\/g, '/')}`);
+    ]
+      .filter(Boolean)
+      .map(url => `${BASE_URL}/${url.replace(/\\/g, '/')}`);
 
     if (imageUrls.length === 0) {
       callPrint();
@@ -269,26 +280,96 @@ const Transaction = () => {
   }, [selectedTransaction]);
 
   const callPrint = () => {
+    if (!printingWindow) {
+      setPrinting(false);
+      return;
+    }
+
     const printContents = document.getElementById('card').outerHTML;
     const styles = `
     <style>
       body { font-family: Arial, sans-serif; zoom: 100%; }
+       @page {
+      size: A4;
+      margin: 30px; /* no extra white margins */
+    }
       img { max-width: 100%; page-break-inside: avoid; }
       .print-card { display: block !important; }
     </style>
   `;
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(`<html><head><title>Card Print</title>${styles}</head><body>`);
-    newWindow.document.write(printContents);
-    newWindow.document.write('</body></html>');
-    newWindow.document.close();
-    newWindow.focus();
-    newWindow.print();
-    newWindow.close();
+
+    printingWindow.document.write(
+      `<html><head><title>Card Print</title>${styles}</head><body>`
+    );
+    printingWindow.document.write(printContents);
+    printingWindow.document.write('</body></html>');
+    printingWindow.document.close();
+    printingWindow.focus();
+    printingWindow.print();
+    printingWindow.close();
 
     setPrinting(false);
+    setPrintingWindow(null);
   };
 
+  // const handlePrintClick = (transaction) => {
+  //   setPrinting(true);
+  //   setImagesLoaded(0);
+  //   setSelectedTransaction(transaction);
+  // };
+  //
+  //
+  // useEffect(() => {
+  //   if (!selectedTransaction) return;
+  //
+  //   const imageUrls = [
+  //     selectedTransaction?.cardCustomizationId?.cardId?.frontDesign,
+  //     selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign,
+  //     selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign,
+  //     selectedTransaction?.cardCustomizationId?.cardId?.backDesign
+  //   ].filter(Boolean).map(url => `${BASE_URL}/${url.replace(/\\/g, '/')}`);
+  //
+  //   if (imageUrls.length === 0) {
+  //     callPrint();
+  //     return;
+  //   }
+  //
+  //   let loaded = 0;
+  //   imageUrls.forEach(url => {
+  //     const img = new Image();
+  //     img.src = url;
+  //     img.onload = () => {
+  //       loaded++;
+  //       setImagesLoaded(prev => prev + 1);
+  //       if (loaded === imageUrls.length) {
+  //         callPrint();
+  //       }
+  //     };
+  //   });
+  // }, [selectedTransaction]);
+  //
+  // const callPrint = () => {
+  //   const printContents = document.getElementById('card').outerHTML;
+  //   const styles = `
+  //   <style>
+  //     body { font-family: Arial, sans-serif; zoom: 100%; }
+  //     img { max-width: 100%; page-break-inside: avoid; }
+  //     .print-card { display: block !important; }
+  //   </style>
+  // `;
+  //   const newWindow = window.open('', '_blank');
+  //   newWindow.document.write(`<html><head><title>Card Print</title>${styles}</head><body>`);
+  //   newWindow.document.write(printContents);
+  //   newWindow.document.write('</body></html>');
+  //   newWindow.document.close();
+  //   newWindow.focus();
+  //   newWindow.print();
+  //   newWindow.close();
+  //
+  //   setPrinting(false);
+  // };
+
+  console.log('transactions', transactions);
   return (
     <>
       <Head>
@@ -303,7 +384,7 @@ const Transaction = () => {
           justifyContent: 'center'
         }}
       >
-        <Container sx={{mt: {xs: 5 , md:0}}}>
+        <Container sx={{ mt: { xs: 5, md: 0 } }}>
           <Typography variant="h2" sx={{
             mb: 3,
             display: 'flex',
@@ -415,7 +496,7 @@ const Transaction = () => {
                               {printing && selectedTransaction?._id === data._id ? (
                                 <CircularProgress size={24}/>
                               ) : (
-                                <DownloadIcon onClick={() => handlePrintClick(data)} />
+                                <DownloadIcon onClick={() => handlePrintClick(data)}/>
                               )}
                             </IconButton>
 
@@ -458,164 +539,464 @@ const Transaction = () => {
 
           {/* Printable Card Layout */}
 
-          <div id="card" className="print-card">
+          {/*<div id="card" className="print-card" style={{ width: '100%', height: '100%' }}>*/}
+          {/*  {selectedTransaction && (*/}
+          {/*    <div style={{ display: 'flex', flexDirection: 'column' }}>*/}
+
+          {/*      /!* Front Design - Page 1 *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.frontDesign && (*/}
+          {/*        <div style={{*/}
+          {/*          width: '100%',*/}
+          {/*          aspectRatio: '1 / 1.414',*/}
+          {/*          // pageBreakAfter: 'always',*/}
+          {/*          display: 'flex',*/}
+          {/*          flexDirection: 'column',*/}
+          {/*          alignItems: 'center',*/}
+          {/*          justifyContent: 'center'*/}
+          {/*        }}>*/}
+          {/*          <img*/}
+          {/*            src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.frontDesign.replace(/\\/g, '/')}`}*/}
+          {/*            alt="Front"*/}
+          {/*            // style={{ width: '100%', height: '100%', objectFit: 'contain' }}*/}
+          {/*          />*/}
+          {/*          <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Front Design</p>*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+          {/*      /!* Inside Design - Page 2 *!/*/}
+          {/*      {(selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign ||*/}
+          {/*        selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign) && (*/}
+          {/*        <div style={{*/}
+          {/*          width: '100%',*/}
+          {/*          aspectRatio: '1 / 1.414',*/}
+          {/*          // pageBreakAfter: 'always',*/}
+          {/*          display: 'flex',*/}
+          {/*          flexDirection: 'column',*/}
+          {/*          alignItems: 'center',*/}
+          {/*          justifyContent: 'center'*/}
+          {/*        }}>*/}
+          {/*          <div style={{*/}
+          {/*            display: 'flex',*/}
+          {/*            // width: '100%',*/}
+          {/*            // height: '100%',*/}
+          {/*            alignItems: 'center',*/}
+          {/*            justifyContent: 'center',*/}
+          {/*            position: 'relative'*/}
+          {/*          }}>*/}
+          {/*            {selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign && (*/}
+          {/*              <img*/}
+          {/*                src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign.replace(/\\/g, '/')}`}*/}
+          {/*                alt="Inside Left"*/}
+          {/*                // style={{ width: '50%', height: '100%', objectFit: 'contain' }}*/}
+          {/*              />*/}
+          {/*            )}*/}
+          {/*            <div style={{*/}
+          {/*              width: '2px',*/}
+          {/*              height: '100%',*/}
+          {/*              backgroundColor: 'grey',*/}
+          {/*              position: 'absolute',*/}
+          {/*              left: '50%',*/}
+          {/*              transform: 'translateX(-50%)'*/}
+          {/*            }} />*/}
+          {/*            {selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign && (*/}
+          {/*              <img*/}
+          {/*                src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign.replace(/\\/g, '/')}`}*/}
+          {/*                alt="Inside Right"*/}
+          {/*                // style={{ width: '50%', height: '100%', objectFit: 'contain' }}*/}
+          {/*              />*/}
+          {/*            )}*/}
+          {/*          </div>*/}
+          {/*          <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Inside Design</p>*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+          {/*      /!* Back Design - Page 3 *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.backDesign && (*/}
+          {/*        <div style={{*/}
+          {/*          width: '100%',*/}
+          {/*          aspectRatio: '1 / 1.414',*/}
+          {/*          display: 'flex',*/}
+          {/*          flexDirection: 'column',*/}
+          {/*          alignItems: 'center',*/}
+          {/*          justifyContent: 'center'*/}
+          {/*        }}>*/}
+          {/*          <div style={{*/}
+          {/*            position: 'relative',*/}
+          {/*            // width: '100%',*/}
+          {/*            // height: '100%',*/}
+          {/*          }}>*/}
+          {/*            <img*/}
+          {/*              src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.backDesign.replace(/\\/g, '/')}`}*/}
+          {/*              alt="Back"*/}
+          {/*              // style={{ width: '100%', height: '100%', objectFit: 'contain' }}*/}
+          {/*            />*/}
+          {/*            <div style={{*/}
+          {/*              position: 'absolute',*/}
+          {/*              bottom: '10%',*/}
+          {/*              left: '50%',*/}
+          {/*              transform: 'translateX(-50%)'*/}
+          {/*            }}>*/}
+          {/*              <QRCodeGenerator*/}
+          {/*                size={100} // bigger QR for print clarity*/}
+          {/*                value={`${AR_EXPERIENCE_LINK}/${selectedTransaction?.cardCustomizationId?._id}`}*/}
+          {/*              />*/}
+          {/*            </div>*/}
+          {/*          </div>*/}
+          {/*          <p style={{ fontWeight: 'bold', marginTop: '10px' }}>Back Design</p>*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</div>*/}
+
+          {/*<div id="card" className="print-card" style={{ width: '100%' }}>*/}
+          {/*  {selectedTransaction && (*/}
+          {/*    <div style={{ display: 'flex', flexDirection: 'column' }}>*/}
+
+          {/*      /!* Front - Page 1 *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.frontDesign && (*/}
+          {/*        <div style={{*/}
+          {/*          height: '100%',*/}
+          {/*          aspectRatio: '1 / 1.414',*/}
+          {/*          // display: 'flex',*/}
+          {/*          // flexDirection: 'column',*/}
+          {/*          // alignItems: 'center',*/}
+          {/*          // justifyContent: 'center',*/}
+          {/*          // pageBreakAfter: 'always'*/}
+          {/*        }}>*/}
+          {/*          <img*/}
+          {/*            src={`${BASE_URL}/${selectedTransaction.cardCustomizationId.cardId.frontDesign.replace(/\\/g, '/')}`}*/}
+          {/*            alt="Front"*/}
+          {/*            style={{ width: '100%', height: '100%', objectFit: 'contain' }}*/}
+          {/*          />*/}
+          {/*          /!*<p style={{ fontWeight: 'bold', marginTop: '10px' }}>Front Design</p>*!/*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+          {/*      /!* Inside Left - Page 2 *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign && (*/}
+          {/*        <div style={{*/}
+          {/*          height: '100%',*/}
+          {/*          aspectRatio: '1 / 1.414',*/}
+          {/*          // display: 'flex',*/}
+          {/*          // flexDirection: 'column',*/}
+          {/*          // alignItems: 'center',*/}
+          {/*          // justifyContent: 'center',*/}
+          {/*          // pageBreakAfter: 'always'*/}
+          {/*        }}>*/}
+          {/*          <img*/}
+          {/*            src={`${BASE_URL}/${selectedTransaction.cardCustomizationId.cardId.insideLeftDesign.replace(/\\/g, '/')}`}*/}
+          {/*            alt="Inside Left"*/}
+          {/*            style={{ width: '100%', height: '100%', objectFit: 'contain' }}*/}
+          {/*          />*/}
+          {/*          /!*<p style={{ fontWeight: 'bold', marginTop: '10px' }}>Inside Left</p>*!/*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+          {/*      /!* Inside Right - Page 3 *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign && (*/}
+          {/*        <div style={{*/}
+          {/*          height: '100%',*/}
+          {/*          aspectRatio: '1 / 1.414',*/}
+          {/*          // display: 'flex',*/}
+          {/*          // flexDirection: 'column',*/}
+          {/*          // alignItems: 'center',*/}
+          {/*          // justifyContent: 'center',*/}
+          {/*          // pageBreakAfter: 'always'*/}
+          {/*        }}>*/}
+          {/*          <img*/}
+          {/*            src={`${BASE_URL}/${selectedTransaction.cardCustomizationId.cardId.insideRightDesign.replace(/\\/g, '/')}`}*/}
+          {/*            alt="Inside Right"*/}
+          {/*            style={{ width: '100%', height: '100%', objectFit: 'contain' }}*/}
+          {/*          />*/}
+          {/*          /!*<p style={{ fontWeight: 'bold', marginTop: '10px' }}>Inside Right</p>*!/*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+          {/*      /!* Back - Page 4 *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.backDesign && (*/}
+          {/*        <div style={{*/}
+          {/*          height: '100%',*/}
+          {/*          aspectRatio: '1 / 1.414',*/}
+          {/*          // display: 'flex',*/}
+          {/*          // flexDirection: 'column',*/}
+          {/*          // alignItems: 'center',*/}
+          {/*          // justifyContent: 'center'*/}
+          {/*        }}>*/}
+          {/*          <div style={{ position: 'relative', width: '100%' , height:'100%'}}>*/}
+          {/*            <img*/}
+          {/*              src={`${BASE_URL}/${selectedTransaction.cardCustomizationId.cardId.backDesign.replace(/\\/g, '/')}`}*/}
+          {/*              alt="Back"*/}
+          {/*              style={{ width: '100%', height: '100%', objectFit: 'contain' }}*/}
+          {/*            />*/}
+          {/*            <div style={{*/}
+          {/*              position: 'absolute',*/}
+          {/*              bottom: '10%',*/}
+          {/*              left: '50%',*/}
+          {/*              transform: 'translateX(-50%)'*/}
+          {/*            }}>*/}
+          {/*              <QRCodeGenerator*/}
+          {/*                size={150}*/}
+          {/*                value={`${AR_EXPERIENCE_LINK}/${selectedTransaction.cardCustomizationId?._id}`}*/}
+          {/*              />*/}
+          {/*            </div>*/}
+          {/*          </div>*/}
+          {/*          /!*<p style={{ fontWeight: 'bold', marginTop: '10px' }}>Back Design</p>*!/*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</div>*/}
+
+          <div id="card" className="print-card" style={{ width: '100%' }}>
             {selectedTransaction && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'flex-start',
-                  gap: '10px',
-                  padding: '10px',
-                  flexWrap: 'nowrap'
-                }}
-              >
-                {/* Front Design */}
-                {selectedTransaction?.cardCustomizationId?.cardId?.frontDesign && (
-                  <div style={{ textAlign: 'center', flex: '1 1 25%', maxWidth: '250px' }}>
-                    <div
-                      style={{
-                        position: 'relative',
-                        aspectRatio: '1 / 1.414',
-                        marginBottom: '0.5rem'
-                      }}
-                    >
-                      <img
-                        src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.frontDesign.replace(
-                          /\\/g,
-                          '/')}`}
-                        alt="Front"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain'
-                        }}
-                      />
-                    </div>
-                    <p style={{ fontWeight: 'bold' }}>Front Design</p>
-                  </div>
-                )}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
 
-                {/* Inside Left + Inside Right Combined */}
-                {(selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign ||
-                  selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign) && (
-                  <div
-                    style={{
+                {/* Reusable Card Page */}
+                {[
+                  {
+                    src: selectedTransaction?.cardCustomizationId?.cardId?.frontDesign,
+                    label: 'Front Design'
+                  },
+                  {
+                    src: selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign,
+                    label: 'Inside Left Design'
+                  },
+                  {
+                    src: selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign,
+                    label: 'Inside Right Design'
+                  },
+                  {
+                    src: selectedTransaction?.cardCustomizationId?.cardId?.backDesign,
+                    label: 'Back Design',
+                    qr: true
+                  }
+                ].map((card, index) => (
+                  card.src && (
+                    <div key={index} style={{
+                      width: '100%',
+                      aspectRatio: '1 / 1.414',
                       display: 'flex',
-                      flexDirection: 'column',
                       alignItems: 'center',
-                      flex: '1 1 50%',
-                      maxWidth: '500px',
-                      margin: '0 auto'
-                    }}
-                  >
-                    {/* Images Row */}
-                    <div
-                      style={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        position: 'relative'
-                      }}
-                    >
-                      {/* Inside Left */}
-                      {selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign && (
-                        <img
-                          src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign.replace(
-                            /\\/g,
-                            '/')}`}
-                          alt="Inside Left"
-                          style={{
-                            width: '50%',
-                            aspectRatio: '1 / 1.414',
-                            objectFit: 'contain'
-                          }}
-                        />
-                      )}
-
-                      {/* Center Divider */}
-                      <div
-                        style={{
-                          width: '2px',
-                          height: '99%',
-                          backgroundColor: 'grey',
-                          position: 'absolute',
-                          left: '50%',
-                          transform: 'translateX(-50%)'
-                        }}
-                      />
-
-                      {/* Inside Right */}
-                      {selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign && (
-                        <img
-                          src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign.replace(
-                            /\\/g,
-                            '/')}`}
-                          alt="Inside Right"
-                          style={{
-                            width: '50%',
-                            aspectRatio: '1 / 1.414',
-                            objectFit: 'contain'
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {/* Caption */}
-                    <p style={{ fontWeight: 'bold' }}>Inside Design</p>
-                  </div>
-                )}
-
-
-                {/* Back Design with QR Code */}
-                {selectedTransaction?.cardCustomizationId?.cardId?.backDesign && (
-                  <div style={{ textAlign: 'center', flex: '1 1 25%', maxWidth: '250px' }}>
-                    <div
-                      style={{
-                        position: 'relative',
-                        aspectRatio: '1 / 1.414',
-                        marginBottom: '0.5rem'
-                      }}
-                    >
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      pageBreakAfter: 'always',
+                      position: 'relative',
+                      margin: '0 auto'          // center horizontally
+                    }}>
                       <img
-                        src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.backDesign.replace(
-                          /\\/g,
-                          '/')}`}
-                        alt="Back"
+                        src={`${BASE_URL}/${card.src.replace(/\\/g, '/')}`}
+                        alt={card.label}
                         style={{
                           width: '100%',
                           height: '100%',
                           objectFit: 'contain'
                         }}
                       />
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '10%',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          // background: '#fff',
-                          padding: '4px',
-                          borderRadius: '4px'
-                          // boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
-                        }}
-                      >
-                        <QRCodeGenerator
-                          className="qr-code"
-                          value={`${AR_EXPERIENCE_LINK}/${selectedTransaction?.cardCustomizationId?._id}`}
+                      <p style={{
+                        fontWeight: 'bold',
+                        marginTop: '10px',
+                        fontSize: '20px'
+                      }}>{card.label}</p>
+                      {card.qr && (
+                        <div
                           style={{
-                            width: '40px', height: '40px'
-                          }}/>
-                      </div>
+                            position: 'absolute',
+                            bottom: '10%',      // close to bottom
+                            left: '50%',         // horizontally center
+                            transform: 'translateX(-50%)',
+                            // width: '300px',      // bigger width
+                            // height: '300px',     // bigger height
+                            display: 'flex',
+                            justifyContent: 'center',
+                            // backgroundColor: 'red',
+                            alignItems: 'center',
+                            // zIndex: 10           // ensure it is on top if needed
+
+                            // position: 'absolute',
+                            // bottom: '15%',
+                            // left: '50%',
+                            // // width:'100%', height:'100%',
+                            // transform: 'translateX(-50%)'
+
+                          }}>
+                          {/*<div style={{ backgroundColor: 'white', width:'200px', height:'200px' }}>*/}
+                          <QRCodeGenerator
+                            // sx={{width:'100% important', height:'100% !important'}}
+                            // size={300}
+                            value={`${AR_EXPERIENCE_LINK}/${selectedTransaction?.cardCustomizationId?._id}`}
+                          />
+                        {/*</div>*/}
+                        </div>
+                      )}
                     </div>
-                    <p style={{ fontWeight: 'bold' }}>Back Design</p>
-                  </div>
-                )}
+                  )
+                ))}
+
               </div>
             )}
           </div>
+
+
+          {/*<div id="card" className="print-card">*/}
+          {/*  {selectedTransaction && (*/}
+          {/*    <div*/}
+          {/*      style={{*/}
+          {/*        display: 'flex',*/}
+          {/*        flexDirection: 'row',*/}
+          {/*        justifyContent: 'center',*/}
+          {/*        alignItems: 'flex-start',*/}
+          {/*        gap: '10px',*/}
+          {/*        padding: '10px',*/}
+          {/*        flexWrap: 'nowrap'*/}
+          {/*      }}*/}
+          {/*    >*/}
+          {/*      /!* Front Design *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.frontDesign && (*/}
+          {/*        <div style={{ textAlign: 'center', flex: '1 1 25%', maxWidth: '250px' }}>*/}
+          {/*          <div*/}
+          {/*            style={{*/}
+          {/*              position: 'relative',*/}
+          {/*              aspectRatio: '1 / 1.414',*/}
+          {/*              marginBottom: '0.5rem'*/}
+          {/*            }}*/}
+          {/*          >*/}
+          {/*            <img*/}
+          {/*              src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.frontDesign.replace(*/}
+          {/*                /\\/g,*/}
+          {/*                '/')}`}*/}
+          {/*              alt="Front"*/}
+          {/*              style={{*/}
+          {/*                width: '100%',*/}
+          {/*                height: '100%',*/}
+          {/*                objectFit: 'contain'*/}
+          {/*              }}*/}
+          {/*            />*/}
+          {/*          </div>*/}
+          {/*          <p style={{ fontWeight: 'bold' }}>Front Design</p>*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+          {/*      /!* Inside Left + Inside Right Combined *!/*/}
+          {/*      {(selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign ||*/}
+          {/*        selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign) && (*/}
+          {/*        <div*/}
+          {/*          style={{*/}
+          {/*            display: 'flex',*/}
+          {/*            flexDirection: 'column',*/}
+          {/*            alignItems: 'center',*/}
+          {/*            flex: '1 1 50%',*/}
+          {/*            maxWidth: '500px',*/}
+          {/*            margin: '0 auto'*/}
+          {/*          }}*/}
+          {/*        >*/}
+          {/*          /!* Images Row *!/*/}
+          {/*          <div*/}
+          {/*            style={{*/}
+          {/*              width: '100%',*/}
+          {/*              display: 'flex',*/}
+          {/*              justifyContent: 'center',*/}
+          {/*              alignItems: 'center',*/}
+          {/*              position: 'relative'*/}
+          {/*            }}*/}
+          {/*          >*/}
+          {/*            /!* Inside Left *!/*/}
+          {/*            {selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign && (*/}
+          {/*              <img*/}
+          {/*                src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign.replace(*/}
+          {/*                  /\\/g,*/}
+          {/*                  '/')}`}*/}
+          {/*                alt="Inside Left"*/}
+          {/*                style={{*/}
+          {/*                  width: '50%',*/}
+          {/*                  aspectRatio: '1 / 1.414',*/}
+          {/*                  objectFit: 'contain'*/}
+          {/*                }}*/}
+          {/*              />*/}
+          {/*            )}*/}
+
+          {/*            /!* Center Divider *!/*/}
+          {/*            <div*/}
+          {/*              style={{*/}
+          {/*                width: '2px',*/}
+          {/*                height: '99%',*/}
+          {/*                backgroundColor: 'grey',*/}
+          {/*                position: 'absolute',*/}
+          {/*                left: '50%',*/}
+          {/*                transform: 'translateX(-50%)'*/}
+          {/*              }}*/}
+          {/*            />*/}
+
+          {/*            /!* Inside Right *!/*/}
+          {/*            {selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign && (*/}
+          {/*              <img*/}
+          {/*                src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign.replace(*/}
+          {/*                  /\\/g,*/}
+          {/*                  '/')}`}*/}
+          {/*                alt="Inside Right"*/}
+          {/*                style={{*/}
+          {/*                  width: '50%',*/}
+          {/*                  aspectRatio: '1 / 1.414',*/}
+          {/*                  objectFit: 'contain'*/}
+          {/*                }}*/}
+          {/*              />*/}
+          {/*            )}*/}
+          {/*          </div>*/}
+
+          {/*          /!* Caption *!/*/}
+          {/*          <p style={{ fontWeight: 'bold' }}>Inside Design</p>*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+
+
+          {/*      /!* Back Design with QR Code *!/*/}
+          {/*      {selectedTransaction?.cardCustomizationId?.cardId?.backDesign && (*/}
+          {/*        <div style={{ textAlign: 'center', flex: '1 1 25%', maxWidth: '250px' }}>*/}
+          {/*          <div*/}
+          {/*            style={{*/}
+          {/*              position: 'relative',*/}
+          {/*              aspectRatio: '1 / 1.414',*/}
+          {/*              marginBottom: '0.5rem'*/}
+          {/*            }}*/}
+          {/*          >*/}
+          {/*            <img*/}
+          {/*              src={`${BASE_URL}/${selectedTransaction?.cardCustomizationId?.cardId?.backDesign.replace(*/}
+          {/*                /\\/g,*/}
+          {/*                '/')}`}*/}
+          {/*              alt="Back"*/}
+          {/*              style={{*/}
+          {/*                width: '100%',*/}
+          {/*                height: '100%',*/}
+          {/*                objectFit: 'contain'*/}
+          {/*              }}*/}
+          {/*            />*/}
+          {/*            <div*/}
+          {/*              style={{*/}
+          {/*                position: 'absolute',*/}
+          {/*                bottom: '10%',*/}
+          {/*                left: '50%',*/}
+          {/*                transform: 'translateX(-50%)'*/}
+          {/*                // padding: '4px',*/}
+          {/*                // borderRadius: '4px'*/}
+          {/*                // boxShadow: '0 4px 8px rgba(0,0,0,0.2)'*/}
+          {/*              }}*/}
+          {/*            >*/}
+          {/*              /!*<div style={{*!/*/}
+          {/*              /!*  width: '20px', height: '20px',*!/*/}
+          {/*              /!*}}>*!/*/}
+          {/*              <QRCodeGenerator*/}
+          {/*                size={10}*/}
+          {/*                value={`${AR_EXPERIENCE_LINK}/${selectedTransaction?.cardCustomizationId?._id}`}/>*/}
+          {/*            </div>*/}
+          {/*            /!*</div>*!/*/}
+          {/*          </div>*/}
+          {/*          <p style={{ fontWeight: 'bold' }}>Back Design</p>*/}
+          {/*        </div>*/}
+          {/*      )}*/}
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</div>*/}
 
         </Container>
       </Box>
