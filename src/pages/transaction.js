@@ -797,8 +797,8 @@ const Transaction = () => {
                       />
                       <p style={{
                         fontWeight: 'bold',
-                        marginTop: '10px',
-                        fontSize: '20px'
+                        // marginTop: '10px',
+                        fontSize: '10px'
                       }}>{card.label}</p>
                       {card.qr && (
                         <div
