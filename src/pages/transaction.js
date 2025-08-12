@@ -784,7 +784,7 @@ const Transaction = () => {
                       justifyContent: 'center',
                       pageBreakAfter: 'none',
                       position: 'relative',
-                      marginTop: 30          // center horizontally
+                      marginTop: 20          // center horizontally
                     }}>
                       <img
                         src={`${BASE_URL}/${card.src.replace(/\\/g, '/')}`}
