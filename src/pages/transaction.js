@@ -294,7 +294,7 @@ const Transaction = () => {
       size: A4;
       /*marginTop: 40px; !* no extra white margins *!*/
     }
-      img { max-width: 100%; page-break-inside: avoid; }
+      img { max-width: 100%; }
       .print-card { display: block !important; }
     </style>
   `;
@@ -782,7 +782,7 @@ const Transaction = () => {
                       alignItems: 'center',
                       flexDirection: 'column',
                       justifyContent: 'center',
-                      pageBreakAfter: 'none',
+                      // pageBreakAfter: 'none',
                       position: 'relative',
                       // marginTop: 20          // center horizontally
                     }}>
