@@ -8,7 +8,7 @@ const QRCodeGenerator = ({ value }) => {
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('mobile'));
   return (
     // <div style={{ background: 'white', padding: '16px' }}>
-    <QRCode value={value} size={isMobile ? 30 :100} />
+    <QRCode value={value} size={200} />
     // </div>
   );
 };

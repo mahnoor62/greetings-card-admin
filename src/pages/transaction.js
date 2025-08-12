@@ -288,10 +288,11 @@ const Transaction = () => {
     const printContents = document.getElementById('card').outerHTML;
     const styles = `
     <style>
-      body { font-family: Arial, sans-serif; zoom: 100%; }
+      body { font-family: Arial, sans-serif; zoom: 100%;   margin: 0;
+    padding: 0;}
        @page {
       size: A4;
-      margin: 30px; /* no extra white margins */
+      /*marginTop: 40px; !* no extra white margins *!*/
     }
       img { max-width: 100%; page-break-inside: avoid; }
       .print-card { display: block !important; }
@@ -781,9 +782,9 @@ const Transaction = () => {
                       alignItems: 'center',
                       flexDirection: 'column',
                       justifyContent: 'center',
-                      pageBreakAfter: 'always',
+                      pageBreakAfter: 'none',
                       position: 'relative',
-                      margin: '0 auto'          // center horizontally
+                      marginTop: 30          // center horizontally
                     }}>
                       <img
                         src={`${BASE_URL}/${card.src.replace(/\\/g, '/')}`}
@@ -821,13 +822,9 @@ const Transaction = () => {
                             // transform: 'translateX(-50%)'
 
                           }}>
-                          {/*<div style={{ backgroundColor: 'white', width:'200px', height:'200px' }}>*/}
                           <QRCodeGenerator
-                            // sx={{width:'100% important', height:'100% !important'}}
-                            // size={300}
                             value={`${AR_EXPERIENCE_LINK}/${selectedTransaction?.cardCustomizationId?._id}`}
                           />
-                        {/*</div>*/}
                         </div>
                       )}
                     </div>
