@@ -72,10 +72,6 @@ const Transaction = () => {
   const [card, setCard] = useState(null);
   const [openDialogue, setOpenDialogue] = useState(false);
 
-  // const { user } = useAuth();
-  // const token = user?.token;
-  // const router = useRouter();
-  // const { id } = router.query;
 
   const getCard = async () => {
     try {
@@ -150,29 +146,29 @@ const Transaction = () => {
   const totalCount = filtered.length;
 
 //handle approved button status here:
-  const handleApprovedStatus = async (id) => {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const token = window.localStorage.getItem('token');
-    const loading = toast.loading('Updating transaction status...');
-
-    try {
-      if (token) {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/admin/approved-status/${id}`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'x-access-token': token
-            }
-          }
-        );
-      }
-    } catch (error) {
-      console.log(error);
-    }
-
-    toast.dismiss(loading);
-  };
+//   const handleApprovedStatus = async (id) => {
+//     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+//     const token = window.localStorage.getItem('token');
+//     const loading = toast.loading('Updating transaction status...');
+//
+//     try {
+//       if (token) {
+//         const response = await axios.get(
+//           `${API_BASE_URL}/api/admin/approved-status/${id}`,
+//           {
+//             headers: {
+//               'Content-Type': 'application/json',
+//               'x-access-token': token
+//             }
+//           }
+//         );
+//       }
+//     } catch (error) {
+//       console.log(error);
+//     }
+//
+//     toast.dismiss(loading);
+//   };
   const formatDateTime = (t) => {
 
     const dateObj = new Date(t);
@@ -196,41 +192,7 @@ const Transaction = () => {
     return `${formattedDate} ${formattedTime}`;
   };
 
-  // const printReceipt = (transaction) => {
-  //
-  //   setLoading(true);
-  //   setSelectedTransaction(transaction);
-  //   const printContents = document.getElementById('card').outerHTML; // full div le
-  //   const styles = `
-  //     <style>
-  //       body {
-  //         font-family: Arial, sans-serif;
-  //         zoom: 100%;
-  //       }
-  //       img {
-  //         max-width: 100%;
-  //         page-break-inside: avoid;
-  //       }
-  //       .print-card {
-  //         display: block !important;
-  //       }
-  //         .qr-code {
-  //     width: 10px !important;
-  //     height: 10px !important;
-  //   }
-  //     </style>
-  //   `;
-  //   const newWindow = window.open('', '_blank');
-  //   newWindow.document.write(`<html><head><title>Card Print</title>${styles}</head><body>`);
-  //   newWindow.document.write(printContents);
-  //   newWindow.document.write('</body></html>');
-  //   newWindow.document.close();
-  //   newWindow.focus();
-  //   newWindow.print();
-  //   newWindow.close();
-  //
-  //   setLoading(false);
-  // };
+
 
   const handlePrintClick = (transaction) => {
     // Open window here — inside the click event to avoid popup blocking
