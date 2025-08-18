@@ -63,12 +63,13 @@ const Id = () => {
     <style>
       @media print {
         @page {
+        size: A5; 
           margin: 0;
         }
         body {
-          margin: 20px;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji' !important;
-          zoom: 180%; 
+          margin: 10px;
+     font-family: 'Calibri', sans-serif !important;
+          zoom: 100%; 
         }
         .print-only {
           display: block !important;
