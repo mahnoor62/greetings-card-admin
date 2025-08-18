@@ -265,7 +265,7 @@ const Transaction = () => {
       /*align-items:center;*/
       /*marginTop: 20px;*/
     }
-      img { max-width: 100%; margin-top: 20px;}
+      img { max-width: 100%;}
       .print-card { display: block !important; }
     </style>
   `;
