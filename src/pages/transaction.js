@@ -250,11 +250,17 @@ const Transaction = () => {
     const printContents = document.getElementById('card').outerHTML;
     const styles = `
     <style>
-      body { font-family: Arial, sans-serif; zoom: 100%;   margin: 0; padding:0;
-   }
+     body {
+     margin:0; padding:0;
+     font-family: 'Calibri', sans-serif !important;
+          zoom: 100%; 
+        }
        @page {
-      size: A5;
-      /*marginTop: 40px; !* no extra white margins *!*/
+      size: A5 !important;
+      /*display:flex;*/
+      /*justify-content:center;*/
+      /*align-items:center;*/
+      /*marginTop: 20px;*/
     }
       img { max-width: 100%; }
       .print-card { display: block !important; }
@@ -712,7 +718,7 @@ const Transaction = () => {
           {/*  )}*/}
           {/*</div>*/}
 
-          <div id="card" className="print-card" style={{ width: '100%'}}>
+          <div id="card" className="print-card" style={{width: '100%'}}>
             {selectedTransaction && (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
 
@@ -757,11 +763,11 @@ const Transaction = () => {
                           objectFit: 'contain'
                         }}
                       />
-                      <p style={{
-                        fontWeight: 'bold',
-                        marginTop: '10px',
-                        fontSize: '20px'
-                      }}>{card.label}</p>
+                      {/*<p style={{*/}
+                      {/*  fontWeight: 'bold',*/}
+                      {/*  marginTop: '10px',*/}
+                      {/*  fontSize: '20px'*/}
+                      {/*}}>{card.label}</p>*/}
                       {card.qr && (
                         <div
                           style={{
