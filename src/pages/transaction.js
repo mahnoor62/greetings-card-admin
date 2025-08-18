@@ -757,11 +757,11 @@ const Transaction = () => {
                           objectFit: 'contain'
                         }}
                       />
-                      {/*<p style={{*/}
-                      {/*  fontWeight: 'bold',*/}
-                      {/*  // marginTop: '10px',*/}
-                      {/*  fontSize: '20px'*/}
-                      {/*}}>{card.label}</p>*/}
+                      <p style={{
+                        fontWeight: 'bold',
+                        marginTop: '10px',
+                        fontSize: '20px'
+                      }}>{card.label}</p>
                       {card.qr && (
                         <div
                           style={{
