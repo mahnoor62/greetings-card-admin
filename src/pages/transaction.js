@@ -250,8 +250,8 @@ const Transaction = () => {
     const printContents = document.getElementById('card').outerHTML;
     const styles = `
     <style>
-      body { font-family: Arial, sans-serif; zoom: 100%;   margin: 0;
-    padding: 0;}
+      body { font-family: Arial, sans-serif; zoom: 100%;   margin: 0; padding:0;
+   }
        @page {
       size: A4;
       /*marginTop: 40px; !* no extra white margins *!*/
@@ -760,7 +760,7 @@ const Transaction = () => {
                       <p style={{
                         fontWeight: 'bold',
                         // marginTop: '10px',
-                        fontSize: '20px'
+                        fontSize: '10px'
                       }}>{card.label}</p>
                       {card.qr && (
                         <div
