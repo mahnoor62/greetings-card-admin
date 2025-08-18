@@ -739,7 +739,7 @@ const Transaction = () => {
                   card.src && (
                     <div key={index} style={{
                       width: '100%',
-                      aspectRatio: '1 / 1.414',
+                      aspectRatio: '1 / 1.4142',
                       display: 'flex',
                       alignItems: 'center',
                       flexDirection: 'column',
