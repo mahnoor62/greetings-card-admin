@@ -253,7 +253,7 @@ const Transaction = () => {
       body { font-family: Arial, sans-serif; zoom: 100%;   margin: 0; padding:0;
    }
        @page {
-      size: A4;
+      size: A5;
       /*marginTop: 40px; !* no extra white margins *!*/
     }
       img { max-width: 100%; }
@@ -712,7 +712,7 @@ const Transaction = () => {
           {/*  )}*/}
           {/*</div>*/}
 
-          <div id="card" className="print-card" style={{ width: '100%' }}>
+          <div id="card" className="print-card" style={{ width: '100%'}}>
             {selectedTransaction && (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
 
@@ -757,31 +757,22 @@ const Transaction = () => {
                           objectFit: 'contain'
                         }}
                       />
-                      <p style={{
-                        fontWeight: 'bold',
-                        // marginTop: '10px',
-                        fontSize: '10px'
-                      }}>{card.label}</p>
+                      {/*<p style={{*/}
+                      {/*  fontWeight: 'bold',*/}
+                      {/*  // marginTop: '10px',*/}
+                      {/*  fontSize: '20px'*/}
+                      {/*}}>{card.label}</p>*/}
                       {card.qr && (
                         <div
                           style={{
                             position: 'absolute',
-                            bottom: '10%',      // close to bottom
-                            left: '50%',         // horizontally center
+                            bottom: '10%',
+                            left: '50%',
                             transform: 'translateX(-50%)',
-                            // width: '300px',      // bigger width
-                            // height: '300px',     // bigger height
                             display: 'flex',
                             justifyContent: 'center',
-                            // backgroundColor: 'red',
                             alignItems: 'center',
-                            // zIndex: 10           // ensure it is on top if needed
 
-                            // position: 'absolute',
-                            // bottom: '15%',
-                            // left: '50%',
-                            // // width:'100%', height:'100%',
-                            // transform: 'translateX(-50%)'
 
                           }}>
                           <QRCodeGenerator
