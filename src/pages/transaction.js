@@ -250,19 +250,22 @@ const Transaction = () => {
     const printContents = document.getElementById('card').outerHTML;
     const styles = `
     <style>
+
      body {
      margin:0; padding:0;
+     /*background-color: pink;*/
+     /*display:flex; justify-content: center; align-items: center; height: 100%;*/
      font-family: 'Calibri', sans-serif !important;
           zoom: 100%; 
         }
        @page {
-      size: A5 !important;
+       size: A5 portrait !important;
       /*display:flex;*/
       /*justify-content:center;*/
       /*align-items:center;*/
       /*marginTop: 20px;*/
     }
-      img { max-width: 100%; }
+      img { max-width: 100%; margin-top: 20px;}
       .print-card { display: block !important; }
     </style>
   `;
