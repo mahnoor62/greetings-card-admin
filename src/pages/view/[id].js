@@ -67,7 +67,6 @@ const Id = () => {
           margin: 0;
         }
         body {
-          margin: 10px;
      font-family: 'Calibri', sans-serif !important;
           zoom: 100%; 
         }
