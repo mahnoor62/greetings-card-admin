@@ -63,7 +63,7 @@ const Id = () => {
     <style>
       @media print {
         @page {
-        size: A5; 
+        size: A5 !important; 
           margin: 0;
         }
         body {
