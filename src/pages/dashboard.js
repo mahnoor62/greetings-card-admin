@@ -54,7 +54,7 @@ const Dashboard = () => {
           display: 'flex',
           flexDirection: 'column',
           overflowY: 'auto',
-          pt:10,
+          pt:5,
           pb:5
         }}
       >

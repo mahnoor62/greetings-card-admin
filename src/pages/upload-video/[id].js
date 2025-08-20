@@ -52,9 +52,9 @@ const Id = () => {
     }
 
     const sizeInMB = file.size / (1024 * 1024);
-    if (sizeInMB > 1) {
+    if (sizeInMB > 2) {
       toast.error(
-        `Video size is too large. Selected file is ${sizeInMB.toFixed(2)} MB. Max allowed size is 1 MB.`,
+        `Video size is too large. Selected file is ${sizeInMB.toFixed(2)} MB. Max allowed size is 2 MB.`,
         { duration: 3000 }
       );
       return;

@@ -269,9 +269,11 @@ const Transaction = () => {
       .print-card { display: block !important; }
     </style>
   `;
-
+    // ✅ use transaction id as window title
+    const docTitle = `Greetings Card-${selectedTransaction?.transaction_id}`;
+    console.log(":docTitle", docTitle);
     printingWindow.document.write(
-      `<html><head><title>Card Print</title>${styles}</head><body>`
+      `<html><head><title>${docTitle}</title>${styles}</head><body>`
     );
     printingWindow.document.write(printContents);
     printingWindow.document.write('</body></html>');
