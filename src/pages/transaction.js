@@ -72,7 +72,6 @@ const Transaction = () => {
   const [card, setCard] = useState(null);
   const [openDialogue, setOpenDialogue] = useState(false);
 
-
   const getCard = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/api/transactions/get-single-transaction-detail/${id}`,
@@ -192,116 +191,714 @@ const Transaction = () => {
     return `${formattedDate} ${formattedTime}`;
   };
 
+// 1) helper: builds & prints without relying on React state
+//   const printTransaction = (transaction, winRef) => {
+//     const docTitle = `Greetings Card-${transaction?.transaction_id}`;
+//     const makeUrl = (p) => p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null;
+//
+//     const cards = [
+//       { src: makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),  qr: false },
+//       { src: makeUrl(transaction?.cardCustomizationId?.cardId?.insideLeftDesign),  qr: false },
+//       { src: makeUrl(transaction?.cardCustomizationId?.cardId?.insideRightDesign), qr: false },
+//       { src: makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign),   qr: true }
+//     ].filter(c => !!c.src);
+//
+//     const styles = `
+//     <style>
+//       @page { size: A4 landscape; margin: 10mm; }
+//       * { box-sizing: border-box; }
+//       html, body { margin:0; padding:0; font-family: Calibri, sans-serif; }
+//       .page { display:grid; grid-template-columns:1fr 1fr; gap:8mm; page-break-after:always; align-items:center; }
+//       .page:last-child { page-break-after:auto; }
+//       .card { position:relative; width:100%; aspect-ratio:1/1.4142; border:0.2mm solid #ddd; overflow:hidden; break-inside:avoid; }
+//       .card img { width:100%; height:100%; object-fit:contain; display:block; }
+//       .qr { position:absolute; bottom:10%; left:50%; transform:translateX(-50%); display:flex; }
+//     </style>
+//   `;
+//
+//     const makeCardHTML = (c) => `
+//     <div class="card">
+//       <img src="${c.src}" alt="card" />
+//       ${c.qr ? `<div class="qr" id="qr-slot"></div>` : ``}
+//     </div>
+//   `;
+//
+//     const pages = [];
+//     for (let i = 0; i < cards.length; i += 2) {
+//       pages.push(`
+//       <section class="page">
+//         ${makeCardHTML(cards[i])}
+//         ${cards[i + 1] ? makeCardHTML(cards[i + 1]) : `<div></div>`}
+//       </section>
+//     `);
+//     }
+//
+//     winRef.document.write(`<html><head><title>${docTitle}</title>${styles}</head><body>${pages.join('')}</body></html>`);
+//     winRef.document.close();
+//
+//     // NOTE: QRCodeGenerator is React component; print window me direct mount mushkil hota hai.
+//     // Agar QR chahiye to isay server se PNG/IMG laa kar yahan <img> se inject kar dein.
+//     // Example (agar aap ke paas QR image URL ho): holder.innerHTML = '<img src=".../qr.png" />';
+//
+//     winRef.focus();
+//     winRef.print();
+//   };
+//
+// // 2) click handler: open window synchronously, call helper, close & set flags
+//   const handlePrintClick = (transaction) => {
+//     try {
+//       const newWindow = window.open('', '_blank'); // must be in click stack
+//       if (!newWindow) {
+//         toast.error('Please allow popups to print/download.');
+//         return;
+//       }
+//       setPrinting(true);
+//
+//       // OPTIONAL: pre-load images to avoid blank prints in some browsers
+//       const urls = [
+//         transaction?.cardCustomizationId?.cardId?.frontDesign,
+//         transaction?.cardCustomizationId?.cardId?.insideLeftDesign,
+//         transaction?.cardCustomizationId?.cardId?.insideRightDesign,
+//         transaction?.cardCustomizationId?.cardId?.backDesign
+//       ].filter(Boolean).map(u => `${BASE_URL}/${u.replace(/\\/g,'/')}`);
+//
+//       let loaded = 0;
+//       if (urls.length === 0) {
+//         printTransaction(transaction, newWindow);
+//         newWindow.close();
+//         setPrinting(false);
+//         return;
+//       }
+//       urls.forEach(src => {
+//         const img = new Image();
+//         img.onload = () => {
+//           loaded += 1;
+//           if (loaded === urls.length) {
+//             printTransaction(transaction, newWindow);
+//             newWindow.close();
+//             setPrinting(false);
+//           }
+//         };
+//         img.onerror = () => {
+//           // even if one fails, continue after attempts
+//           loaded += 1;
+//           if (loaded === urls.length) {
+//             printTransaction(transaction, newWindow);
+//             newWindow.close();
+//             setPrinting(false);
+//           }
+//         };
+//         img.src = src;
+//       });
+//     } catch (e) {
+//       console.error(e);
+//       setPrinting(false);
+//     }
+//   };
 
+  // 2nd wokring version
+//   const printTransaction = (transaction, winRef) => {
+//     const docTitle = `Greetings Card-${transaction?.transaction_id}`;
+//     const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
+//
+//     const cards = [
+//       {
+//         src: makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
+//         qr: false,
+//         heading: transaction?.cardCustomizationId?.arTemplateData?.mainHeadingText,
+//         para1: transaction?.cardCustomizationId?.arTemplateData?.paragraph1Text,
+//         para2: transaction?.cardCustomizationId?.arTemplateData?.paragraph2Text
+//       },
+//       { src: makeUrl(transaction?.cardCustomizationId?.cardId?.insideLeftDesign), qr: false },
+//       { src: makeUrl(transaction?.cardCustomizationId?.cardId?.insideRightDesign), qr: false },
+//       { src: makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign), qr: true }
+//     ].filter(c => !!c.src);
+//
+//     const PAGE_MARGIN_MM = 10;
+//     const GAP_MM = 6;            // A5 me thoda chhota gap best hota hai
+//     const CONTENT_W = 210 - PAGE_MARGIN_MM * 2; // 190mm
+//     const CONTENT_H = 148 - PAGE_MARGIN_MM * 2; // 128mm
+//     const COL_W = (CONTENT_W - GAP_MM) / 2;   // (190 - 6)/2 = 92mm
+//
+//     const styles = `
+// <style>
+//   @page {
+//     size: A5 landscape;
+//     zoom: 110%;
+//     margin: ${PAGE_MARGIN_MM}mm;
+//   }
+//
+//   * { box-sizing: border-box; }
+//   html, body { margin:0; padding:0; font-family: Calibri, sans-serif; }
+//
+//   /* Har printed page ko exact content mm do. VH use nahi karna! */
+//   .page {
+//     width: ${CONTENT_W}mm;
+//     height: ${CONTENT_H}mm;
+//     display: grid;
+//     grid-template-columns:
+//       ${COL_W}mm
+//       ${COL_W}mm;
+//     gap: ${GAP_MM}mm;
+//     align-items: center;
+//     justify-items: center;
+//     /* Important: break-inside avoid to stop weird splits */
+//     break-inside: avoid;
+//     page-break-after: always;
+//   }
+//   .page:last-child { page-break-after: auto; }
+//
+//   /* Card ko HEIGHT-first fit karao, width ratio se aaye */
+//   .card {
+//     position: relative;
+//     height: calc(100% - 2mm);   /* tiny safety to avoid overflow */
+//     aspect-ratio: 1 / 1.4142;   /* A-series ratio */
+//     width: auto;
+//     /* Border ko ya to remove ya hairline, warna rounding se wrap ho sakta */
+//     border: 0;                  /* was: 0.2mm solid #ddd */
+//     overflow: hidden;
+//     break-inside: avoid;
+//   }
+//
+//   .card img {
+//     width: 100%;
+//     height: 100%;
+//     object-fit: contain;
+//     display: block;
+//   }
+//
+//   .qr {
+//     position: absolute;
+//     bottom: 7%;
+//     left: 50%;
+//     transform: translateX(-50%);
+//     display: flex;
+//   }
+//   .qr > img, .qr > canvas, .qr > svg {
+//     width: 10mm;  /* A5 me chhota size */
+//     height: 10mm;
+//   }
+//
+// /*heading and paragaph css*/
+//
+// /* FULL overlay box that sits inside the card with safe padding */
+// .overlay-text{
+//   position: absolute;
+//   inset: 8%;                 /* = 8% padding from all sides (safe border) */
+//   display: flex;             /* center content vertically + horizontally */
+//   align-items: center;
+//   justify-content: center;
+//   text-align: center;
+//   z-index: 2;
+//   pointer-events: none;
+//   /* ensure the box never spills outside the card */
+//   max-width: 84%;
+//   max-height: 84%;
+// }
+//
+// /* the actual text container that must fit in the box */
+// .overlay-inner{
+//   max-width: 100%;
+//   max-height: 100%;
+//   overflow: hidden;          /* if text still exceeds, cut safely (no overlap) */
+//   line-height: 1.25;
+//   color: black;               /* dark bg example; change to #111 on light bg */
+// }
+//
+// /* make long words/uuuuuu… wrap instead of overflowing */
+// .overlay-inner h2,
+// .overlay-inner p{
+//   margin: 0 0 3mm;
+//   word-break: break-word;    /* break long tokens */
+//   overflow-wrap: anywhere;   /* wrap anywhere if no spaces */
+// }
+//
+// .overlay-inner h2{
+//   font-weight: 700;
+//   font-size: 18pt;
+//   margin-bottom: 4mm;
+// }
+//
+// /* default paragraph size; adjust if needed */
+// .overlay-inner p{
+//   font-size: 12pt;
+// }
+//
+// /* optional outline for readability on busy artwork */
+// .overlay-inner .stroke{
+//   -webkit-text-stroke: 0.6pt #000;
+//   /*text-shadow: 0 0 1.2mm rgba(0,0,0,.6);*/
+// }
+//
+// @media print{
+//   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+//
+// }
+//
+//
+// /* placeholder box that replaces the image */
+// /* placeholder box that overlays but allows faint image */
+// .card-placeholder {
+//   position: absolute;
+//   inset: 0;
+//   background: #ffff; /* white with 85% opacity */
+//   border:2px solid #bbb;
+//   /*border-radius: 1mm;*/
+//   z-index: 1;  /* above image but below text + QR */
+// }
+//
+// /* Overlay text should always be above */
+// .overlay-text {
+//   position: absolute;
+//   inset: 8%;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   text-align: center;
+//   z-index: 2;  /* above placeholder */
+//   pointer-events: none;
+//   max-width: 84%;
+//   max-height: 84%;
+//   overflow: hidden;
+// }
+//
+// /* QR code on top of everything */
+// .qr {
+//   position: absolute;
+//   bottom: 7%;
+//   left: 50%;
+//   transform: translateX(-50%);
+//   display: flex;
+//   z-index: 3;  /* highest layer */
+// }
+// .qr > img,
+// .qr > canvas,
+// .qr > svg {
+//   width: 10mm;
+//   height: 10mm;
+// }
+//
+//
+//
+//
+// </style>
+// `;
+//
+//     //   const styles = `
+//     //   <style>
+//     //     @page { size: A4 landscape; margin: 10mm; }
+//     //     * { box-sizing: border-box; }
+//     //     html, body { margin:0; padding:0; font-family: Calibri, sans-serif; }
+//     //     .page { display:grid; grid-template-columns:1fr 1fr; gap:8mm; page-break-after:always; align-items:center; }
+//     //     .page:last-child { page-break-after:auto; }
+//     //     .card { position:relative; width:100%; aspect-ratio:1/1.4142; border:0.2mm solid #ddd; overflow:hidden; break-inside:avoid; }
+//     //     .card img { width:100%; height:100%; object-fit:contain; display:block; }
+//     //     .qr { position:absolute; bottom:10%; left:50%; transform:translateX(-50%); display:flex; }
+//     //     .qr > img, .qr > canvas, .qr > svg { width:20mm; height:20mm; } /* QR size */
+//     //   </style>
+//     // `;
+//
+//
+//     const makeCardHTML = (c) => `
+//   <div class="card">
+//     <!-- keep the img in DOM but hide it -->
+//     <img src="${c.src}" alt="card" class="is-hidden" />
+//     <!-- placeholder white box with border -->
+//     <div class="card-placeholder"></div>
+//
+//     ${
+//       (c.heading || c.para1 || c.para2) ? `
+//         <div class="overlay-text">
+//           <div class="overlay-inner">
+//             ${c.heading ? `<h2 class="stroke">${c.heading}</h2>` : ``}
+//             ${c.para1  ? `<p class="stroke">${c.para1}</p>`       : ``}
+//             ${c.para2  ? `<p class="stroke">${c.para2}</p>`       : ``}
+//           </div>
+//         </div>
+//       ` : ``
+//     }
+//
+//     ${c.qr ? `<div class="qr"><div id="qr-slot"></div></div>` : ``}
+//   </div>
+// `;
+//
+//
+// //     const makeCardHTML = (c) => `
+// //   <div class="card">
+// //     <img src="${c.src}" alt="card" />
+// //     ${
+// //       (c.heading || c.para1 || c.para2) ? `
+// //         <div class="overlay-text">
+// //           <div class="overlay-inner">
+// //             ${c.heading ? `<h2 class="stroke">${c.heading}</h2>` : ``}
+// //             ${c.para1  ? `<p class="stroke">${c.para1}</p>`       : ``}
+// //             ${c.para2  ? `<p class="stroke">${c.para2}</p>`       : ``}
+// //           </div>
+// //         </div>
+// //       ` : ``
+// //     }
+// //     ${c.qr ? `<div class="qr"><div id="qr-slot"></div></div>` : ``}
+// //   </div>
+// // `;
+//
+//
+//     const pages = [];
+//     for (let i = 0; i < cards.length; i += 2) {
+//       pages.push(`
+//     <section class="page">
+//       ${makeCardHTML(cards[i])}
+//       ${cards[i + 1]
+//         ? makeCardHTML(cards[i + 1])
+//         : `<div style="width:${COL_W}mm;height:100%"></div>`}
+//     </section>
+//   `);
+//     }
+//
+//
+//     // const pages = [];
+//     // for (let i = 0; i < cards.length; i += 2) {
+//     //   pages.push(`
+//     //   <section class="page">
+//     //     ${makeCardHTML(cards[i])}
+//     //     ${cards[i + 1] ? makeCardHTML(cards[i + 1]) : `<div></div>`}
+//     //   </section>
+//     // `);
+//     // }
+//
+//     // Write the printable document
+//     winRef.document.write(`<html><head><title>${docTitle}</title>${styles}</head><body>${pages.join(
+//       '')}</body></html>`);
+//     winRef.document.close();
+//
+//     // --- Add QR using a tiny CDN lib (no install required) ---
+//     const script = winRef.document.createElement('script');
+//     // qrcodejs (UMD)
+//     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+//     script.onload = () => {
+//       const qrValue = `${AR_EXPERIENCE_LINK}/${transaction?.cardCustomizationId?._id}`;
+//       const slot = winRef.document.getElementById('qr-slot');
+//
+//       if (slot && winRef.QRCode) {
+//         // Generate QR into the slot
+//         const qr = new winRef.QRCode(slot, {
+//           text: qrValue,
+//           width: 150,   // rendered size; CSS will cap to 34mm for print
+//           height: 150,
+//           correctLevel: winRef.QRCode.CorrectLevel.M
+//         });
+//
+//         // Wait until the QR <img> is present/loaded, then print
+//         const waitForImgAndPrint = () => {
+//           const img = slot.querySelector('img') || slot.querySelector('canvas');
+//           if (!img) {
+//             // observe until child arrives
+//             const obs = new winRef.MutationObserver(() => {
+//               const ready = slot.querySelector('img') || slot.querySelector('canvas');
+//               if (ready) {
+//                 obs.disconnect();
+//                 // for <img>, ensure it's loaded
+//                 if (ready.tagName === 'IMG' && !ready.complete) {
+//                   ready.onload = () => {
+//                     winRef.focus();
+//                     winRef.print();
+//                   };
+//                 } else {
+//                   winRef.focus();
+//                   winRef.print();
+//                 }
+//               }
+//             });
+//             obs.observe(slot, { childList: true, subtree: true });
+//           } else {
+//             if (img.tagName === 'IMG' && !img.complete) {
+//               img.onload = () => {
+//                 winRef.focus();
+//                 winRef.print();
+//               };
+//             } else {
+//               winRef.focus();
+//               winRef.print();
+//             }
+//           }
+//         };
+//
+//         waitForImgAndPrint();
+//       } else {
+//         // Fallback: print anyway
+//         winRef.focus();
+//         winRef.print();
+//       }
+//     };
+//     script.onerror = () => {
+//       // If CDN fails, still print (without QR) so user isn't blocked
+//       winRef.focus();
+//       winRef.print();
+//     };
+//     winRef.document.head.appendChild(script);
+//
+//     // Close when printing finishes
+//     winRef.onafterprint = () => {
+//       try { winRef.close(); } catch {}
+//     };
+//   };
+//
+//   const handlePrintClick = (transaction) => {
+//     try {
+//       const newWindow = window.open('', '_blank'); // must be user-initiated
+//       if (!newWindow) {
+//         toast.error('Please allow popups to print/download.');
+//         return;
+//       }
+//       setPrinting(true);
+//
+//       const urls = [
+//         transaction?.cardCustomizationId?.cardId?.frontDesign,
+//         transaction?.cardCustomizationId?.cardId?.insideLeftDesign,
+//         transaction?.cardCustomizationId?.cardId?.insideRightDesign,
+//         transaction?.cardCustomizationId?.cardId?.backDesign
+//       ].filter(Boolean).map(u => `${BASE_URL}/${u.replace(/\\/g, '/')}`);
+//
+//       const proceed = () => {
+//         printTransaction(transaction, newWindow);
+//         // window will close on afterprint inside printTransaction
+//         setPrinting(false);
+//       };
+//
+//       if (urls.length === 0) {
+//         proceed();
+//         return;
+//       }
+//
+//       let loaded = 0;
+//       urls.forEach(src => {
+//         const img = new Image();
+//         img.onload = img.onerror = () => {
+//           loaded += 1;
+//           if (loaded === urls.length) {
+//             proceed();
+//           }
+//         };
+//         img.src = src;
+//       });
+//     } catch (e) {
+//       console.error(e);
+//       setPrinting(false);
+//     }
+//   };
+
+// version 3
+  const printTransaction = (transaction, winRef) => {
+    const docTitle = `Greetings Card-${transaction?.transaction_id}`;
+    const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
+
+    // sirf front aur back lena hai
+    const front = {
+      src: makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
+      heading: transaction?.cardCustomizationId?.arTemplateData?.mainHeadingText,
+      para1: transaction?.cardCustomizationId?.arTemplateData?.paragraph1Text,
+      para2: transaction?.cardCustomizationId?.arTemplateData?.paragraph2Text
+    };
+    const back = {
+      src: makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign),
+      qr: true
+    };
+
+    const PAGE_MARGIN_MM = 10;
+    const GAP_MM = 6;
+    const CONTENT_W = 210 - PAGE_MARGIN_MM * 2;
+    const CONTENT_H = 148 - PAGE_MARGIN_MM * 2;
+    const COL_W = (CONTENT_W - GAP_MM) / 2;
+
+    const styles = `
+<style>
+  @page {
+    size: A5 landscape;
+    margin: ${PAGE_MARGIN_MM}mm;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; font-family: Calibri, sans-serif; }
+  .page {
+    width: ${CONTENT_W}mm;
+    height: ${CONTENT_H}mm;
+    display: grid;
+    grid-template-columns: ${COL_W}mm ${COL_W}mm;
+    gap: ${GAP_MM}mm;
+    align-items: center;
+    justify-items: center;
+    break-inside: avoid;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  .card {
+    position: relative;
+    height: calc(100% - 2mm);
+    aspect-ratio: 1 / 1.4142;
+    width: auto;
+    border: 2px solid #bbb;   /* sirf border */
+    background: #fff;         /* sirf white bg */
+    overflow: hidden;
+    break-inside: avoid;
+  }
+
+  .overlay-text{
+    position: absolute;
+    inset: 8%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 2;
+    pointer-events: none;
+    max-width: 84%;
+    max-height: 84%;
+  }
+  .overlay-inner{
+    max-width: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    line-height: 1.25;
+    color: black;
+  }
+  .overlay-inner h2{ font-weight:700; font-size:18pt; margin:0 0 4mm; }
+  .overlay-inner p{ font-size:12pt; margin:0 0 3mm; }
+  .overlay-inner .stroke{ -webkit-text-stroke:0.6pt #000; }
+
+  .qr {
+    position: absolute;
+    bottom: 7%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    z-index: 3;
+  }
+  .qr > img, .qr > canvas, .qr > svg {
+    width: 10mm;
+    height: 10mm;
+  }
+</style>`;
+
+    const makeCardHTML = (c) => `
+    <div class="card">
+      ${(c.heading || c.para1 || c.para2) ? `
+        <div class="overlay-text">
+          <div class="overlay-inner">
+            ${c.heading ? `<h2 class="stroke">${c.heading}</h2>` : ``}
+            ${c.para1 ? `<p class="stroke">${c.para1}</p>` : ``}
+            ${c.para2 ? `<p class="stroke">${c.para2}</p>` : ``}
+          </div>
+        </div>` : ``}
+      ${c.qr ? `<div class="qr"><div id="qr-slot"></div></div>` : ``}
+    </div>
+  `;
+
+    // pages banani hain manually: sirf front aur back
+    const pages = [
+      `<section class="page">
+        ${makeCardHTML(front)}
+        <div></div>
+     </section>`,
+      `<section class="page">
+        <div></div>
+        ${makeCardHTML(back)}
+     </section>`
+    ];
+
+    // Write document
+    winRef.document.write(
+      `<html><head><title>${docTitle}</title>${styles}</head><body>${pages.join('')}</body></html>`
+    );
+    winRef.document.close();
+
+    // QR load
+    const script = winRef.document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    script.onload = () => {
+      const qrValue = `${AR_EXPERIENCE_LINK}/${transaction?.cardCustomizationId?._id}`;
+      const slot = winRef.document.getElementById('qr-slot');
+      if (slot && winRef.QRCode) {
+        const qr = new winRef.QRCode(slot, {
+          text: qrValue,
+          width: 150,
+          height: 150,
+          correctLevel: winRef.QRCode.CorrectLevel.M
+        });
+        setTimeout(() => { winRef.focus(); winRef.print(); }, 500);
+      } else {
+        winRef.focus(); winRef.print();
+      }
+    };
+    script.onerror = () => { winRef.focus(); winRef.print(); };
+    winRef.document.head.appendChild(script);
+
+    winRef.onafterprint = () => { try { winRef.close(); } catch {} };
+  };
 
   const handlePrintClick = (transaction) => {
-    // Open window here — inside the click event to avoid popup blocking
-    const newWindow = window.open('', '_blank');
-    if (!newWindow) {
-      console.log('Please allow popups for this site.');
-      return;
-    }
+    try {
+      const newWindow = window.open('', '_blank'); // must be user-initiated
+      if (!newWindow) {
+        toast.error('Please allow popups to print/download.');
+        return;
+      }
+      setPrinting(true);
 
-    setPrinting(true);
-    setImagesLoaded(0);
-    setSelectedTransaction(transaction);
-    setPrintingWindow(newWindow); // store window reference
-  };
+      const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
+      const urls = [
+        makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
+        makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign)
+      ].filter(Boolean);
 
-  useEffect(() => {
-    if (!selectedTransaction) {
-      return;
-    }
-
-    const imageUrls = [
-      selectedTransaction?.cardCustomizationId?.cardId?.frontDesign,
-      selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign,
-      selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign,
-      selectedTransaction?.cardCustomizationId?.cardId?.backDesign
-    ]
-      .filter(Boolean)
-      .map(url => `${BASE_URL}/${url.replace(/\\/g, '/')}`);
-
-    if (imageUrls.length === 0) {
-      callPrint();
-      return;
-    }
-
-    let loaded = 0;
-    imageUrls.forEach(url => {
-      const img = new Image();
-      img.src = url;
-      img.onload = () => {
-        loaded++;
-        setImagesLoaded(prev => prev + 1);
-        if (loaded === imageUrls.length) {
-          callPrint();
-        }
+      const proceed = () => {
+        printTransaction(transaction, newWindow);
+        setPrinting(false);
       };
-    });
-  }, [selectedTransaction]);
 
-  const callPrint = () => {
-    if (!printingWindow) {
+      if (urls.length === 0) { proceed(); return; }
+
+      let loaded = 0;
+      urls.forEach(src => {
+        const img = new Image();
+        img.onload = img.onerror = () => {
+          loaded += 1;
+          if (loaded === urls.length) proceed();
+        };
+        img.src = src;
+      });
+    } catch (e) {
+      console.error(e);
       setPrinting(false);
-      return;
     }
-
-    const printContents = document.getElementById('card').outerHTML;
-    const styles = `
-    <style>
-
-     body {
-     margin:0; padding:0;
-     /*background-color: pink;*/
-     /*display:flex; justify-content: center; align-items: center; height: 100%;*/
-     font-family: 'Calibri', sans-serif !important;
-          zoom: 100%; 
-        }
-       @page {
-       size: A5 portrait !important;
-      /*display:flex;*/
-      /*justify-content:center;*/
-      /*align-items:center;*/
-      /*marginTop: 20px;*/
-    }
-      img { max-width: 100%;}
-      .print-card { display: block !important; }
-    </style>
-  `;
-    // ✅ use transaction id as window title
-    const docTitle = `Greetings Card-${selectedTransaction?.transaction_id}`;
-    console.log(":docTitle", docTitle);
-    printingWindow.document.write(
-      `<html><head><title>${docTitle}</title>${styles}</head><body>`
-    );
-    printingWindow.document.write(printContents);
-    printingWindow.document.write('</body></html>');
-    printingWindow.document.close();
-    printingWindow.focus();
-    printingWindow.print();
-    printingWindow.close();
-
-    setPrinting(false);
-    setPrintingWindow(null);
   };
 
+  // 1st wokring version in portrate
   // const handlePrintClick = (transaction) => {
+  //   // Open window here — inside the click event to avoid popup blocking
+  //   const newWindow = window.open('', '_blank');
+  //   if (!newWindow) {
+  //     console.log('Please allow popups for this site.');
+  //     return;
+  //   }
+  //
   //   setPrinting(true);
   //   setImagesLoaded(0);
   //   setSelectedTransaction(transaction);
+  //   setPrintingWindow(newWindow); // store window reference
   // };
   //
-  //
   // useEffect(() => {
-  //   if (!selectedTransaction) return;
+  //   if (!selectedTransaction) {
+  //     return;
+  //   }
   //
   //   const imageUrls = [
   //     selectedTransaction?.cardCustomizationId?.cardId?.frontDesign,
   //     selectedTransaction?.cardCustomizationId?.cardId?.insideLeftDesign,
   //     selectedTransaction?.cardCustomizationId?.cardId?.insideRightDesign,
   //     selectedTransaction?.cardCustomizationId?.cardId?.backDesign
-  //   ].filter(Boolean).map(url => `${BASE_URL}/${url.replace(/\\/g, '/')}`);
+  //   ]
+  //     .filter(Boolean)
+  //     .map(url => `${BASE_URL}/${url.replace(/\\/g, '/')}`);
   //
   //   if (imageUrls.length === 0) {
   //     callPrint();
@@ -323,24 +920,48 @@ const Transaction = () => {
   // }, [selectedTransaction]);
   //
   // const callPrint = () => {
+  //   if (!printingWindow) {
+  //     setPrinting(false);
+  //     return;
+  //   }
+  //
   //   const printContents = document.getElementById('card').outerHTML;
   //   const styles = `
   //   <style>
-  //     body { font-family: Arial, sans-serif; zoom: 100%; }
-  //     img { max-width: 100%; page-break-inside: avoid; }
+  //
+  //    body {
+  //    margin:0; padding:0;
+  //    /*background-color: pink;*/
+  //    /*display:flex; justify-content: center; align-items: center; height: 100%;*/
+  //    font-family: 'Calibri', sans-serif !important;
+  //         zoom: 100%;
+  //       }
+  //      @page {
+  //      size: A5 portrait !important;
+  //     /*display:flex;*/
+  //     /*justify-content:center;*/
+  //     /*align-items:center;*/
+  //     /*marginTop: 20px;*/
+  //   }
+  //     img { max-width: 100%;}
   //     .print-card { display: block !important; }
   //   </style>
   // `;
-  //   const newWindow = window.open('', '_blank');
-  //   newWindow.document.write(`<html><head><title>Card Print</title>${styles}</head><body>`);
-  //   newWindow.document.write(printContents);
-  //   newWindow.document.write('</body></html>');
-  //   newWindow.document.close();
-  //   newWindow.focus();
-  //   newWindow.print();
-  //   newWindow.close();
+  //   // ✅ use transaction id as window title
+  //   const docTitle = `Greetings Card-${selectedTransaction?.transaction_id}`;
+  //   console.log(":docTitle", docTitle);
+  //   printingWindow.document.write(
+  //     `<html><head><title>${docTitle}</title>${styles}</head><body>`
+  //   );
+  //   printingWindow.document.write(printContents);
+  //   printingWindow.document.write('</body></html>');
+  //   printingWindow.document.close();
+  //   printingWindow.focus();
+  //   printingWindow.print();
+  //   printingWindow.close();
   //
   //   setPrinting(false);
+  //   setPrintingWindow(null);
   // };
 
   console.log('transactions', transactions);
@@ -722,8 +1343,8 @@ const Transaction = () => {
           {/*    </div>*/}
           {/*  )}*/}
           {/*</div>*/}
-
-          <div id="card" className="print-card" style={{width: '100%'}}>
+          {/*workung code*/}
+          <div id="card" className="print-card" style={{ width: '100%' }}>
             {selectedTransaction && (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
 
@@ -756,7 +1377,7 @@ const Transaction = () => {
                       flexDirection: 'column',
                       justifyContent: 'center',
                       // pageBreakAfter: 'none',
-                      position: 'relative',
+                      position: 'relative'
                       // marginTop: 20          // center horizontally
                     }}>
                       <img
@@ -782,8 +1403,7 @@ const Transaction = () => {
                             transform: 'translateX(-50%)',
                             display: 'flex',
                             justifyContent: 'center',
-                            alignItems: 'center',
-
+                            alignItems: 'center'
 
                           }}>
                           <QRCodeGenerator
