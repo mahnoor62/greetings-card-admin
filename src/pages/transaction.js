@@ -819,8 +819,8 @@ const Transaction = () => {
       if (slot && winRef.QRCode) {
         const qr = new winRef.QRCode(slot, {
           text: qrValue,
-          width: 150,
-          height: 150,
+          width: 100,
+          height: 100,
           correctLevel: winRef.QRCode.CorrectLevel.M
         });
         setTimeout(() => { winRef.focus(); winRef.print(); }, 500);
