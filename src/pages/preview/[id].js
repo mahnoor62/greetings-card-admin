@@ -327,33 +327,39 @@ const Id = () => {
                     }}
                   />
                 ) : (
+
                   <Box
-                    sx={{
-                      display: 'flex',
-                      jusitfyContent: 'center',
-                      alignItems: 'center',
-                      width: { lg: 320, xs: '100%', md: 250 },
-                      height: 450,
-                      bgcolor: '#f0f3f8',
-                      boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                      borderRadius: 0
-                    }}
+                    // sx={{
+                    //   display: 'flex',
+                    //   jusitfyContent: 'center',
+                    //   alignItems: 'center',
+                    //   width: { lg: 320, xs: '100%', md: 250 },
+                    //   height: 450,
+                    //   bgcolor: '#f0f3f8',
+                    //   boxShadow: '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                    //   borderRadius: 0
+                    // }}
                   />
                 )
               }
-              <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                // mt: 2
-                // gap: 1
-              }}>
-                {/*<AddCircleRoundedIcon sx={{color:'grey'}}/>*/}
-                <Typography variant="body1" sx={{ color: 'black', fontWeight: 900 }}>
-                  Back design
-                </Typography>
-              </Box>
+              {
+                card?.backDesign && (
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    // mt: 2
+                    // gap: 1
+                  }}>
+                    {/*<AddCircleRoundedIcon sx={{color:'grey'}}/>*/}
+                    <Typography variant="body1" sx={{ color: 'black', fontWeight: 900 }}>
+                      Back design
+                    </Typography>
+                  </Box>
+                )
+              }
+
             </Grid>
           </Grid>
         </Container>

@@ -480,13 +480,18 @@ const Page = () => {
   }, [insideRightImage]);
 
   const handleNextClick = () => {
-    if (!image || !backImage || !insideLeftImage || !insideRightImage) {
-      toast.error('Please upload all required card images before proceeding.',
-        {
-          duration: 3000
-        });
-      return;
-    }
+    // if (!image || !backImage || !insideLeftImage || !insideRightImage) {
+    // if (!image || !insideLeftImage || !insideRightImage) {
+    //   toast.error('Please upload all required card images before proceeding.',
+    //     {
+    //       duration: 3000
+    //     });
+    //   return;
+    // }
+
+    console.log("image", image)
+    console.log("insideLeftImage", insideLeftImage)
+    console.log("insideRightImage", insideRightImage)
 
     router.push(`/upload-video/${id}`);
   };

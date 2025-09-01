@@ -735,7 +735,7 @@ const Transaction = () => {
     height: calc(100% - 2mm);
     aspect-ratio: 1 / 1.4142;
     width: auto;
-    border: 2px solid #bbb;   /* sirf border */
+    /*border: 2px solid #bbb;   !* sirf border *!*/
     background: #fff;         /* sirf white bg */
     overflow: hidden;
     break-inside: avoid;
