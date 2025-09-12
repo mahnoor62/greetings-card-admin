@@ -674,88 +674,88 @@ const Page = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6} md={3}>
-              <Card sx={{
-                bgcolor: '#f0f3f8',
-                height: 400,
-                // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.06), 0px 0px 0px rgba(0, 0, 0, 0)',
-                borderRadius: 0
-              }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: '100%',
-                    py: 3
-                  }}
-                >
-
-                  {/* Image at Top */}
-                  <Box
-                    component="img"
-                    onDrop={handleDropForBack}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDragLeave={(e) => e.preventDefault()}
-                    src={
-                      backImage
-                        ? URL.createObjectURL(backImage)
-                        : existingBackUrl || `${WEB_URL}/drag.png`
-                    }
-                    // src={backImage ? URL.createObjectURL(backImage) : `${WEB_URL}/drag.png`}
-                    // src={`${WEB_URL}/drag.png`}
-                    alt="Drag Icon"
-                    sx={{
-                      width: backImage || existingBackUrl ? 150 : 100,
-                      height: backImage || existingBackUrl ? 200 : 100
-                    }}
-                  />
-
-                  {/* Text in Center */}
-                  <CardContent sx={{ textAlign: 'center' }}>
-                    <Typography variant="body1" sx={{ color: 'black', fontWeight: 900 }}>
-                      Drag & drop <span style={{ color: '#c09b9b' }}>image</span>
-                    </Typography>
-                  </CardContent>
-
-                  {/* Button at Bottom */}
-                  <CardActions>
-                    <Button
-                      disabled={backLoading}
-                      onClick={() => document.getElementById('backDesign').click()}
-                      variant="contained"
-                      sx={{
-                        minWidth: { md: 150, xs: 100 },
-                        backgroundColor: '#c09b9b !important',
-                        color: '#1a1d25',
-                        fontWeight: 700,
-                        borderRadius: '999px',
-                        '&:hover': {
-                          backgroundColor: '#c09b9b !important'
-                        }
-                      }}
-                    >
-                      {backLoading ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/> : 'Upload'}
-                    </Button>
-                  </CardActions>
-                </Box>
-              </Card>
-              <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'center',
-                mt: { md: 5, xs: 2 },
-                gap: 1
-              }}>
-                <AddCircleRoundedIcon onClick={() => document.getElementById('backDesign').click()}
-                                      sx={{ color: 'grey' }}/>
-                <Typography variant="body1" sx={{ color: 'black' }}>
-                  Back design
-                </Typography>
-              </Box>
-            </Grid>
+            {/*<Grid item xs={6} md={3}>*/}
+            {/*  <Card sx={{*/}
+            {/*    bgcolor: '#f0f3f8',*/}
+            {/*    height: 400,*/}
+            {/*    // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.06), 0px 0px 0px rgba(0, 0, 0, 0)',*/}
+            {/*    borderRadius: 0*/}
+            {/*  }}>*/}
+            {/*    <Box*/}
+            {/*      sx={{*/}
+            {/*        display: 'flex',*/}
+            {/*        flexDirection: 'column',*/}
+            {/*        justifyContent: 'space-between',*/}
+            {/*        alignItems: 'center',*/}
+            {/*        height: '100%',*/}
+            {/*        py: 3*/}
+            {/*      }}*/}
+            {/*    >*/}
+            
+            {/*      /!* Image at Top *!/*/}
+            {/*      <Box*/}
+            {/*        component="img"*/}
+            {/*        onDrop={handleDropForBack}*/}
+            {/*        onDragOver={(e) => e.preventDefault()}*/}
+            {/*        onDragLeave={(e) => e.preventDefault()}*/}
+            {/*        src={*/}
+            {/*          backImage*/}
+            {/*            ? URL.createObjectURL(backImage)*/}
+            {/*            : existingBackUrl || `${WEB_URL}/drag.png`*/}
+            {/*        }*/}
+            {/*        // src={backImage ? URL.createObjectURL(backImage) : `${WEB_URL}/drag.png`}*/}
+            {/*        // src={`${WEB_URL}/drag.png`}*/}
+            {/*        alt="Drag Icon"*/}
+            {/*        sx={{*/}
+            {/*          width: backImage || existingBackUrl ? 150 : 100,*/}
+            {/*          height: backImage || existingBackUrl ? 200 : 100*/}
+            {/*        }}*/}
+            {/*      />*/}
+            
+            {/*      /!* Text in Center *!/*/}
+            {/*      <CardContent sx={{ textAlign: 'center' }}>*/}
+            {/*        <Typography variant="body1" sx={{ color: 'black', fontWeight: 900 }}>*/}
+            {/*          Drag & drop <span style={{ color: '#c09b9b' }}>image</span>*/}
+            {/*        </Typography>*/}
+            {/*      </CardContent>*/}
+            
+            {/*      /!* Button at Bottom *!/*/}
+            {/*      <CardActions>*/}
+            {/*        <Button*/}
+            {/*          disabled={backLoading}*/}
+            {/*          onClick={() => document.getElementById('backDesign').click()}*/}
+            {/*          variant="contained"*/}
+            {/*          sx={{*/}
+            {/*            minWidth: { md: 150, xs: 100 },*/}
+            {/*            backgroundColor: '#c09b9b !important',*/}
+            {/*            color: '#1a1d25',*/}
+            {/*            fontWeight: 700,*/}
+            {/*            borderRadius: '999px',*/}
+            {/*            '&:hover': {*/}
+            {/*              backgroundColor: '#c09b9b !important'*/}
+            {/*            }*/}
+            {/*          }}*/}
+            {/*        >*/}
+            {/*          {backLoading ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/> : 'Upload'}*/}
+            {/*        </Button>*/}
+            {/*      </CardActions>*/}
+            {/*    </Box>*/}
+            {/*  </Card>*/}
+            {/*  <Box sx={{*/}
+            {/*    display: 'flex',*/}
+            {/*    flexDirection: 'column',*/}
+            {/*    justifyContent: 'center',*/}
+            {/*    alignItems: 'center',*/}
+            {/*    mt: { md: 5, xs: 2 },*/}
+            {/*    gap: 1*/}
+            {/*  }}>*/}
+            {/*    <AddCircleRoundedIcon onClick={() => document.getElementById('backDesign').click()}*/}
+            {/*                          sx={{ color: 'grey' }}/>*/}
+            {/*    <Typography variant="body1" sx={{ color: 'black' }}>*/}
+            {/*      Back design*/}
+            {/*    </Typography>*/}
+            {/*  </Box>*/}
+            {/*</Grid>*/}
             <Grid item xs={12} md={6}>
               <Card sx={{
                 bgcolor: '#f0f3f8',
