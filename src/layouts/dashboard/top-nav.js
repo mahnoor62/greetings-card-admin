@@ -85,7 +85,7 @@ export const TopNav = (props) => {
               spacing={2}
             >
               <NextLink href="/dashboard"  passHref legacyBehavior>
-              <Typography variant="h5" sx={{ fontWeight: 900 , color:'#c09b9b', fontSize:{md:'20px', xs:'17px'}, cursor:'pointer'}}>{isCardCustomization
+              <Typography variant="h5" sx={{ fontWeight: 900 , color:'#c09b9b', fontSize:{md:'20px',lg:'30px',xs:'17px'}, cursor:'pointer'}}>{isCardCustomization
                 ? 'Front Card Customization'
                 : isPreview ? 'AR Experience' : isAllCards
                   ? 'Upload Greetings Card'
