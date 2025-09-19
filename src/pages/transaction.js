@@ -134,15 +134,21 @@ const Transaction = () => {
     // console.log(searchQuery);
   };
 
+  console.log("transactions", transactions)
+
 //filter function
   const filtered = applyFilter(transactions, searchQuery, [
-    'transaction_id',
+    'paypal_order_id',
     'cardCustomizationId.userId.firstName',
     'cardCustomizationId.userId.email',
-    'status'
+    'status',
+    'title'
   ]);
   const paginatedTransactions = applyPagination(filtered, page, rowsPerPage);
   const totalCount = filtered.length;
+
+
+  console.log("paginatedTransactions", paginatedTransactions)
 
 //handle approved button status here:
 //   const handleApprovedStatus = async (id) => {
@@ -193,7 +199,7 @@ const Transaction = () => {
 
 // 1) helper: builds & prints without relying on React state
 //   const printTransaction = (transaction, winRef) => {
-//     const docTitle = `Greetings Card-${transaction?.transaction_id}`;
+//     const docTitle = `Incardible-${transaction?.transaction_id}`;
 //     const makeUrl = (p) => p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null;
 //
 //     const cards = [
@@ -298,7 +304,7 @@ const Transaction = () => {
 
   // 2nd wokring version
 //   const printTransaction = (transaction, winRef) => {
-//     const docTitle = `Greetings Card-${transaction?.transaction_id}`;
+//     const docTitle = `Incardible-${transaction?.transaction_id}`;
 //     const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
 //
 //     const cards = [
@@ -688,7 +694,7 @@ const Transaction = () => {
 
 // version 3
   const printTransaction = (transaction, winRef) => {
-    const docTitle = `Greetings Card-${transaction?.transaction_id}`;
+    const docTitle = `Incardible-${transaction?.transaction_id}`;
     const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
 
     // sirf front aur back lena hai
@@ -948,7 +954,7 @@ const Transaction = () => {
   //   </style>
   // `;
   //   // ✅ use transaction id as window title
-  //   const docTitle = `Greetings Card-${selectedTransaction?.transaction_id}`;
+  //   const docTitle = `Incardible-${selectedTransaction?.transaction_id}`;
   //   console.log(":docTitle", docTitle);
   //   printingWindow.document.write(
   //     `<html><head><title>${docTitle}</title>${styles}</head><body>`
@@ -968,35 +974,76 @@ const Transaction = () => {
   return (
     <>
       <Head>
-        <title>Transaction | {process.env.NEXT_PUBLIC_APP_NAME}</title>
+        <title>Transactions | Incardible</title>
       </Head>
       <Box
         sx={{
-          // backgroundColor: 'background.paper',
-          // flex: '1 1 auto',
-          alignItems: 'center',
           display: 'flex',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          width: '100%'
         }}
       >
-        <Container sx={{ mt: { xs: 5, md: 0 } }}>
+        <Container 
+          maxWidth="lg"
+          sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            py: 4
+          }}
+        >
           <Typography variant="h2" sx={{
             mb: 3,
             display: 'flex',
             justifyContent: 'flex-start',
-            alignItems: 'center'
+            alignItems: 'center',
+            width: '100%'
           }}>Transactions</Typography>
-          <TableContainer component={Paper} sx={{ width: '100%' }}>
-            {/*<TableContainer component={Paper} sx={{width: '100%'}} >*/}
-            <Table aria-label="simple table" sx={{ width: '100%' }}>
+
+<TableContainer
+  component={Paper}
+  sx={{
+    width: '100%',
+    maxWidth: '100%',
+    mx: 'auto',
+    display: 'block',
+    overflowX: {xs: 'auto', md:'hidden' },                // ← horizontal scroll
+    WebkitOverflowScrolling: 'touch',
+    scrollbarWidth: 'thin',
+    '&::-webkit-scrollbar': { height: 6 },
+    '&::-webkit-scrollbar-thumb': { borderRadius: 4 }
+  }}
+>
+  <Table
+    aria-label="transactions table"
+    sx={{
+      width: '100%',
+      minWidth: { xs: 960, sm: 960, md: 'auto' },
+      tableLayout: { xs: 'auto', md: 'auto' }
+    }}
+  >
+
+          {/* <TableContainer component={Paper} sx={{ 
+            width: '100%',
+            maxWidth: '100%',
+            mx: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+        
+            <Table aria-label="simple table" sx={{ width: '100%' }}> */}
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
-                  <TableCell colSpan={8} sx={{ width: '100%' }}>
+                  <TableCell colSpan={11} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
-                      alignItems: 'center',
+                      alignItems: {md:'flex-end', xs:'flex-start'},
                       flexDirection: { md: 'row', xs: 'column' },
-                      justifyContent: 'flex-end',
+                      // justifyContent: 'center',
                       width: '100%'
                     }}>
 
@@ -1042,18 +1089,21 @@ const Transaction = () => {
                 <TableRow sx={{ justifyContent: 'space-between', alignItems: 'left' }}>
                   <TableCell sx={{ width: '10%' }}>No</TableCell>
                   <TableCell sx={{ textAlign: 'left', width: '20%' }}>Account</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '15%' }}>Transaction Id</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Card Id</TableCell>
+                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Transaction Id</TableCell>
+                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Card Title</TableCell>
                   <TableCell sx={{ textAlign: 'left', width: '10%' }}>Amount</TableCell>
+                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Quantity</TableCell>
+                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Express Shipping</TableCell>
+                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>News & Offers</TableCell>
                   <TableCell sx={{ textAlign: 'left', width: '10%' }}>Status</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '40%' }}>Order Date</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Action</TableCell>
+                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Order Date</TableCell>
+                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {loadingComplete ? (
                   <TableRow align="center">
-                    <TableCell colSpan={8} align="center">
+                    <TableCell colSpan={10} align="center">
                       <CircularProgress/>
                     </TableCell>
                   </TableRow>
@@ -1062,28 +1112,37 @@ const Transaction = () => {
                     const serialNumber = page * rowsPerPage + index + 1;
                     return (
                       <TableRow key={data._id}>
-                        <TableCell component="th" scope="row">
+                        <TableCell component="th" scope="row" >
                           {serialNumber}
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        <TableCell component="th" scope="row" >
                           {data?.cardCustomizationId?.userId?.firstName}
                           <br/>
                           {data?.cardCustomizationId?.userId?.email}
                         </TableCell>
                         <TableCell component="th" scope="row">
-                          {data?.transaction_id}
+                          {data?.paypal_order_id}
                         </TableCell>
                         <TableCell component="th" scope="row">
-                          {data?.cardCustomizationId?._id}
+                          {data?.cardCustomizationId?.cardId?.title}
                         </TableCell>
                         <TableCell component="th" scope="row">
-                          {`${data?.cardCustomizationId?.cardId?.price} AUD`}
+                          {`${data?.total} AUD`}
                         </TableCell>
                         <TableCell component="th" scope="row">
-                          {data.status}
+                          {data?.quantity}
                         </TableCell>
                         <TableCell component="th" scope="row">
-                          {formatDateTime(data?.createdAt)}
+                          {data?.expressShipping? 'Yes':'No'}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {data?.newsAndOffers? 'Yes':'No'}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {data?.status}
+                        </TableCell>
+                        <TableCell component="th" scope="row">
+                          {formatDateTime(data?.paid_at)}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{ textAlign: 'left' }}>
                           <Tooltip title="Download Card">
@@ -1122,7 +1181,12 @@ const Transaction = () => {
           </TableContainer>
 
           <TablePagination
-            sx={{ mb: 5 }}
+            sx={{ 
+              mb: 5,
+              display: 'flex',
+              justifyContent: 'flex-end',
+              width: '100%'
+            }}
             rowsPerPageOptions={[5, 10, 25, 50, 100]}
             component="div"
             count={totalCount}

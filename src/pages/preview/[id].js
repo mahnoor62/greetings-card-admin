@@ -364,36 +364,36 @@ const Id = () => {
           </Grid>
         </Container>
 
-        <Box
-          sx={{
-            width: '100%',
-            // mb:5,
-            display: 'flex',
-            justifyContent: { xs: 'center', md: 'flex-end' },
-            // alignItems: 'center',
-            pr: 3
-          }}
-        >
-          <NextLink href="/dashboard" passHref legacyBehavior>
-            <Button
-              // onClick={handleSkip}
-              sx={{
-                mt: { xs: 10, md: 0 },
-                textAlign: 'center',
-                backgroundColor: '#c09b9b !important',
-                color: '#1a1d25',
-                minWidth: { md: 150, xs: 100 },
-                '&:hover': {
-                  backgroundColor: '#c09b9b !important',
-                  color: '#1a1d25'
-                }
-              }}
-              variant="contained"
-            >
-              Dashboard
-            </Button>
-          </NextLink>
-        </Box>
+        {/*<Box*/}
+        {/*  sx={{*/}
+        {/*    width: '100%',*/}
+        {/*    // mb:5,*/}
+        {/*    display: 'flex',*/}
+        {/*    justifyContent: { xs: 'center', md: 'flex-end' },*/}
+        {/*    // alignItems: 'center',*/}
+        {/*    pr: 3*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  <NextLink href="/dashboard" passHref legacyBehavior>*/}
+        {/*    <Button*/}
+        {/*      // onClick={handleSkip}*/}
+        {/*      sx={{*/}
+        {/*        mt: { xs: 10, md: 0 },*/}
+        {/*        textAlign: 'center',*/}
+        {/*        backgroundColor: '#c09b9b !important',*/}
+        {/*        color: '#1a1d25',*/}
+        {/*        minWidth: { md: 150, xs: 100 },*/}
+        {/*        '&:hover': {*/}
+        {/*          backgroundColor: '#c09b9b !important',*/}
+        {/*          color: '#1a1d25'*/}
+        {/*        }*/}
+        {/*      }}*/}
+        {/*      variant="contained"*/}
+        {/*    >*/}
+        {/*      Dashboard*/}
+        {/*    </Button>*/}
+        {/*  </NextLink>*/}
+        {/*</Box>*/}
 
       </Box>
     </>

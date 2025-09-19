@@ -19,18 +19,16 @@ export const UpdatePassword = () => {
 
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+
+  console.log("user in pas", user)
   const formik = useFormik({
     initialValues: {
-      oldPassword: '',
+      oldPassword:  '',
       newPassword: '',
       reTypeNewPassword: '',
       submit: null
     },
     validationSchema: Yup.object({
-      oldPassword: Yup
-        .string()
-        .max(255)
-        .required('Old Password is required'),
       newPassword: Yup
         .string()
         .max(255)
@@ -38,15 +36,16 @@ export const UpdatePassword = () => {
       reTypeNewPassword: Yup
         .string()
         .max(255)
-        .required('Password is required')
-    }), // Corrected
+        .required('Password confirmation is required')
+        .oneOf([Yup.ref('newPassword'), null], 'Passwords must match')
+    }),
     onSubmit: async (values, helpers) => {
       setLoading(true);
 
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
         const token = window.localStorage.getItem('token');
-        const response = await axios.post(API_BASE_URL + '/api/admin/update-password',
+        const response = await axios.post(API_BASE_URL + '/api/profile/update-password',
           {
             oldPassword: values.oldPassword,
             newPassword: values.newPassword,
@@ -69,7 +68,7 @@ export const UpdatePassword = () => {
       setLoading(false);
     }
   });
-
+console.log("formik.values.oldPassword", formik.values.oldPassword)
   return (
     <form
       autoComplete="off"
@@ -143,7 +142,21 @@ export const UpdatePassword = () => {
           </Box>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained" type="submit" disabled={formik.isSubmitting}>
+          <Button 
+            variant="contained" 
+            type="submit" 
+            disabled={formik.isSubmitting}
+            sx={{
+              '&:hover': {
+                backgroundColor: '#c09b9b !important',
+                color: '#1a1d25',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                transition: 'all 0.3s ease-in-out'
+              },
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
             Save details
           </Button>
         </CardActions>

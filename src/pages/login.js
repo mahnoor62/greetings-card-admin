@@ -23,6 +23,7 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const { signIn, user } = useAuth();
   const isMounted = useMounted();
+  const router = useRouter();
 
   const formik = useFormik({
     initialValues: {
@@ -47,6 +48,8 @@ const Page = () => {
       try {
         await signIn({ email: values.email, password: values.password });
         toast.success('Login successfully');
+        // Redirect to cards page after successful login
+        router.push('/cards');
       } catch (err) {
         toast.error(err.message);
         helpers.setStatus({ success: false });

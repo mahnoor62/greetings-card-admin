@@ -248,34 +248,90 @@ const UplaodCards = () => {
     <>
       <Head>
         <title>
-          Dashboard | {APP_NAME}
+          Cards | Incardible
         </title>
       </Head>
       <Box sx={{
-        overflowY: 'hidden',
-        display: 'flex', justifyContent: 'center', alignItems: 'center',
-        // pt: { xs: 15, md: 10 },
-        pt: { xs: 15, md: 10 },
-        height: { md: '100% !important', xs: '100% !important' },
-        minHeight: '100vh !important'
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        minHeight: '100vh',
+        width: '100%'
       }}>
-        <Container sx={{ mt: 5 }}>
+        <Container 
+          maxWidth="lg"
+          sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            py: 4
+          }}
+        >
           <Typography variant="h2" sx={{
             mb: 3,
             display: 'flex',
             justifyContent: 'flex-start',
-            alignItems: 'center'
+            alignItems: 'center',
+            width: '100%'
           }}>Cards</Typography>
-          <TableContainer component={Paper} sx={{ width: '100%' }}>
-            {/*<TableContainer component={Paper} sx={{width: '100%'}} >*/}
-            <Table aria-label="simple table" sx={{ width: '100%' }}>
+          {/* Table Title - Always visible on mobile */}
+          {/* <Box sx={{ 
+            width: '100%', 
+            mb: 2,
+            display: { xs: 'block', md: 'none' } // Show only on mobile
+          }}>
+            <Typography variant="h6" sx={{ 
+              fontWeight: 'bold', 
+              color: 'text.primary',
+              textAlign: 'center',
+              py: 1,
+              borderBottom: '2px solid',
+              borderColor: 'primary.main'
+            }}>
+              Cards Table
+            </Typography>
+          </Box> */}
+          <TableContainer
+  component={Paper}
+  sx={{
+    width: '100%',
+    maxWidth: '100%',
+    mx: 'auto',
+    display: 'block',
+    overflowX: 'auto',              // <-- horizontal scroll
+    WebkitOverflowScrolling: 'touch',
+    scrollbarWidth: 'thin',
+    '&::-webkit-scrollbar': { height: 6 },
+    '&::-webkit-scrollbar-thumb': { borderRadius: 4 }
+  }}
+>
+  <Table
+    aria-label="cards table"
+    sx={{
+      width: '100%',
+      // force a logical min width only on small screens
+      minWidth: { xs: 720, sm: 720, md: 'auto' }, // adjust 720 as needed
+      tableLayout: { xs: 'fixed', md: 'auto' }    // keeps columns readable on xs
+    }}
+  >
+{/* 
+          <TableContainer component={Paper} sx={{ 
+            width: '100%',
+            maxWidth: '100%',
+            mx: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+          }}>
+            <Table aria-label="simple table" sx={{ width: '100%' }}> */}
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
-                  <TableCell colSpan={5} sx={{ width: '100%' }}>
+                  <TableCell colSpan={4} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
                       alignItems: 'center',
-                      flexDirection: { md: 'row', xs: 'column' },
+                      flexDirection: { md: 'row', xs: 'row' },
                       justifyContent: 'space-between',
                       width: '100%'
                     }}>
@@ -287,8 +343,7 @@ const UplaodCards = () => {
                         sx={{
                           '& .MuiInputBase-input': {
                             ml: 1,
-                            // textAlign: 'center', // Center align input text and placeholder
-                            padding: '16px 0'   // Optional: vertically center text
+                            padding: '16px 0'
                           },
                           '& .MuiInputBase-root': {
                             display: 'flex',
@@ -300,8 +355,8 @@ const UplaodCards = () => {
                             opacity: 1
                           },
                           height: '55px',
-                          width: '100%',  // take as much space as possible
-                          maxWidth: '400px',  // limit max width if needed
+                          width: '100%',
+                          maxWidth: '400px',
                           borderRadius: 1
                         }}
                         onChange={event => setSearchQuery(event.target.value)}
@@ -323,7 +378,6 @@ const UplaodCards = () => {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'flex-end',
-                          // bgcolor: 'red',
                           borderRadius: 1,
                           cursor: 'pointer'
                         }}
@@ -333,7 +387,7 @@ const UplaodCards = () => {
                           <NextLink href="/category">
                             <IconButton>
                               <CategoryIcon sx={{
-                                fontSize: 50, width: 60, // Increased width
+                                fontSize: 50, width: 60,
                                 height: 55, color: '#c165a0'
                               }}/>
                             </IconButton>
@@ -342,7 +396,7 @@ const UplaodCards = () => {
                         <Tooltip title="Upload Card">
                           <IconButton onClick={handleClickOpen}>
                             <CloudUploadIcon sx={{
-                              fontSize: 50, width: 60, // Increased width
+                              fontSize: 50, width: 60,
                               height: 55, color: 'rgba(71, 85, 105, 1)'
                             }}/>
                           </IconButton>
@@ -354,11 +408,44 @@ const UplaodCards = () => {
                   </TableCell>
 
                 </TableRow>
-                <TableRow sx={{ justifyContent: 'space-between', alignItems: 'left' }}>
-                  <TableCell sx={{ width: '30%' }}>Title</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '30%' }}>Category</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Price</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Action</TableCell>
+                <TableRow sx={{ 
+                  justifyContent: 'space-between', 
+                  alignItems: 'left',
+                  '& .MuiTableCell-root': {
+                    fontWeight: 'bold',
+                    // backgroundColor: 'primary.light',
+                    // color: 'primary.contrastText',
+                    // fontSize: { xs: '0.875rem', md: '1rem' },
+                    // padding: { xs: '8px 4px', md: '16px' }
+                  }
+                }}>
+                  <TableCell sx={{ 
+                    width: { xs: '30%', md: '30%' },
+                    minWidth: { xs: '80px', md: '120px' }
+                  }}>
+                    Title
+                  </TableCell>
+                  <TableCell sx={{ 
+                    textAlign: 'left', 
+                    width: { xs: '25%', md: '30%' },
+                    minWidth: { xs: '80px', md: '120px' }
+                  }}>
+                    Category
+                  </TableCell>
+                  <TableCell sx={{ 
+                    textAlign: 'left', 
+                    width: { xs: '20%', md: '20%' },
+                    minWidth: { xs: '60px', md: '80px' }
+                  }}>
+                    Price
+                  </TableCell>
+                  <TableCell sx={{ 
+                    textAlign: 'left', 
+                    width: { xs: '30%', md: '20%' },
+                    minWidth: { xs: '80px', md: '100px' }
+                  }}>
+                    Action
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -370,43 +457,61 @@ const UplaodCards = () => {
                   </TableRow> :
                   (paginatedCards && paginatedCards.length > 0 ? (
                     paginatedCards.map(data => (
-                      <TableRow key={data._id}>
-                        <TableCell component="th" scope="row">
+                      <TableRow key={data._id} sx={{
+                        '& .MuiTableCell-root': {
+                          // fontSize: { xs: '0.75rem', md: '0.875rem' },
+                          // padding: { xs: '8px 4px', md: '16px' },
+                          wordBreak: 'break-word'
+                        }
+                      }}>
+                        <TableCell component="th" scope="row" sx={{
+                          width: { xs: '25%', md: '30%' },
+                          minWidth: { xs: '80px', md: '120px' }
+                        }}>
                           {data.title}
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        <TableCell component="th" scope="row" sx={{
+                          width: { xs: '25%', md: '30%' },
+                          minWidth: { xs: '80px', md: '120px' }
+                        }}>
                           {data.cardType?.join(', ')}
                         </TableCell>
-                        <TableCell component="th" scope="row">
+                        <TableCell component="th" scope="row" sx={{
+                          width: { xs: '20%', md: '20%' },
+                          minWidth: { xs: '60px', md: '80px' }
+                        }}>
                           {`${data.price} AUD `}
                         </TableCell>
-                        <TableCell component="th" scope="row" sx={{ textAlign: 'left' }}>
-                          <Tooltip title="Delete Card">
-                            <IconButton>
-                              <DeleteIcon
-                                disabled={destroyCard.isSubmitting}
-                                onClick={() => {
-                                  setItemToDelete(data._id);
-                                  setDialogOpen(true);
-                                }}
-                              />
-                            </IconButton>
-                          </Tooltip>
+                        <TableCell component="th" scope="row" sx={{ 
+                          textAlign: 'left',
+                          width: { xs: '30%', md: '20%' },
+                          minWidth: { xs: '80px', md: '100px' }
+                        }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            gap: { xs: 0.5, md: 1 },
+                            flexWrap: 'wrap',
+                            justifyContent: { xs: 'center', md: 'flex-start' }
+                          }}>
+                            <Tooltip title="Delete Card">
+                              <IconButton size="small">
+                                <DeleteIcon
+                                  fontSize="small"
+                                  disabled={destroyCard.isSubmitting}
+                                  onClick={() => {
+                                    setItemToDelete(data._id);
+                                    setDialogOpen(true);
+                                  }}
+                                />
+                              </IconButton>
+                            </Tooltip>
 
-                          {/*<NextLink*/}
-                          {/*  href={{*/}
-                          {/*    pathname: '/upload-cards',*/}
-                          {/*    // query: { cardId: data._id }*/}
-                          {/*  }}*/}
-                          {/*  passHref*/}
-                          {/*>*/}
-                          {/*  <IconButton onClick={() => setSelectedCardId(data._id)}>*/}
-                          <Tooltip title="Update Card">
-                            <IconButton onClick={() => handleClickEditOpen(data._id)}>
-                              <EditIcon/>
-                            </IconButton>
-                          </Tooltip>
-                          {/*</NextLink>*/}
+                            <Tooltip title="Update Card">
+                              <IconButton size="small" onClick={() => handleClickEditOpen(data._id)}>
+                                <EditIcon fontSize="small"/>
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))
@@ -423,7 +528,12 @@ const UplaodCards = () => {
           </TableContainer>
 
           <TablePagination
-            sx={{ mb: 5 }}
+            sx={{
+              mb: 5,
+              display: 'flex',
+              justifyContent: 'flex-end',
+              width: '100%'
+            }}
             rowsPerPageOptions={[5, 10, 25, 50, 100]}
             component="div"
             count={totalCount}

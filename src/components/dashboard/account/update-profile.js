@@ -14,12 +14,16 @@ import * as Yup from 'yup';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../../hooks/use-auth';
+import { QrCodeScannerOutlined } from '@mui/icons-material';
 
 export const UpdateProfile = () => {
 
   const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState(user ? user.email : '');
+
+  console.log("user", user)
+
 
   const formik = useFormik({
     initialValues: {
@@ -47,10 +51,12 @@ export const UpdateProfile = () => {
     onSubmit: async (values, helpers) => {
       setLoading(true);
 
+console.log("values.currentEmail", values.currentEmail)
+
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
         const token = window.localStorage.getItem('token');
-        const response = await axios.post(API_BASE_URL + '/api/admin/update-email',
+        const response = await axios.post(API_BASE_URL + '/api/profile/update-email',
           {
             name: values.name,
             currentEmail: values.currentEmail,
@@ -72,7 +78,9 @@ export const UpdateProfile = () => {
         formik.setValues({
           ...formik.values,
           currentEmail: updatedEmail
+        
         });
+      
         toast.success('Email updated successfully');
       } catch (error) {
         console.log(error);
@@ -151,7 +159,21 @@ export const UpdateProfile = () => {
           </Box>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button variant="contained" type="submit" disabled={formik.isSubmitting}>
+          <Button 
+            variant="contained" 
+            type="submit" 
+            disabled={formik.isSubmitting}
+            sx={{
+              '&:hover': {
+                backgroundColor: '#c09b9b !important',
+                color: '#1a1d25',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                transition: 'all 0.3s ease-in-out'
+              },
+              transition: 'all 0.3s ease-in-out'
+            }}
+          >
             Save details
           </Button>
         </CardActions>

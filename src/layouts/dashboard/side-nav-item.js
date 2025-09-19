@@ -63,9 +63,9 @@ export const SideNavItem = (props) => {
             color: 'neutral.400',
             flexGrow: 1,
             fontFamily: (theme) => theme.typography.fontFamily,
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: 600,
-            lineHeight: '24px',
+            lineHeight: '28px',
             whiteSpace: 'nowrap',
             ...(active && {
               color: 'common.white'

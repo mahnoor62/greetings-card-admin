@@ -10,23 +10,24 @@ const TOP_NAV_HEIGHT = 64;
 
 const LayoutRoot = styled('div')(({ theme }) => ({
   display: 'flex',
-  // overflowY:'hidden',
   flex: '1 1 auto',
   maxWidth: '100%',
-  // height:'100vh'
-  // [theme.breakpoints.up('lg')]: {
-  //   paddingLeft: SIDE_NAV_WIDTH
-  // }
+  [theme.breakpoints.up('lg')]: {
+    paddingLeft: SIDE_NAV_WIDTH
+  }
 }));
 
-const LayoutContainer = styled('div')({
-  // overflowY:'hidden',
+const LayoutContainer = styled('div')(({ theme }) => ({
   display: 'flex',
   flex: '1 1 auto',
   flexDirection: 'column',
   width: '100%',
-  // height:'100vh'
-});
+  paddingTop: TOP_NAV_HEIGHT,
+  minHeight: '100vh',
+  [theme.breakpoints.up('lg')]: {
+    paddingTop: 0
+  }
+}));
 
 export const Layout = withAuthGuard((props) => {
   const { children } = props;
@@ -53,10 +54,10 @@ export const Layout = withAuthGuard((props) => {
   return (
     <>
       <TopNav onNavOpen={() => setOpenNav(true)} />
-      {/*<SideNav*/}
-      {/*  onClose={() => setOpenNav(false)}*/}
-      {/*  open={openNav}*/}
-      {/*/>*/}
+      <SideNav
+        onClose={() => setOpenNav(false)}
+        open={openNav}
+      />
       <LayoutRoot class={"hellooo"}>
         <LayoutContainer >
           {children}

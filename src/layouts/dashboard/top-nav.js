@@ -56,7 +56,8 @@ export const TopNav = (props) => {
           width: '100% !important',
           position: 'fixed',
           pt: 0,
-          top: 0
+          top: 0,
+          display: { xs: 'block', lg: 'none' }
           // backgroundColor: '#1a1d25',
           // position: 'fixed',
           // width: "100%",
@@ -85,14 +86,15 @@ export const TopNav = (props) => {
               spacing={2}
             >
               <NextLink href="/dashboard"  passHref legacyBehavior>
-              <Typography variant="h5" sx={{ fontWeight: 900 , color:'#c09b9b', fontSize:{md:'20px',lg:'30px',xs:'17px'}, cursor:'pointer'}}>{isCardCustomization
-                ? 'Front Card Customization'
-                : isPreview ? 'AR Experience' : isAllCards
-                  ? 'Upload Greetings Card'
-                  : 'AR Greetings Card'}</Typography></NextLink>
+              <Typography variant="h5" sx={{ fontWeight: 900 , color:'#c09b9b', fontSize:{md:'20px',lg:'30px',xs:'22px'}, cursor:'pointer'}}>{isCardCustomization
+                ? 'Incardible'
+                : isPreview ? 'Incardible' : isAllCards
+                  ? 'Incardible'
+                  : 'Incardible'}</Typography></NextLink>
             </Stack>
             {
-              lgUp ? (<Stack
+              lgUp ? (
+              <Stack
                   alignItems="center"
                   direction="row"
                   spacing={2}
@@ -132,50 +134,61 @@ export const TopNav = (props) => {
                     }}
                     src={`${WEB_URL}/blank-profile.webp`}
                   />
-                </Stack>) :
+                </Stack>                ) :
                 (
-                  <>
-                  <Avatar
-                    onClick={accountPopover.handleOpen}
-                    ref={accountPopover.anchorRef}
-                    sx={{
-                      display: isCardCustomization || isDashboard || isPreview  || isUploadCards  ? 'block' : 'none',
-                      cursor: 'pointer',
-                      height: 40,
-                      width: 40
+                  <Stack
+                    alignItems="center"
+                    direction="row"
+                    spacing={2}
+                  >
+                    {/* Mobile Menu Button - 3 dots */}
+                    <IconButton
+                      onClick={onNavOpen}
+                      sx={{
+                        color: '#c09b9b',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <SvgIcon fontSize="large">
+                        <Bars3Icon />
+                      </SvgIcon>
+                    </IconButton>
+
+                    <Avatar
+                      onClick={accountPopover.handleOpen}
+                      ref={accountPopover.anchorRef}
+                      sx={{
+                        display: isCardCustomization || isDashboard || isPreview  || isUploadCards  ? 'block' : 'none',
+                        cursor: 'pointer',
+                        height: 40,
+                        width: 40
+                      }}
+                      src={`${WEB_URL}/blank-profile.webp`}
+                    />
+
+                    {
+                      isCategory &&  (
+                      <NextLink href="/dashboard" passHref legacyBehavior>
+                      <Button
+                      sx={{
+                      textAlign: 'center',
+                      color:'black',
+                      minWidth: 120, '&:hover': {
+                      backgroundColor: '#c09b9b !important',
+                      color: 'black'
+                    }
                     }}
-                    src={`${WEB_URL}/blank-profile.webp`}
-                  />
+                    variant="contained"
+                  >
+                    Dashboard
+                  </Button>
+                </NextLink>
 
-            {
-              isCategory &&  (
-              <NextLink href="/dashboard" passHref legacyBehavior>
-              <Button
-              sx={{
-              textAlign: 'center',
-              color:'black',
-              // display: isCardCustomization || isPreview || isDashboard || isUploadCards?  'none' : 'block',
-              minWidth: 120, '&:hover': {
-              backgroundColor: '#c09b9b !important',
-              color: 'black'
-            }
-            }}
-            variant="contained"
-          >
-            Dashboard
-          </Button>
-        </NextLink>
-
-        )
-        }
-
-                  </>
-
-                  // <IconButton onClick={() => setOpen(!open)} sx={{ p: 0 }}>
-                  //   <SvgIcon fontSize="large">
-                  //     <Bars3Icon/>
-                  //   </SvgIcon>
-                  // </IconButton>
+                )
+                }
+                  </Stack>
                 )
             }
           </Stack>

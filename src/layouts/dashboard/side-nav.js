@@ -17,11 +17,20 @@ import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
 import { items } from './config';
 import { SideNavItem } from './side-nav-item';
+import { useAuth } from 'src/hooks/use-auth';
+import { useRouter } from 'next/router';
 
 export const SideNav = (props) => {
   const { open, onClose } = props;
   const pathname = usePathname();
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
+  const { signOut } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    signOut();
+    router.push('/login');
+  };
 
   const content = (
     <Scrollbar
@@ -47,12 +56,27 @@ export const SideNav = (props) => {
             component={NextLink}
             href="/"
             sx={{
-              display: 'inline-flex',
-              height: 32,
-              width: 32
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textDecoration: 'none',
+              color: 'inherit',
+              width: '100%',
+              py: 2
             }}
           >
-            <Logo />
+            <Box
+              component="img"
+              src="/logo.png"
+              alt="Incardible Logo"
+              sx={{
+                height: 80,
+                width: 80,
+                objectFit: 'contain',
+                display: 'block',
+                mx: 'auto'
+              }}
+            />
           </Box>
           <Box
             sx={{
@@ -61,31 +85,21 @@ export const SideNav = (props) => {
               borderRadius: 1,
               cursor: 'pointer',
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               mt: 2,
               p: '12px'
             }}
           >
-            <div>
-              <Typography
-                color="inherit"
-                variant="subtitle1"
-              >
-                Brands On Games
-              </Typography>
-              {/*<Typography*/}
-              {/*  color="neutral.400"*/}
-              {/*  variant="body2"*/}
-              {/*>*/}
-              {/*  Production*/}
-              {/*</Typography>*/}
-            </div>
-            <SvgIcon
-              fontSize="small"
-              sx={{ color: 'neutral.500' }}
+            <Typography
+              color="inherit"
+              variant="h5"
+              sx={{
+                textAlign: 'center',
+                fontWeight: 'bold'
+              }}
             >
-              <ChevronUpDownIcon />
-            </SvgIcon>
+              Incardible
+            </Typography>
           </Box>
         </Box>
         <Divider sx={{ borderColor: 'neutral.700' }} />
@@ -124,56 +138,33 @@ export const SideNav = (props) => {
           </Stack>
         </Box>
         <Divider sx={{ borderColor: 'neutral.700' }} />
-      {/*  <Box*/}
-      {/*    sx={{*/}
-      {/*      px: 2,*/}
-      {/*      py: 3*/}
-      {/*    }}*/}
-      {/*  >*/}
-      {/*    <Typography*/}
-      {/*      color="neutral.100"*/}
-      {/*      variant="subtitle2"*/}
-      {/*    >*/}
-      {/*      Need more features?*/}
-      {/*    </Typography>*/}
-      {/*    <Typography*/}
-      {/*      color="neutral.500"*/}
-      {/*      variant="body2"*/}
-      {/*    >*/}
-      {/*      Check out our Pro solution template.*/}
-      {/*    </Typography>*/}
-      {/*    <Box*/}
-      {/*      sx={{*/}
-      {/*        display: 'flex',*/}
-      {/*        mt: 2,*/}
-      {/*        mx: 'auto',*/}
-      {/*        width: '160px',*/}
-      {/*        '& img': {*/}
-      {/*          width: '100%'*/}
-      {/*        }*/}
-      {/*      }}*/}
-      {/*    >*/}
-      {/*      <img*/}
-      {/*        alt="Go to pro"*/}
-      {/*        src="/assets/devias-kit-pro.png"*/}
-      {/*      />*/}
-      {/*    </Box>*/}
-      {/*    <Button*/}
-      {/*      component="a"*/}
-      {/*      endIcon={(*/}
-      {/*        <SvgIcon fontSize="small">*/}
-      {/*          <ArrowTopRightOnSquareIcon />*/}
-      {/*        </SvgIcon>*/}
-      {/*      )}*/}
-      {/*      fullWidth*/}
-      {/*      href="https://material-kit-pro-react.devias.io/"*/}
-      {/*      sx={{ mt: 2 }}*/}
-      {/*      target="_blank"*/}
-      {/*      variant="contained"*/}
-      {/*    >*/}
-      {/*      Pro Live Id*/}
-      {/*    </Button>*/}
-      {/*  </Box>*/}
+        <Box
+          sx={{
+            px: 2,
+            py: 3
+          }}
+        >
+          <Button
+            onClick={handleLogout}
+            startIcon={(
+              <SvgIcon fontSize="small">
+                <ArrowTopRightOnSquareIcon />
+              </SvgIcon>
+            )}
+            fullWidth
+            sx={{
+              backgroundColor: 'rgba(255, 255, 255, 0.04)',
+              color: 'neutral.400',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                color: 'common.white'
+              }
+            }}
+            variant="text"
+          >
+            Logout
+          </Button>
+        </Box>
       </Box>
     </Scrollbar>
   );

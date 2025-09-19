@@ -1,12 +1,22 @@
 import Head from 'next/head';
 import { Box } from '@mui/material';
 import { useRouter } from 'next/router';
+import { useAuth } from 'src/hooks/use-auth';
+import { useEffect } from 'react';
 
 const Page = () => {
-
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  router.push('/login');
+  useEffect(() => {
+    if (!isLoading) {
+      if (isAuthenticated) {
+        router.push('/cards');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   return (
     <>
