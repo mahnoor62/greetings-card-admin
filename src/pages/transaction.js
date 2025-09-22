@@ -1305,7 +1305,7 @@ const Transaction = () => {
           </TableContainer>
           <TablePagination
             sx={{ 
-              mb: 2,
+              // mb: 2,
               display: 'flex',
               justifyContent: 'flex-end',
               width: '100%',

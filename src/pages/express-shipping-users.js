@@ -377,7 +377,7 @@ const ExpressShippingUsers = () => {
               onPageChange={handleChangePage}
               onRowsPerPageChange={handleChangeRowsPerPage}
               sx={{
-                mb:2,
+                // mb:2,
                 borderTop: 1,
                 borderColor: 'divider'
               }}
