@@ -12,7 +12,7 @@ import {
   TablePagination, Container, Tooltip, IconButton, Dialog, Checkbox,
   Button, InputAdornment,
   TextField, FormLabel, FormGroup, FormControlLabel,
-  CircularProgress, Typography
+  CircularProgress, Typography, Avatar
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -299,13 +299,14 @@ const UplaodCards = () => {
     maxWidth: '100%',
     mx: 'auto',
     display: 'block',
-    overflowX: 'auto',              // <-- horizontal scroll
+    overflowX: {xs: 'auto', md:'auto' },             // <-- horizontal scroll
     WebkitOverflowScrolling: 'touch',
     scrollbarWidth: 'thin',
     '&::-webkit-scrollbar': { height: 6 },
     '&::-webkit-scrollbar-thumb': { borderRadius: 4 }
   }}
 >
+<Paper sx={{ width: '100%' }}>
   <Table
     aria-label="cards table"
     sx={{
@@ -327,7 +328,7 @@ const UplaodCards = () => {
             <Table aria-label="simple table" sx={{ width: '100%' }}> */}
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
-                  <TableCell colSpan={4} sx={{ width: '100%' }}>
+                  <TableCell colSpan={6} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
                       alignItems: 'center',
@@ -383,7 +384,7 @@ const UplaodCards = () => {
                         }}
                       >
 
-                        <Tooltip title="Category">
+                        {/* <Tooltip title="Category">
                           <NextLink href="/category">
                             <IconButton>
                               <CategoryIcon sx={{
@@ -399,6 +400,38 @@ const UplaodCards = () => {
                               fontSize: 50, width: 60,
                               height: 55, color: 'rgba(71, 85, 105, 1)'
                             }}/>
+                          </IconButton>
+                        </Tooltip> */}
+                        
+                        {/* Category Image */}
+                        <Tooltip title="Category">
+                          <NextLink href="/category">
+                            <IconButton>
+                              <img 
+                                src="/category.png" 
+                                alt="Category" 
+                                style={{
+                                  width: 60,
+                                  height: 55,
+                                  objectFit: 'contain'
+                                }}
+                              />
+                            </IconButton>
+                          </NextLink>
+                        </Tooltip>
+                        
+                        {/* Upload Image */}
+                        <Tooltip title="Upload Card">
+                          <IconButton onClick={handleClickOpen}>
+                            <img 
+                              src="/upload.png" 
+                              alt="Upload" 
+                              style={{
+                                width: 60,
+                                height: 55,
+                                objectFit: 'contain'
+                              }}
+                            />
                           </IconButton>
                         </Tooltip>
 
@@ -420,28 +453,40 @@ const UplaodCards = () => {
                   }
                 }}>
                   <TableCell sx={{ 
-                    width: { xs: '30%', md: '30%' },
-                    minWidth: { xs: '80px', md: '120px' }
+                    width: { xs: '15%', md: '15%' },
+                    minWidth: { xs: '80px', md: '100px' }
+                  }}>
+                    Image
+                  </TableCell>
+                  <TableCell sx={{ 
+                    width: { xs: '25%', md: '25%' },
+                    minWidth: { xs: '100px', md: '120px' }
                   }}>
                     Title
                   </TableCell>
                   <TableCell sx={{ 
+                    width: { xs: '25%', md: '25%' },
+                    minWidth: { xs: '100px', md: '120px' }
+                  }}>
+                    Views
+                  </TableCell>
+                  <TableCell sx={{ 
                     textAlign: 'left', 
-                    width: { xs: '25%', md: '30%' },
+                    width: { xs: '20%', md: '25%' },
                     minWidth: { xs: '80px', md: '120px' }
                   }}>
                     Category
                   </TableCell>
                   <TableCell sx={{ 
                     textAlign: 'left', 
-                    width: { xs: '20%', md: '20%' },
+                    width: { xs: '15%', md: '15%' },
                     minWidth: { xs: '60px', md: '80px' }
                   }}>
                     Price
                   </TableCell>
                   <TableCell sx={{ 
                     textAlign: 'left', 
-                    width: { xs: '30%', md: '20%' },
+                    width: { xs: '25%', md: '20%' },
                     minWidth: { xs: '80px', md: '100px' }
                   }}>
                     Action
@@ -451,7 +496,7 @@ const UplaodCards = () => {
               <TableBody>
                 {loadingComplete ?
                   <TableRow align="center">
-                    <TableCell colSpan={4} align="center">
+                    <TableCell colSpan={6} align="center">
                       <CircularProgress/>
                     </TableCell>
                   </TableRow> :
@@ -465,26 +510,48 @@ const UplaodCards = () => {
                         }
                       }}>
                         <TableCell component="th" scope="row" sx={{
-                          width: { xs: '25%', md: '30%' },
-                          minWidth: { xs: '80px', md: '120px' }
+                          width: { xs: '15%', md: '15%' },
+                          minWidth: { xs: '80px', md: '100px' }
+                        }}>
+                          <Avatar
+                            src={data.frontDesign ? `${BASE_URL}/${data.frontDesign.replace(/\\/g, '/')}` : '/placeholder-card.png'}
+                            alt={data.title}
+                            sx={{
+                              width: { xs: 40, md: 60 },
+                              height: { xs: 40, md: 60 },
+                              borderRadius: 1,
+                              objectFit: 'cover'
+                            }}
+                            variant="rounded"
+                          />
+                        </TableCell>
+                        <TableCell component="th" scope="row" sx={{
+                          width: { xs: '25%', md: '25%' },
+                          minWidth: { xs: '100px', md: '120px' }
                         }}>
                           {data.title}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{
-                          width: { xs: '25%', md: '30%' },
+                          width: { xs: '25%', md: '25%' },
+                          minWidth: { xs: '100px', md: '120px' }
+                        }}>
+                          {data.views}
+                        </TableCell>
+                        <TableCell component="th" scope="row" sx={{
+                          width: { xs: '20%', md: '25%' },
                           minWidth: { xs: '80px', md: '120px' }
                         }}>
                           {data.cardType?.join(', ')}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{
-                          width: { xs: '20%', md: '20%' },
+                          width: { xs: '15%', md: '15%' },
                           minWidth: { xs: '60px', md: '80px' }
                         }}>
                           {`${data.price} AUD `}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{ 
                           textAlign: 'left',
-                          width: { xs: '30%', md: '20%' },
+                          width: { xs: '25%', md: '20%' },
                           minWidth: { xs: '80px', md: '100px' }
                         }}>
                           <Box sx={{ 
@@ -517,7 +584,7 @@ const UplaodCards = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={4} align="center">
+                      <TableCell colSpan={5} align="center">
                         No Cards Found
                       </TableCell>
                     </TableRow>
@@ -525,15 +592,14 @@ const UplaodCards = () => {
                 }
               </TableBody>
             </Table>
-          </TableContainer>
-
-          <TablePagination
+            <TablePagination
             sx={{
-              mb: 5,
+              mb: 2,
               display: 'flex',
               justifyContent: 'flex-end',
               width: '100%'
-            }}
+,   borderTop: 1,
+borderColor: 'divider'            }}
             rowsPerPageOptions={[5, 10, 25, 50, 100]}
             component="div"
             count={totalCount}
@@ -542,7 +608,10 @@ const UplaodCards = () => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
+</Paper>
+          </TableContainer>
 
+          
 
           <React.Fragment>
             <Dialog open={open} onClose={handleClose} sx={{ width: '100%' }}>

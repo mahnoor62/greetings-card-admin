@@ -1,4 +1,11 @@
-export const FilterHelper = (dataArr = [], query = '', properties = []) => dataArr.filter(data => {
+export const FilterHelper = (dataArr = [], query = '', properties = []) => {
+  // Ensure dataArr is always an array
+  if (!Array.isArray(dataArr)) {
+    console.warn('FilterHelper: dataArr is not an array, returning empty array:', dataArr);
+    return [];
+  }
+
+  return dataArr.filter(data => {
   if (query) {
     let queryMatched = false;
 
@@ -22,14 +29,28 @@ export const FilterHelper = (dataArr = [], query = '', properties = []) => dataA
   }
 
   return true;
-});
+  });
+};
 
-export const applyPagination = (list, page, rowsPerPage) => list.slice(page * rowsPerPage,
-  page * rowsPerPage + rowsPerPage);
+export const applyPagination = (list, page, rowsPerPage) => {
+  // Ensure list is always an array
+  if (!Array.isArray(list)) {
+    console.warn('applyPagination: list is not an array, returning empty array:', list);
+    return [];
+  }
+  
+  return list.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+};
 
 
 
 export const applyFilter = (dataArr = [], query = '', properties = []) => {
+  // Ensure dataArr is always an array
+  if (!Array.isArray(dataArr)) {
+    console.warn('applyFilter: dataArr is not an array, converting to array:', dataArr);
+    return [];
+  }
+
   return dataArr.filter(data => {
     if (!query) {
       return true;

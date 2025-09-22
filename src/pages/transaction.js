@@ -31,11 +31,12 @@ import {
   FormControlLabel,
   Checkbox,
   FormHelperText,
-  DialogActions, useTheme, useMediaQuery, Card
+  DialogActions, useTheme, useMediaQuery, Card, CardMedia, Divider
 } from '@mui/material';
 import TablePagination from '@mui/material/TablePagination';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DownloadIcon from '@mui/icons-material/Download';
+import InfoIcon from '@mui/icons-material/Info';
 import FilterHelper, { applyFilter, applyPagination } from '../utils/filter';
 import toast from 'react-hot-toast';
 import NextLink from 'next/link';
@@ -71,6 +72,42 @@ const Transaction = () => {
 
   const [card, setCard] = useState(null);
   const [openDialogue, setOpenDialogue] = useState(false);
+  const [cardDetailsModal, setCardDetailsModal] = useState(false);
+  const [selectedCardDetails, setSelectedCardDetails] = useState(null);
+  const [transactionDetailsModal, setTransactionDetailsModal] = useState(false);
+  const [selectedTransactionDetails, setSelectedTransactionDetails] = useState(null);
+  const [addressDetailsModal, setAddressDetailsModal] = useState(false);
+  const [selectedAddressDetails, setSelectedAddressDetails] = useState(null);
+
+  const handleOpenCardDetails = (transaction) => {
+    setSelectedCardDetails(transaction);
+    setCardDetailsModal(true);
+  };
+
+  const handleCloseCardDetails = () => {
+    setCardDetailsModal(false);
+    setSelectedCardDetails(null);
+  };
+
+  const handleOpenTransactionDetails = (transaction) => {
+    setSelectedTransactionDetails(transaction);
+    setTransactionDetailsModal(true);
+  };
+
+  const handleCloseTransactionDetails = () => {
+    setTransactionDetailsModal(false);
+    setSelectedTransactionDetails(null);
+  };
+
+  const handleOpenAddressDetails = (transaction) => {
+    setSelectedAddressDetails(transaction);
+    setAddressDetailsModal(true);
+  };
+
+  const handleCloseAddressDetails = () => {
+    setAddressDetailsModal(false);
+    setSelectedAddressDetails(null);
+  };
 
   const getCard = async () => {
     try {
@@ -981,6 +1018,7 @@ const Transaction = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
+          overflowY: 'auto',
           minHeight: '100vh',
           width: '100%'
         }}
@@ -1002,6 +1040,7 @@ const Transaction = () => {
             alignItems: 'center',
             width: '100%'
           }}>Transactions</Typography>
+           <Paper sx={{ width: '100%', overflow: 'hidden' }}>
 
 <TableContainer
   component={Paper}
@@ -1010,13 +1049,14 @@ const Transaction = () => {
     maxWidth: '100%',
     mx: 'auto',
     display: 'block',
-    overflowX: {xs: 'auto', md:'hidden' },                // ← horizontal scroll
+    overflowX: {xs: 'auto', md:'auto' },                // ← horizontal scroll
     WebkitOverflowScrolling: 'touch',
     scrollbarWidth: 'thin',
     '&::-webkit-scrollbar': { height: 6 },
     '&::-webkit-scrollbar-thumb': { borderRadius: 4 }
   }}
 >
+
   <Table
     aria-label="transactions table"
     sx={{
@@ -1038,7 +1078,7 @@ const Transaction = () => {
             <Table aria-label="simple table" sx={{ width: '100%' }}> */}
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
-                  <TableCell colSpan={11} sx={{ width: '100%' }}>
+                  <TableCell colSpan={12} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
                       alignItems: {md:'flex-end', xs:'flex-start'},
@@ -1087,17 +1127,13 @@ const Transaction = () => {
 
                 </TableRow>
                 <TableRow sx={{ justifyContent: 'space-between', alignItems: 'left' }}>
-                  <TableCell sx={{ width: '10%' }}>No</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Account</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Transaction Id</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Card Title</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Amount</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Quantity</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Express Shipping</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>News & Offers</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Status</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '20%' }}>Order Date</TableCell>
-                  <TableCell sx={{ textAlign: 'left', width: '10%' }}>Action</TableCell>
+                  <TableCell >No</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Account</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Transaction  Details</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Card Title</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Address</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Order Date</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -1120,26 +1156,113 @@ const Transaction = () => {
                           <br/>
                           {data?.cardCustomizationId?.userId?.email}
                         </TableCell>
-                        <TableCell component="th" scope="row">
-                          {data?.paypal_order_id}
+                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '150px' }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            gap: 1
+                          }}>
+                            <Tooltip title="View Transaction Details">
+                              <IconButton 
+                                size="small"
+                                onClick={() => handleOpenTransactionDetails(data)}
+                                sx={{
+                                  color: '#000000',
+                                  backgroundColor: '#fce7f3',
+                                  border: '2px solid',
+                                  borderColor: '#fce7f3',
+                                  transition: 'all 0.3s ease',
+                                  '&:hover': {
+                                    backgroundColor: '#000000',
+                                    color: '#fce7f3',
+                                    borderColor: '#000000',
+                                    transform: 'scale(1.1)',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                                  }
+                                }}
+                              >
+                                <InfoIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Box sx={{ 
+                              fontWeight: 500,
+                              fontSize: '0.875rem'
+                            }}>
+                              {data?.paypal_order_id}
+                            </Box>
+                          </Box>
                         </TableCell>
-                        <TableCell component="th" scope="row">
-                          {data?.cardCustomizationId?.cardId?.title}
+                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '200px' }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            gap: 1
+                          }}>
+                            <Tooltip title="View Card Details">
+                              <IconButton 
+                                size="small"
+                                onClick={() => handleOpenCardDetails(data)}
+                                sx={{
+                                  color: '#000000',
+                                  backgroundColor: '#fce7f3',
+                                  border: '2px solid',
+                                  borderColor: '#fce7f3',
+                                  transition: 'all 0.3s ease',
+                                  '&:hover': {
+                                    backgroundColor: '#000000',
+                                    color: '#fce7f3',
+                                    borderColor: '#000000',
+                                    transform: 'scale(1.1)',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                                  }
+                                }}
+                              >
+                                <InfoIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Box sx={{ 
+                              fontWeight: 500,
+                              fontSize: '0.875rem'
+                            }}>
+                              {data?.cardCustomizationId?.cardId?.title}
+                            </Box>
+                          </Box>
                         </TableCell>
-                        <TableCell component="th" scope="row">
-                          {`${data?.total} AUD`}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {data?.quantity}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {data?.expressShipping? 'Yes':'No'}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {data?.newsAndOffers? 'Yes':'No'}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {data?.status}
+                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '200px' }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            gap: 1
+                          }}>
+                            <Tooltip title="View Address Details">
+                              <IconButton 
+                                size="small"
+                                onClick={() => handleOpenAddressDetails(data)}
+                                sx={{
+                                  color: '#000000',
+                                  backgroundColor: '#fce7f3',
+                                  border: '2px solid',
+                                  borderColor: '#fce7f3',
+                                  transition: 'all 0.3s ease',
+                                  '&:hover': {
+                                    backgroundColor: '#000000',
+                                    color: '#fce7f3',
+                                    borderColor: '#000000',
+                                    transform: 'scale(1.1)',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                                  }
+                                }}
+                              >
+                                <InfoIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            <Box sx={{ 
+                              fontWeight: 500,
+                              fontSize: '0.875rem'
+                            }}>
+                              {data?.delivery_address}
+                            </Box>
+                          </Box>
                         </TableCell>
                         <TableCell component="th" scope="row">
                           {formatDateTime(data?.paid_at)}
@@ -1177,15 +1300,17 @@ const Transaction = () => {
                 )}
 
               </TableBody>
+              
             </Table>
           </TableContainer>
-
           <TablePagination
             sx={{ 
-              mb: 5,
+              mb: 2,
               display: 'flex',
               justifyContent: 'flex-end',
-              width: '100%'
+              width: '100%',
+                 borderTop: 1,
+                borderColor: 'divider'
             }}
             rowsPerPageOptions={[5, 10, 25, 50, 100]}
             component="div"
@@ -1195,6 +1320,1612 @@ const Transaction = () => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
+  </Paper>
+         
+          {/* Card Details Modal */}
+          <Dialog
+            open={cardDetailsModal}
+            onClose={handleCloseCardDetails}
+            maxWidth="lg"
+            fullWidth
+            fullScreen={fullScreen}
+            PaperProps={{
+              sx: {
+                minHeight: '600px',
+                maxHeight: '80vh',
+                borderRadius: 3,
+                boxShadow: '0 24px 48px rgba(0, 0, 0, 0.15)',
+                overflow: 'hidden'
+              }
+            }}
+          >
+            <DialogTitle sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 3,
+              backgroundColor: '#ffffff',
+              color: '#1a1a1a',
+              py: 4,
+              px: 4,
+              borderBottom: '1px solid #e5e7eb'
+            }}>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
+                backgroundColor: '#f9fafb',
+                border: '1px solid #e5e7eb'
+              }}>
+                <InfoIcon sx={{ fontSize: 24, color: '#374151' }} />
+              </Box>
+              <Box>
+                <Typography variant="h4" sx={{ 
+                  fontWeight: 700, 
+                  mb: 1,
+                  color: '#111827',
+                  fontSize: '1.75rem'
+                }}>
+                  Card Details
+                </Typography>
+                <Typography variant="body1" sx={{ 
+                  color: '#6b7280',
+                  fontWeight: 400,
+                  fontSize: '1rem'
+                }}>
+                  Complete card information and customization
+                </Typography>
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{ 
+              p: 0,
+              backgroundColor: '#ffffff',
+              mt: 2,
+              overflowY: 'auto',
+              maxHeight: '50vh',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#c1c1c1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: '#a8a8a8',
+              },
+            }}>
+              {selectedCardDetails && (
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 3,
+                  p: 3,
+                  px: 4
+                }}>
+                  {/* Card Images Section */}
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      color: '#111827',
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      Card Information
+                    </Typography>
+                    <Grid container spacing={2} sx={{ justifyContent: 'center' }}>
+                      {/* Front Design */}
+                      {selectedCardDetails?.cardCustomizationId?.cardId?.frontDesign && (
+                        <Grid item xs={12} sm={6} md={3}>
+                          <Card sx={{ 
+                            maxWidth: 300, 
+                            mx: 'auto',
+                            borderRadius: 3,
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.15)'
+                            }
+                          }}>
+                            <CardMedia
+                              component="img"
+                              height="300"
+                              image={`${BASE_URL}/${selectedCardDetails.cardCustomizationId.cardId.frontDesign.replace(/\\/g, '/')}`}
+                              alt="Front Design"
+                              sx={{ 
+                                objectFit: 'cover',
+                                borderRadius: '12px 12px 0 0'
+                              }}
+                            />
+                            <Box sx={{ 
+                              p: 2, 
+                              textAlign: 'center',
+                              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600,
+                                color: 'primary.main'
+                              }}>
+                                Front Design
+                              </Typography>
+                            </Box>
+                          </Card>
+                        </Grid>
+                      )}
+                      {/* Back Design */}
+                      {selectedCardDetails?.cardCustomizationId?.cardId?.backDesign && (
+                        <Grid item xs={12} sm={6} md={3}>
+                          <Card sx={{ 
+                            maxWidth: 300, 
+                            mx: 'auto',
+                            borderRadius: 3,
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.15)'
+                            }
+                          }}>
+                            <CardMedia
+                              component="img"
+                              height="300"
+                              image={`${BASE_URL}/${selectedCardDetails.cardCustomizationId.cardId.backDesign.replace(/\\/g, '/')}`}
+                              alt="Back Design"
+                              sx={{ 
+                                objectFit: 'cover',
+                                borderRadius: '12px 12px 0 0'
+                              }}
+                            />
+                            <Box sx={{ 
+                              p: 2, 
+                              textAlign: 'center',
+                              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600,
+                                color: 'primary.main'
+                              }}>
+                                Back Design
+                              </Typography>
+                            </Box>
+                          </Card>
+                        </Grid>
+                      )}
+                      {/* Inside Left Design */}
+                      {selectedCardDetails?.cardCustomizationId?.cardId?.insideLeftDesign && (
+                        <Grid item xs={12} sm={6} md={3}>
+                          <Card sx={{ 
+                            maxWidth: 300, 
+                            mx: 'auto',
+                            borderRadius: 3,
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.15)'
+                            }
+                          }}>
+                            <CardMedia
+                              component="img"
+                              height="300"
+                              image={`${BASE_URL}/${selectedCardDetails.cardCustomizationId.cardId.insideLeftDesign.replace(/\\/g, '/')}`}
+                              alt="Inside Left Design"
+                              sx={{ 
+                                objectFit: 'cover',
+                                borderRadius: '12px 12px 0 0'
+                              }}
+                            />
+                            <Box sx={{ 
+                              p: 2, 
+                              textAlign: 'center',
+                              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600,
+                                color: 'primary.main'
+                              }}>
+                                Inside Left Design
+                              </Typography>
+                            </Box>
+                          </Card>
+                        </Grid>
+                      )}
+                      {/* Inside Right Design */}
+                      {selectedCardDetails?.cardCustomizationId?.cardId?.insideRightDesign && (
+                        <Grid item xs={12} sm={6} md={3}>
+                          <Card sx={{ 
+                            maxWidth: 300, 
+                            mx: 'auto',
+                            borderRadius: 3,
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.15)'
+                            }
+                          }}>
+                            <CardMedia
+                              component="img"
+                              height="300"
+                              image={`${BASE_URL}/${selectedCardDetails.cardCustomizationId.cardId.insideRightDesign.replace(/\\/g, '/')}`}
+                              alt="Inside Right Design"
+                              sx={{ 
+                                objectFit: 'cover',
+                                borderRadius: '12px 12px 0 0'
+                              }}
+                            />
+                            <Box sx={{ 
+                              p: 2, 
+                              textAlign: 'center',
+                              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600,
+                                color: 'primary.main'
+                              }}>
+                                Inside Right Design
+                              </Typography>
+                            </Box>
+                          </Card>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Card Information Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      color: '#111827',
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      ℹ️ Card Information
+                    </Typography>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Card Title
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 700,
+                            color: '#111827'
+                          }}>
+                            {selectedCardDetails?.cardCustomizationId?.cardId?.title || selectedCardDetails?.title}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Card Type
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 700,
+                            color: '#111827'
+                          }}>
+                            {selectedCardDetails?.cardCustomizationId?.cardId?.cardType?.join(', ') || 'Standard Card'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      {selectedCardDetails?.cardCustomizationId?.cardId?.price && (
+                        <Grid item xs={12} sm={6}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            textAlign: 'center'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Card Price
+                            </Typography>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700,
+                              color: '#111827'
+                            }}>
+                              ${selectedCardDetails.cardCustomizationId.cardId.price} AUD
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Quantity Ordered
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 700,
+                            color: '#111827'
+                          }}>
+                            {selectedCardDetails?.quantity}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Card Customization Details */}
+                  {selectedCardDetails?.cardCustomizationId?.arTemplateData && (
+                    <Box>
+                      <Typography variant="h6" sx={{ 
+                        fontWeight: 600, 
+                        color: '#111827',
+                        mb: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}>
+                        ✨ Card Customization
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {selectedCardDetails.cardCustomizationId.arTemplateData.mainHeading && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ 
+                              p: 2,
+                              backgroundColor: '#ffffff',
+                              borderRadius: 2,
+                              border: '1px solid #e5e7eb',
+                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                              height: '100%'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600, 
+                                mb: 1,
+                                color: '#374151',
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                              }}>
+                                Main Heading
+                              </Typography>
+                              <Typography sx={{ 
+                                fontSize: '1.2rem', 
+                                fontWeight: 500,
+                                color: '#111827'
+                              }}>
+                                {selectedCardDetails.cardCustomizationId.arTemplateData.mainHeading.text || 
+                                 selectedCardDetails.cardCustomizationId.arTemplateData.mainHeading}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        {selectedCardDetails.cardCustomizationId.arTemplateData.paragraph1 && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ 
+                              p: 2,
+                              backgroundColor: '#ffffff',
+                              borderRadius: 2,
+                              border: '1px solid #e5e7eb',
+                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                              height: '100%'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600, 
+                                mb: 1,
+                                color: '#374151',
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                              }}>
+                                Custom Paragraph
+                              </Typography>
+                              <Typography sx={{ 
+                                fontSize: '1rem', 
+                                fontWeight: 400, 
+                                lineHeight: 1.6,
+                                color: '#111827'
+                              }}>
+                                {selectedCardDetails.cardCustomizationId.arTemplateData.paragraph1.text || 
+                                 selectedCardDetails.cardCustomizationId.arTemplateData.paragraph1}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        {/* {selectedCardDetails.cardCustomizationId.arTemplateData.templateIndex && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ 
+                              p: 2,
+                              backgroundColor: 'grey.50',
+                              borderRadius: 1,
+                              border: '1px solid',
+                              borderColor: 'grey.200'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                                Template Index
+                              </Typography>
+                              <Typography sx={{ color: '#111827' }}>
+                                Template {selectedCardDetails.cardCustomizationId.arTemplateData.templateIndex}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )} */}
+                      </Grid>
+                    </Box>
+                  )}
+
+                  {/* Video Content */}
+                  {selectedCardDetails?.cardCustomizationId?.templateVideo && (
+                    <Box>
+                      <Typography variant="h6" sx={{ 
+                        fontWeight: 600, 
+                        color: '#111827',
+                        mb: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}>
+                        🎥 Video Content
+                      </Typography>
+                      <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
+                        <Grid item xs={12} sm={6} md={4}>
+                          <Card sx={{ 
+                            maxWidth: 300, 
+                            mx: 'auto',
+                            borderRadius: 3,
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 16px 48px rgba(0, 0, 0, 0.15)'
+                            }
+                          }}>
+                            <video 
+                              controls 
+                              style={{ 
+                                width: '100%', 
+                                height: '300px', 
+                                objectFit: 'cover',
+                                borderRadius: '12px 12px 0 0'
+                              }}
+                              src={selectedCardDetails.cardCustomizationId.templateVideo}
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                            <Box sx={{ 
+                              p: 2, 
+                              textAlign: 'center',
+                              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600,
+                                color: 'info.main'
+                              }}>
+                                Custom Video Content
+                              </Typography>
+                            </Box>
+                          </Card>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+
+                  {/* Card Creation Information */}
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      Card Creation Details
+                    </Typography>
+                    <Grid container spacing={2}>
+                      {selectedCardDetails?.cardCustomizationId?.cardId?.createdAt && (
+                        <Grid item xs={12} sm={6}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Card Created
+                            </Typography>
+                            <Typography sx={{ color: '#111827' }}>
+                              {new Date(selectedCardDetails.cardCustomizationId.cardId.createdAt).toLocaleString()}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {selectedCardDetails?.cardCustomizationId?.createdAt && (
+                        <Grid item xs={12} sm={6}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Customization Created
+                            </Typography>
+                            <Typography sx={{ color: '#111827' }}>
+                              {new Date(selectedCardDetails.cardCustomizationId.createdAt).toLocaleString()}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      {/* {selectedCardDetails?.cardCustomizationId?.cardId?.uuid && (
+                        <Grid item xs={12}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Card UUID
+                            </Typography>
+                            <Typography sx={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>
+                              {selectedCardDetails.cardCustomizationId.cardId.uuid}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )} */}
+                    </Grid>
+                  </Box>
+                </Box>
+              )}
+            </DialogContent>
+            <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
+              <Button 
+                onClick={handleCloseCardDetails} 
+                variant="outlined"
+                sx={{
+                  backgroundColor: '#ffffff',
+                  color: '#111827',
+                  border: '1px solid #d1d5db',
+                  borderRadius: 2,
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  '&:hover': {
+                    backgroundColor: '#f9fafb',
+                    borderColor: '#9ca3af',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.2s ease-in-out'
+                  },
+                  transition: 'all 0.2s ease-in-out'
+                }}
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Transaction Details Modal */}
+          <Dialog
+            open={transactionDetailsModal}
+            onClose={handleCloseTransactionDetails}
+            maxWidth="md"
+            fullWidth
+            fullScreen={fullScreen}
+            PaperProps={{
+              sx: {
+                minHeight: '600px',
+                maxHeight: '80vh',
+                borderRadius: 3,
+                boxShadow: '0 24px 48px rgba(0, 0, 0, 0.15)',
+                overflow: 'hidden'
+              }
+            }}
+          >
+            <DialogTitle sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 3,
+              backgroundColor: '#ffffff',
+              color: '#1a1a1a',
+              py: 4,
+              px: 4,
+              borderBottom: '1px solid #e5e7eb'
+            }}>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
+                backgroundColor: '#f9fafb',
+                border: '1px solid #e5e7eb'
+              }}>
+                <InfoIcon sx={{ fontSize: 24, color: '#374151' }} />
+              </Box>
+              <Box>
+                <Typography variant="h4" sx={{ 
+                  fontWeight: 700, 
+                  mb: 1,
+                  color: '#111827',
+                  fontSize: '1.75rem'
+                }}>
+                  Transaction Details
+                </Typography>
+                <Typography variant="body1" sx={{ 
+                  color: '#6b7280',
+                  fontWeight: 400,
+                  fontSize: '1rem'
+                }}>
+                  Complete transaction information and payment details
+                </Typography>
+              </Box>
+            </DialogTitle>
+            <Container>
+            <DialogContent sx={{ 
+              p: 0,
+              backgroundColor: '#ffffff',
+              mt: 2,
+              overflowY: 'auto',
+              maxHeight: '50vh',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#c1c1c1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: '#a8a8a8',
+              },
+            }}>
+              {selectedTransactionDetails && (
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 3,
+                  p: 3,
+                  px: 4
+                }}>
+                  {/* Transaction ID & Status */}
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      color: '#111827',
+                      mb: 2,
+                      fontSize: '1.125rem'
+                    }}>
+                      Transaction Information
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1.5,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Transaction ID
+                          </Typography>
+                          <Box sx={{
+                            backgroundColor: '#f9fafb',
+                            padding: '8px 12px',
+                            borderRadius: 1,
+                            border: '1px solid #e5e7eb',
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <Typography sx={{ 
+                              fontFamily: 'monospace', 
+                              fontWeight: 500,
+                              color: '#111827',
+                              fontSize: '0.875rem'
+                            }}>
+                              {selectedTransactionDetails?.paypal_order_id}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1.5,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Status
+                          </Typography>
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: 2,
+                            py: '8px',
+                            borderRadius: '6px',
+                            backgroundColor: selectedTransactionDetails?.status === 'COMPLETED' ? '#f0f9ff' : 
+                                           selectedTransactionDetails?.status === 'PENDING' ? '#fef3c7' : '#fef2f2',
+                            border: '1px solid',
+                            borderColor: selectedTransactionDetails?.status === 'COMPLETED' ? '#0ea5e9' : 
+                                        selectedTransactionDetails?.status === 'PENDING' ? '#f59e0b' : '#ef4444',
+                            flex: 1,
+                            justifyContent: 'flex-start'
+                          }}>
+                            <Typography sx={{ 
+                              color: selectedTransactionDetails?.status === 'COMPLETED' ? '#0ea5e9' : 
+                                     selectedTransactionDetails?.status === 'PENDING' ? '#f59e0b' : '#ef4444',
+                              fontWeight: 600,
+                              textTransform: 'uppercase',
+                              fontSize: '0.75rem'
+                            }}>
+                              {selectedTransactionDetails?.status}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Pricing Details */}
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      color: '#111827',
+                      mb: 2,
+                      fontSize: '1.125rem'
+                    }}>
+                      Pricing Breakdown
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6} md={3}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Base Price
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 700,
+                            color: '#111827'
+                          }}>
+                            ${selectedTransactionDetails?.price || 0} AUD
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={3}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            GST
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 700,
+                            color: '#111827'
+                          }}>
+                            ${selectedTransactionDetails?.gst || 0} AUD
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={3}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Shipping
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 700,
+                            color: '#111827'
+                          }}>
+                            ${selectedTransactionDetails?.shipping || 0} AUD
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      {selectedTransactionDetails?.expressShipping && (
+                        <Grid item xs={12} sm={6} md={3}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            textAlign: 'center',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Express Shipping
+                            </Typography>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700,
+                              color: '#111827'
+                            }}>
+                              ${selectedTransactionDetails?.expressShippingRate || 0} AUD
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      <Grid item xs={12}>
+                        <Box sx={{ 
+                          p: 3,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '2px solid #111827',
+                          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center'
+                        }}>
+                          <Typography variant="subtitle1" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Total Amount
+                          </Typography>
+                          <Typography variant="h4" sx={{ 
+                            fontWeight: 800,
+                            color: '#111827'
+                          }}>
+                            ${selectedTransactionDetails?.total || 0} AUD
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Payment Information */}
+                  {selectedTransactionDetails?.data && (
+                    <Box>
+                      <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        Payment Information
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {selectedTransactionDetails.data.payer && (
+                          <>
+                            <Grid item xs={12} sm={6}>
+                              <Box sx={{ 
+                                p: 2,
+                                backgroundColor: 'grey.50',
+                                borderRadius: 1,
+                                border: '1px solid',
+                                borderColor: 'grey.200'
+                              }}>
+                                <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                                  Payer Name
+                                </Typography>
+                                <Typography sx={{ color: '#111827' }}>
+                                  {selectedTransactionDetails.data.payer.name.given_name} {selectedTransactionDetails.data.payer.name.surname}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <Box sx={{ 
+                                p: 2,
+                                backgroundColor: 'grey.50',
+                                borderRadius: 1,
+                                border: '1px solid',
+                                borderColor: 'grey.200'
+                              }}>
+                                <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                                  Payer Email
+                                </Typography>
+                                <Typography sx={{ color: '#111827' }}>
+                                  {selectedTransactionDetails.data.payer.email_address}
+                                </Typography>
+                              </Box>
+                            </Grid>
+                          </>
+                        )}
+                        {selectedTransactionDetails.data.purchase_units?.[0]?.payments?.captures?.[0] && (
+                          <Grid item xs={12}>
+                            <Box sx={{ 
+                              p: 2,
+                              backgroundColor: 'grey.50',
+                              borderRadius: 1,
+                              border: '1px solid',
+                              borderColor: 'grey.200'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                                Payment Capture ID
+                              </Typography>
+                              <Typography sx={{ fontFamily: 'monospace' }}>
+                                {selectedTransactionDetails.data.purchase_units[0].payments.captures[0].id}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                      </Grid>
+                    </Box>
+                  )}
+
+                  {/* Order Information */}
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      Order Information
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: 'grey.50',
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600, mb: 1 }}>
+                            Quantity
+                          </Typography>
+                          <Typography>{selectedTransactionDetails?.quantity}</Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: 'grey.50',
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600, mb: 1 }}>
+                            Express Shipping
+                          </Typography>
+                          <Typography sx={{ 
+                            color: selectedTransactionDetails?.expressShipping ? 'success.main' : 'error.main',
+                            fontWeight: 500
+                          }}>
+                            {selectedTransactionDetails?.expressShipping ? 'Yes' : 'No'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: 'grey.50',
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600, mb: 1 }}>
+                            News & Offers
+                          </Typography>
+                          <Typography sx={{ 
+                            color: selectedTransactionDetails?.newsAndOffers ? 'success.main' : 'error.main',
+                            fontWeight: 500
+                          }}>
+                            {selectedTransactionDetails?.newsAndOffers ? 'Subscribed' : 'Not Subscribed'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      {selectedTransactionDetails?.paid_at && (
+                        <Grid item xs={12} sm={6}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Payment Date
+                            </Typography>
+                            <Typography sx={{ color: '#111827' }}>
+                              {new Date(selectedTransactionDetails.paid_at).toLocaleString()}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+                </Box>
+              )}
+            </DialogContent></Container>
+            <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
+              <Button 
+                onClick={handleCloseTransactionDetails} 
+                variant="outlined"
+                sx={{
+                  backgroundColor: '#ffffff',
+                  color: '#111827',
+                  border: '1px solid #d1d5db',
+                  borderRadius: 2,
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  '&:hover': {
+                    backgroundColor: '#f9fafb',
+                    borderColor: '#9ca3af',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.2s ease-in-out'
+                  },
+                  transition: 'all 0.2s ease-in-out'
+                }}
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Address Details Modal */}
+          <Dialog
+            open={addressDetailsModal}
+            onClose={handleCloseAddressDetails}
+            maxWidth="md"
+            fullWidth
+            fullScreen={fullScreen}
+            PaperProps={{
+              sx: {
+                minHeight: '600px',
+                maxHeight: '80vh',
+                borderRadius: 3,
+                boxShadow: '0 24px 48px rgba(0, 0, 0, 0.15)',
+                overflow: 'hidden'
+              }
+            }}
+          >
+            <DialogTitle sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 3,
+              backgroundColor: '#ffffff',
+              color: '#1a1a1a',
+              py: 4,
+              px: 4,
+              borderBottom: '1px solid #e5e7eb'
+            }}>
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
+                backgroundColor: '#f9fafb',
+                border: '1px solid #e5e7eb'
+              }}>
+                <InfoIcon sx={{ fontSize: 24, color: '#374151' }} />
+              </Box>
+              <Box>
+                <Typography variant="h4" sx={{ 
+                  fontWeight: 700, 
+                  mb: 1,
+                  color: '#111827',
+                  fontSize: '1.75rem'
+                }}>
+                  Address Details
+                </Typography>
+                <Typography variant="body1" sx={{ 
+                  color: '#6b7280',
+                  fontWeight: 400,
+                  fontSize: '1rem'
+                }}>
+                  Complete delivery and customer information
+                </Typography>
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{ 
+              p: 0,
+              backgroundColor: '#ffffff',
+              mt: 2,
+              overflowY: 'auto',
+              maxHeight: '50vh',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: '#f1f1f1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#c1c1c1',
+                borderRadius: '4px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: '#a8a8a8',
+              },
+            }}>
+              {selectedAddressDetails && (
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 3,
+                  p: 3,
+                  px: 4
+                }}>
+                  {/* Delivery Address */}
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      color: '#111827',
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      📍 Delivery Address
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}  >
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Complete Address
+                          </Typography>
+                          <Typography variant="body1" sx={{ 
+                            lineHeight: 1.6,
+                            color: '#111827'
+                          }}>
+                            {selectedAddressDetails?.delivery_address}<br/>
+                            {selectedAddressDetails?.suburb}<br/>
+                            {selectedAddressDetails?.state} {selectedAddressDetails?.postal_code}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Contact Information */}
+                  <Box>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      color: '#111827',
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      📞 Contact Information
+                    </Typography>
+                    <Grid container spacing={2} alignItems="stretch">
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Phone Number
+                          </Typography>
+                          <Typography sx={{ 
+                            fontFamily: 'monospace', 
+                            fontSize: '1.1rem',
+                            color: '#111827',
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            {selectedAddressDetails?.phone_number}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      {selectedAddressDetails?.cardCustomizationId?.userId?.email && (
+                        <Grid item xs={12} sm={6}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Customer Email
+                            </Typography>
+                            <Typography sx={{ 
+                              color: '#111827',
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}>
+                              {selectedAddressDetails.cardCustomizationId.userId.email}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Customer Information */}
+                  {selectedAddressDetails?.cardCustomizationId?.userId && (
+                    <Box>
+                      <Typography variant="h6" sx={{ 
+                        fontWeight: 600, 
+                        color: '#111827',
+                        mb: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}>
+                        👤 Customer Information
+                      </Typography>
+                      <Grid container spacing={2} alignItems="stretch">
+                        <Grid item xs={12} sm={6}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Customer Name
+                            </Typography>
+                            <Typography sx={{ 
+                              color: '#111827',
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}>
+                              {selectedAddressDetails.cardCustomizationId.userId.firstName} {selectedAddressDetails.cardCustomizationId.userId.lastName}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Account Status
+                            </Typography>
+                            <Typography sx={{ 
+                              color: selectedAddressDetails.cardCustomizationId.userId.isVerified ? '#0ea5e9' : '#ef4444',
+                              fontWeight: 500,
+                              fontSize: '0.9rem',
+                              flex: 1,
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}>
+                              {selectedAddressDetails.cardCustomizationId.userId.isVerified ? 'Verified' : 'Unverified'}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+
+                  <Divider />
+
+                  {/* Shipping Preferences */}
+                  <Box>
+                    <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      Shipping Preferences
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: 'grey.50',
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600, mb: 1 }}>
+                            Shipping Type
+                          </Typography>
+                          <Typography sx={{ 
+                            color: selectedAddressDetails?.expressShipping ? 'success.main' : 'info.main',
+                            fontWeight: 500
+                          }}>
+                            {selectedAddressDetails?.expressShipping ? 'Express Shipping' : 'Standard Shipping'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: 'grey.50',
+                          borderRadius: 1,
+                          border: '1px solid',
+                          borderColor: 'grey.200'
+                        }}>
+                          <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600, mb: 1 }}>
+                            Marketing Preferences
+                          </Typography>
+                          <Typography sx={{ 
+                            color: selectedAddressDetails?.newsAndOffers ? 'success.main' : 'error.main',
+                            fontWeight: 500
+                          }}>
+                            {selectedAddressDetails?.newsAndOffers ? 'Subscribed to News & Offers' : 'Not Subscribed'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Box>
+              )}
+            </DialogContent>
+            <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
+              <Button 
+                onClick={handleCloseAddressDetails} 
+                variant="outlined"
+                sx={{
+                  backgroundColor: '#ffffff',
+                  color: '#111827',
+                  border: '1px solid #d1d5db',
+                  borderRadius: 2,
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  '&:hover': {
+                    backgroundColor: '#f9fafb',
+                    borderColor: '#9ca3af',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.2s ease-in-out'
+                  },
+                  transition: 'all 0.2s ease-in-out'
+                }}
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
 
           {/* Printable Card Layout */}
 
@@ -1647,8 +3378,7 @@ const Transaction = () => {
       </Box>
 
     </>
-  )
-    ;
+  );
 };
 
 Transaction.getLayout = (page) => (

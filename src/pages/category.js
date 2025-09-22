@@ -300,15 +300,31 @@ const Category = () => {
                             cursor: 'pointer'
                           }}
                         >
+                          <Tooltip title="Category">
+                          <NextLink href="/category">
+                            <IconButton>
+                              <img 
+                                src="/add.png" 
+                                alt="add" 
+                                style={{
+                                  width: 60,
+                                  height: 55,
+                                  objectFit: 'contain'
+                                }}
+                              />
+                            </IconButton>
+                          </NextLink>
+                        </Tooltip>
+                        
 
-                          <Tooltip title="Add Category">
+                          {/* <Tooltip title="Add Category">
                             <IconButton onClick={handleClickOpen}>
                               <AddToPhotosIcon sx={{
                                 fontSize: 50, width: 60, // Increased width
                                 height: 55, color: '#c165a0'
                               }}/>
                             </IconButton>
-                          </Tooltip>
+                          </Tooltip> */}
                         </Box>
 
                       </Box>

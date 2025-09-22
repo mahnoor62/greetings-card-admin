@@ -168,7 +168,7 @@ export const TopNav = (props) => {
                       src={`${WEB_URL}/blank-profile.webp`}
                     />
 
-                    {
+                    {/* {
                       isCategory &&  (
                       <NextLink href="/dashboard" passHref legacyBehavior>
                       <Button
@@ -187,7 +187,7 @@ export const TopNav = (props) => {
                 </NextLink>
 
                 )
-                }
+                } */}
                   </Stack>
                 )
             }

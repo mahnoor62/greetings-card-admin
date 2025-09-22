@@ -48,7 +48,7 @@ const Dashboard = () => {
         </title>
       </Head>
 
-      <Box
+      {/* <Box
         sx={{
           height: '100vh',
           display: 'flex',
@@ -60,7 +60,7 @@ const Dashboard = () => {
       >
         <UplaodCards />
         <Transaction />
-      </Box>
+      </Box> */}
     </>
   );
 };
