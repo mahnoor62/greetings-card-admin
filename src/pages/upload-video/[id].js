@@ -343,6 +343,24 @@ const Id = () => {
             pr: { md: 5, xs: 0}
           }}
         >
+          {/* Back Button */}
+          <Button
+            onClick={() => router.back()}
+            sx={{
+              textAlign: 'center',
+              backgroundColor: '#c09b9b !important',
+              color: '#1a1d25',
+              minWidth: { md: 150, xs: 100 },
+              '&:hover': {
+                backgroundColor: '#c09b9b !important',
+                color: '#1a1d25'
+              }
+            }}
+            variant="contained"
+          >
+            Back
+          </Button>
+
           <NextLink href={`/preview/${id}`} passHref legacyBehavior>
             <Button
               // onClick={handleSkip}
