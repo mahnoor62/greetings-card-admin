@@ -301,9 +301,10 @@ const Category = () => {
                           }}
                         >
                           <Tooltip title="Category">
-                          <NextLink href="/category">
+                          {/* <NextLink href="/category"> */}
                             <IconButton>
                               <img 
+                              onClick={handleClickOpen}
                                 src="/add.png" 
                                 alt="add" 
                                 style={{
@@ -313,7 +314,7 @@ const Category = () => {
                                 }}
                               />
                             </IconButton>
-                          </NextLink>
+                          {/* </NextLink> */}
                         </Tooltip>
                         
 

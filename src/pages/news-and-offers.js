@@ -457,11 +457,13 @@ const NewsAndOffers = () => {
                     style={{ display: 'none' }}
                     onChange={handleFile}
                   />
-                  <label htmlFor="image">
-                    <Button variant="outlined" startIcon={<PhotoCamera />} component="span">
-                      {formik.values.image ? 'Change Image' : 'Choose Image'}
-                    </Button>
-                  </label>
+                  {!formik.values.image && (
+                    <label htmlFor="image">
+                      <Button variant="outlined" startIcon={<PhotoCamera />} component="span">
+                        Choose Image
+                      </Button>
+                    </label>
+                  )}
                   {formik.touched.image && formik.errors.image && (
                     <Typography variant="caption" color="error" sx={{ ml: 2 }}>
                       {formik.errors.image}

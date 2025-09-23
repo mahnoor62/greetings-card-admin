@@ -50,7 +50,10 @@ export const SideNavItem = (props) => {
               justifyContent: 'center',
               mr: 2,
               ...(active && {
-                color: 'primary.main'
+                color: 'primary.main',
+                '& img': {
+                  filter: 'brightness(0) saturate(100%) invert(40%) sepia(20%) saturate(200%) hue-rotate(320deg) brightness(120%) contrast(90%)', // Theme pink filter
+                }
               })
             }}
           >

@@ -1011,7 +1011,7 @@ const Transaction = () => {
   return (
     <>
       <Head>
-        <title>Transactions | Incardible</title>
+        <title>Orders | Incardible</title>
       </Head>
       <Box
         sx={{
@@ -1039,7 +1039,7 @@ const Transaction = () => {
             justifyContent: 'flex-start',
             alignItems: 'center',
             width: '100%'
-          }}>Transactions</Typography>
+          }}>Orders</Typography>
            <Paper sx={{ width: '100%', overflow: 'hidden' }}>
 
 <TableContainer
@@ -1129,9 +1129,10 @@ const Transaction = () => {
                 <TableRow sx={{ justifyContent: 'space-between', alignItems: 'left' }}>
                   <TableCell >No</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Account</TableCell>
-                  <TableCell sx={{ textAlign: 'left' }}>Transaction  Details</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Order Details</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Card Title</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Address</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Shipping</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Order Date</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Action</TableCell>
                 </TableRow>
@@ -1139,7 +1140,7 @@ const Transaction = () => {
               <TableBody>
                 {loadingComplete ? (
                   <TableRow align="center">
-                    <TableCell colSpan={10} align="center">
+                    <TableCell colSpan={9} align="center">
                       <CircularProgress/>
                     </TableCell>
                   </TableRow>
@@ -1162,22 +1163,14 @@ const Transaction = () => {
                             alignItems: 'center',
                             gap: 1
                           }}>
-                            <Tooltip title="View Transaction Details">
+                            <Tooltip title="View Order Details">
                               <IconButton 
                                 size="small"
                                 onClick={() => handleOpenTransactionDetails(data)}
                                 sx={{
-                                  color: '#000000',
-                                  backgroundColor: '#fce7f3',
-                                  border: '2px solid',
-                                  borderColor: '#fce7f3',
-                                  transition: 'all 0.3s ease',
+                                  color: 'inherit',
                                   '&:hover': {
-                                    backgroundColor: '#000000',
-                                    color: '#fce7f3',
-                                    borderColor: '#000000',
-                                    transform: 'scale(1.1)',
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                                    backgroundColor: 'transparent'
                                   }
                                 }}
                               >
@@ -1203,17 +1196,9 @@ const Transaction = () => {
                                 size="small"
                                 onClick={() => handleOpenCardDetails(data)}
                                 sx={{
-                                  color: '#000000',
-                                  backgroundColor: '#fce7f3',
-                                  border: '2px solid',
-                                  borderColor: '#fce7f3',
-                                  transition: 'all 0.3s ease',
+                                  color: 'inherit',
                                   '&:hover': {
-                                    backgroundColor: '#000000',
-                                    color: '#fce7f3',
-                                    borderColor: '#000000',
-                                    transform: 'scale(1.1)',
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                                    backgroundColor: 'transparent'
                                   }
                                 }}
                               >
@@ -1239,17 +1224,9 @@ const Transaction = () => {
                                 size="small"
                                 onClick={() => handleOpenAddressDetails(data)}
                                 sx={{
-                                  color: '#000000',
-                                  backgroundColor: '#fce7f3',
-                                  border: '2px solid',
-                                  borderColor: '#fce7f3',
-                                  transition: 'all 0.3s ease',
+                                  color: 'inherit',
                                   '&:hover': {
-                                    backgroundColor: '#000000',
-                                    color: '#fce7f3',
-                                    borderColor: '#000000',
-                                    transform: 'scale(1.1)',
-                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                                    backgroundColor: 'transparent'
                                   }
                                 }}
                               >
@@ -1261,6 +1238,34 @@ const Transaction = () => {
                               fontSize: '0.875rem'
                             }}>
                               {data?.delivery_address}
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        <TableCell component="th" scope="row" sx={{ textAlign: 'left' }}>
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            gap: 1
+                          }}>
+                            <Box sx={{
+                              px: 2,
+                              py: 1,
+                              borderRadius: 1,
+                              backgroundColor: data?.expressShipping === true ? '#f0f9ff' : '#f0fdf4',
+                              border: '1px solid',
+                              borderColor: data?.expressShipping === true ? '#0ea5e9' : '#22c55e',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 1
+                            }}>
+                              <Typography sx={{ 
+                                color: data?.expressShipping === true ? '#0ea5e9' : '#22c55e',
+                                fontWeight: 600,
+                                fontSize: '0.875rem',
+                                textTransform: 'capitalize'
+                              }}>
+                                {data?.expressShipping === true ? 'Express' : 'Standard'}
+                              </Typography>
                             </Box>
                           </Box>
                         </TableCell>
@@ -1293,8 +1298,8 @@ const Transaction = () => {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={8} align="center">
-                      No Transaction Found
+                    <TableCell colSpan={9} align="center">
+                      No Order Found
                     </TableCell>
                   </TableRow>
                 )}
@@ -1327,10 +1332,9 @@ const Transaction = () => {
             open={cardDetailsModal}
             onClose={handleCloseCardDetails}
             maxWidth="lg"
-            fullWidth
-            fullScreen={fullScreen}
             PaperProps={{
               sx: {
+                backgroundColor: '#ffffff',
                 minHeight: '600px',
                 maxHeight: '80vh',
                 borderRadius: 3,
@@ -1418,7 +1422,7 @@ const Transaction = () => {
                       alignItems: 'center',
                       gap: 1
                     }}>
-                      Card Information
+                      Cards
                     </Typography>
                     <Grid container spacing={2} sx={{ justifyContent: 'center' }}>
                       {/* Front Design */}
@@ -1592,7 +1596,7 @@ const Transaction = () => {
                       alignItems: 'center',
                       gap: 1
                     }}>
-                      ℹ️ Card Information
+                       Card Information
                     </Typography>
                     <Grid container spacing={3}>
                       <Grid item xs={12} sm={6}>
@@ -1721,7 +1725,7 @@ const Transaction = () => {
                         alignItems: 'center',
                         gap: 1
                       }}>
-                        ✨ Card Customization
+                        Card Customization
                       </Typography>
                       <Grid container spacing={2}>
                         {selectedCardDetails.cardCustomizationId.arTemplateData.mainHeading && (
@@ -1827,7 +1831,7 @@ const Transaction = () => {
                         alignItems: 'center',
                         gap: 1
                       }}>
-                        🎥 Video Content
+                         Video Content
                       </Typography>
                       <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
                         <Grid item xs={12} sm={6} md={4}>
@@ -1987,15 +1991,14 @@ const Transaction = () => {
             </DialogActions>
           </Dialog>
 
-          {/* Transaction Details Modal */}
+          {/* Order Details Modal */}
           <Dialog
             open={transactionDetailsModal}
             onClose={handleCloseTransactionDetails}
             maxWidth="md"
-            fullWidth
-            fullScreen={fullScreen}
             PaperProps={{
               sx: {
+                backgroundColor: '#ffffff',
                 minHeight: '600px',
                 maxHeight: '80vh',
                 borderRadius: 3,
@@ -2033,14 +2036,14 @@ const Transaction = () => {
                   color: '#111827',
                   fontSize: '1.75rem'
                 }}>
-                  Transaction Details
+                  Order Details
                 </Typography>
                 <Typography variant="body1" sx={{ 
                   color: '#6b7280',
                   fontWeight: 400,
                   fontSize: '1rem'
                 }}>
-                  Complete transaction information and payment details
+                  Complete  order and payment details
                 </Typography>
               </Box>
             </DialogTitle>
@@ -2082,7 +2085,7 @@ const Transaction = () => {
                       mb: 2,
                       fontSize: '1.125rem'
                     }}>
-                      Transaction Information
+                      Order Information
                     </Typography>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
@@ -2104,7 +2107,7 @@ const Transaction = () => {
                             textTransform: 'uppercase',
                             letterSpacing: '0.05em'
                           }}>
-                            Transaction ID
+                            Order ID
                           </Typography>
                           <Box sx={{
                             backgroundColor: '#f9fafb',
@@ -2554,10 +2557,9 @@ const Transaction = () => {
             open={addressDetailsModal}
             onClose={handleCloseAddressDetails}
             maxWidth="md"
-            fullWidth
-            fullScreen={fullScreen}
             PaperProps={{
               sx: {
+                backgroundColor: '#ffffff',
                 minHeight: '600px',
                 maxHeight: '80vh',
                 borderRadius: 3,
@@ -2776,7 +2778,7 @@ const Transaction = () => {
                         alignItems: 'center',
                         gap: 1
                       }}>
-                        👤 Customer Information
+                        Customer Information
                       </Typography>
                       <Grid container spacing={2} alignItems="stretch">
                         <Grid item xs={12} sm={6}>
@@ -2854,21 +2856,34 @@ const Transaction = () => {
                     <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                       Shipping Preferences
                     </Typography>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={2} alignItems="stretch">
                       <Grid item xs={12} sm={6}>
                         <Box sx={{ 
                           p: 2,
-                          backgroundColor: 'grey.50',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'grey.200'
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
                         }}>
-                          <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600, mb: 1 }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
                             Shipping Type
                           </Typography>
                           <Typography sx={{ 
-                            color: selectedAddressDetails?.expressShipping ? 'success.main' : 'info.main',
-                            fontWeight: 500
+                            color: selectedAddressDetails?.expressShipping ? '#22c55e' : '#0ea5e9',
+                            fontWeight: 500,
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
                           }}>
                             {selectedAddressDetails?.expressShipping ? 'Express Shipping' : 'Standard Shipping'}
                           </Typography>
@@ -2877,17 +2892,30 @@ const Transaction = () => {
                       <Grid item xs={12} sm={6}>
                         <Box sx={{ 
                           p: 2,
-                          backgroundColor: 'grey.50',
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: 'grey.200'
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
                         }}>
-                          <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 600, mb: 1 }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
                             Marketing Preferences
                           </Typography>
                           <Typography sx={{ 
-                            color: selectedAddressDetails?.newsAndOffers ? 'success.main' : 'error.main',
-                            fontWeight: 500
+                            color: selectedAddressDetails?.newsAndOffers ? '#22c55e' : '#ef4444',
+                            fontWeight: 500,
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
                           }}>
                             {selectedAddressDetails?.newsAndOffers ? 'Subscribed to News & Offers' : 'Not Subscribed'}
                           </Typography>

@@ -1,61 +1,98 @@
-import ChartBarIcon from '@heroicons/react/24/solid/ChartBarIcon';
-import CogIcon from '@heroicons/react/24/solid/CogIcon';
-import LockClosedIcon from '@heroicons/react/24/solid/LockClosedIcon';
-import ShoppingBagIcon from '@heroicons/react/24/solid/ShoppingBagIcon';
-import UserIcon from '@heroicons/react/24/solid/UserIcon';
-import UserPlusIcon from '@heroicons/react/24/solid/UserPlusIcon';
-import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
-import XCircleIcon from '@heroicons/react/24/solid/XCircleIcon';
-import CreditCardIcon from '@heroicons/react/24/solid/CreditCardIcon';
-import CurrencyDollarIcon from '@heroicons/react/24/solid/CurrencyDollarIcon';
-import TruckIcon from '@heroicons/react/24/solid/TruckIcon';
-import NewspaperIcon from '@heroicons/react/24/solid/NewspaperIcon';
-import { SvgIcon } from '@mui/material';
+// Commented out heroicons imports - using custom icons from public folder
+// import ChartBarIcon from '@heroicons/react/24/solid/ChartBarIcon';
+// import CogIcon from '@heroicons/react/24/solid/CogIcon';
+// import LockClosedIcon from '@heroicons/react/24/solid/LockClosedIcon';
+// import ShoppingBagIcon from '@heroicons/react/24/solid/ShoppingBagIcon';
+// import UserIcon from '@heroicons/react/24/solid/UserIcon';
+// import UserPlusIcon from '@heroicons/react/24/solid/UserPlusIcon';
+// import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
+// import XCircleIcon from '@heroicons/react/24/solid/XCircleIcon';
+// import CreditCardIcon from '@heroicons/react/24/solid/CreditCardIcon';
+// import CurrencyDollarIcon from '@heroicons/react/24/solid/CurrencyDollarIcon';
+// import TruckIcon from '@heroicons/react/24/solid/TruckIcon';
+// import NewspaperIcon from '@heroicons/react/24/solid/NewspaperIcon';
+// import { SvgIcon } from '@mui/material';
+import { Box } from '@mui/material';
 
 export const items = [
+  {
+    title: 'Home',
+    path: '/home',
+    icon: (
+      <Box
+        component="img"
+        src="/user.png"
+        alt="Home"
+        sx={{
+          width: 32,
+          height: 32,
+          objectFit: 'contain'
+        }}
+      />
+    )
+  },
   {
     title: 'Cards',
     path: '/cards',
     icon: (
-      <SvgIcon fontSize="medium">
-        <CreditCardIcon />
-      </SvgIcon>
+      <Box
+        component="img"
+        src="/Cards.png"
+        alt="Cards"
+        sx={{
+          width: 32,
+          height: 32,
+          objectFit: 'contain'
+        }}
+      />
     )
   },
   {
-    title: 'Transactions',
-    path: '/transaction',
+    title: 'Order',
+    path: '/order',
     icon: (
-      <SvgIcon fontSize="medium">
-        <CurrencyDollarIcon />
-      </SvgIcon>
+      <Box
+        component="img"
+        src="/transaction.png"
+        alt="Order"
+        sx={{
+          width: 32,
+          height: 32,
+          objectFit: 'contain'
+        }}
+      />
     )
   },
-  {
-    title: 'Express Shipping',
-    path: '/express-shipping-users',
-    icon: (
-      <SvgIcon fontSize="medium">
-        <TruckIcon />
-      </SvgIcon>
-    )
-  },
+  // {
+  //   title: 'Express Shipping',
+  //   path: '/express-shipping-users',
+  //   icon: (
+  //     <Box
+  //       component="img"
+  //       src="/express-shipping.png"
+  //       alt="Express Shipping"
+  //       sx={{
+  //         width: 32,
+  //         height: 32,
+  //         objectFit: 'contain'
+  //       }}
+  //     />
+  //   )
+  // },
   {
     title: 'News and Offers',
     path: '/news-and-offers',
     icon: (
-      <SvgIcon fontSize="medium">
-        <NewspaperIcon />
-      </SvgIcon>
-    )
-  },
-  {
-    title: 'Account',
-    path: '/account',
-    icon: (
-      <SvgIcon fontSize="medium">
-        <UserIcon />
-      </SvgIcon>
+      <Box
+        component="img"
+        src="/news.png"
+        alt="News and Offers"
+        sx={{
+          width: 32,
+          height: 32,
+          objectFit: 'contain'
+        }}
+      />
     )
   }
 ];
