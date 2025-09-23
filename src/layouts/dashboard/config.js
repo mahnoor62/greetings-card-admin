@@ -16,16 +16,16 @@ import { Box } from '@mui/material';
 
 export const items = [
   {
-    title: 'Home',
-    path: '/home',
+    title: 'Dashboard',
+    path: '/dashboard',
     icon: (
       <Box
         component="img"
-        src="/user.png"
-        alt="Home"
+        src="/card.png"
+        alt="Dashboard"
         sx={{
-          width: 32,
-          height: 32,
+          width: 24,
+          height: 24,
           objectFit: 'contain'
         }}
       />
@@ -40,8 +40,8 @@ export const items = [
         src="/Cards.png"
         alt="Cards"
         sx={{
-          width: 32,
-          height: 32,
+          width: 24,
+          height: 24,
           objectFit: 'contain'
         }}
       />
@@ -56,29 +56,13 @@ export const items = [
         src="/transaction.png"
         alt="Order"
         sx={{
-          width: 32,
-          height: 32,
+          width: 24,
+          height: 24,
           objectFit: 'contain'
         }}
       />
     )
   },
-  // {
-  //   title: 'Express Shipping',
-  //   path: '/express-shipping-users',
-  //   icon: (
-  //     <Box
-  //       component="img"
-  //       src="/express-shipping.png"
-  //       alt="Express Shipping"
-  //       sx={{
-  //         width: 32,
-  //         height: 32,
-  //         objectFit: 'contain'
-  //       }}
-  //     />
-  //   )
-  // },
   {
     title: 'News and Offers',
     path: '/news-and-offers',
@@ -88,8 +72,24 @@ export const items = [
         src="/news.png"
         alt="News and Offers"
         sx={{
-          width: 32,
-          height: 32,
+          width: 24,
+          height: 24,
+          objectFit: 'contain'
+        }}
+      />
+    )
+  },
+  {
+    title: 'Account',
+    path: '/account',
+    icon: (
+      <Box
+        component="img"
+        src="/user.png"
+        alt="Account"
+        sx={{
+          width: 24,
+          height: 24,
           objectFit: 'contain'
         }}
       />

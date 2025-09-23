@@ -1213,7 +1213,7 @@ const Transaction = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '200px' }}>
+                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '180px' }}>
                           <Box sx={{ 
                             display: 'flex', 
                             alignItems: 'center',

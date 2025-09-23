@@ -15,7 +15,7 @@ export const Layout = (props) => {
   const router = useRouter();
 
   if (isAuthenticated) {
-    router.push('/home');
+    router.push('/dashboard');
   }
 
   return (

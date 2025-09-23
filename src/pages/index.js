@@ -11,7 +11,7 @@ const Page = () => {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.push('/cards');
+        router.push('/dashboard');
       } else {
         router.push('/login');
       }

@@ -50,6 +50,8 @@ const UplaodCards = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [loadingComplete, setLoadingComplete] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all'); // New filter state
+  const [filteredCardsData, setFilteredCardsData] = useState([]); // Store filtered data
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const { user } = useAuth();
@@ -116,9 +118,41 @@ const UplaodCards = () => {
     }
   };
 
+  // Fetch filtered cards based on filter type
+  const fetchFilteredCards = async (filter) => {
+    try {
+      if (filter === 'all') {
+        setFilteredCardsData([]);
+        return;
+      }
+      
+      let endpoint = '';
+      if (filter === 'popular') {
+        endpoint = '/api/admin/statistics/filter/popular-cards';
+      } else if (filter === 'ar-experience') {
+        endpoint = '/api/admin/statistics/filter/popular-ar-experience-cards';
+      }
+      
+      if (endpoint) {
+        const response = await axios.get(`${BASE_URL}${endpoint}`, {
+          headers: { 'x-access-token': token }
+        });
+        setFilteredCardsData(response.data.data || []);
+      }
+    } catch (error) {
+      console.log('Error fetching filtered cards:', error);
+      setFilteredCardsData([]);
+    }
+  };
+
   useEffect(() => {
     getAllCards();
   }, []);
+
+  // Fetch filtered data when filter changes
+  useEffect(() => {
+    fetchFilteredCards(filterType);
+  }, [filterType]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -141,7 +175,17 @@ const UplaodCards = () => {
     });
   };
 
-  const filteredCards = FilterHelper(cards, searchQuery, ['title']);
+  // Determine which cards to use based on filter
+  let cardsToFilter = cards;
+  if (filterType === 'popular' && filteredCardsData.length > 0) {
+    cardsToFilter = filteredCardsData;
+  } else if (filterType === 'ar-experience' && filteredCardsData.length > 0) {
+    cardsToFilter = filteredCardsData;
+  }
+  
+  // Apply search filter
+  const filteredCards = FilterHelper(cardsToFilter, searchQuery, ['title']);
+  
   const paginatedCards = PaginationHelper(filteredCards, page, rowsPerPage);
   const totalCount = filteredCards.length;
 
@@ -370,6 +414,30 @@ const UplaodCards = () => {
                           )
                         }}
                       />
+
+                      {/* Filter Dropdown */}
+                      <FormControl 
+                        variant="filled" 
+                        sx={{ 
+                          minWidth: 200, 
+                          ml: 2,
+                          '& .MuiInputBase-root': {
+                            height: '55px',
+                            borderRadius: 1
+                          }
+                        }}
+                      >
+                        <InputLabel>Filter by</InputLabel>
+                        <Select
+                          value={filterType}
+                          onChange={(event) => setFilterType(event.target.value)}
+                          label="Filter by"
+                        >
+                          <MenuItem value="all">All Cards</MenuItem>
+                          <MenuItem value="popular">Popular Cards</MenuItem>
+                          <MenuItem value="ar-experience">Popular AR Experience</MenuItem>
+                        </Select>
+                      </FormControl>
 
                       {/* Upload Icon */}
                       <Box

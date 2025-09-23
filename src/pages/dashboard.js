@@ -1,66 +1,177 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer, FormHelperText,
-  TableHead,
-  TableRow, Grid, FormControl, InputLabel, Select, MenuItem,
-  Paper, Box, DialogActions, DialogContent, DialogTitle, DialogContentText,
-  TablePagination, Container, Tooltip, IconButton, Dialog, Checkbox,
-  Button, InputAdornment,
-  TextField, FormLabel, FormGroup, FormControlLabel,
-  CircularProgress, Typography
+  Box,
+  Container,
+  Grid,
+  Typography,
+  Paper,
+  CircularProgress,
+  Card,
+  CardContent,
+  Divider
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-
-import EditIcon from '@mui/icons-material/Edit';
-import SearchIcon from '@mui/icons-material/Search';
-import toast from 'react-hot-toast';
-import axios from 'axios';
-import { FilterHelper, PaginationHelper } from '/src/helpers/filter';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import NextLink from 'next/link';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
-import ConfirmationDialog from '../components/confirmationDialogue';
-import Switch from '@mui/material/Switch';
 import { Layout as DashboardLayout } from '../layouts/dashboard/layout';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Head from 'next/head';
 import { useAuth } from '../hooks/use-auth';
-import { useCardContext } from '../contexts/cardIdContext';
-import CategoryIcon from '@mui/icons-material/Category';
-import  UplaodCards  from './cards';
-import Transaction from './transaction';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+// Import dashboard components
+import StatisticsCards from '../components/dashboard/statistics-cards';
+import MostPopularCard from '../components/dashboard/most-popular-card';
+import MostPopularARTemplate from '../components/dashboard/most-popular-ar-template';
+import WebsiteTrafficStats from '../components/dashboard/website-traffic-stats';
+import OrderStats from '../components/dashboard/order-stats';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
 
 const Dashboard = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [trafficData, setTrafficData] = useState(null);
+  const [orderData, setOrderData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const token = user?.token;
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch dashboard overview (all time)
+      const dashboardResponse = await axios.get(`${BASE_URL}/api/admin/statistics/dashboard?timeframe=all`, {
+        headers: { 'x-access-token': token }
+      });
+      setDashboardData(dashboardResponse.data.data);
+
+      // Fetch website traffic stats (all time)
+      const trafficResponse = await axios.get(`${BASE_URL}/api/admin/statistics/website-traffic?timeframe=all`, {
+        headers: { 'x-access-token': token }
+      });
+      setTrafficData(trafficResponse.data.data);
+
+      // Fetch order stats (all time)
+      const orderResponse = await axios.get(`${BASE_URL}/api/admin/statistics/orders?timeframe=all`, {
+        headers: { 'x-access-token': token }
+      });
+      setOrderData(orderResponse.data.data);
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      fetchDashboardData();
+    }
+  }, [token]);
+
   return (
     <>
       <Head>
-        <title>
-          Dashboard | {APP_NAME}
-        </title>
+        <title>Dashboard | {APP_NAME}</title>
       </Head>
 
-      {/* <Box
-        sx={{
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          overflowY: 'auto',
-          pt:5,
-          pb:5
-        }}
-      >
-        <UplaodCards />
-        <Transaction />
-      </Box> */}
+      <Box sx={{ 
+        minHeight: '100vh', 
+        // background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        py: 4
+      }}>
+        <Box  sx={{pl:'5%', pr:'5%'}}>
+          {/* Elegant Header */}
+          <Card sx={{ 
+            mb: 10, 
+            // display:'flex',justifyContent:'center', ali
+            // width:'50%',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+          }}>
+            <CardContent sx={{ p: 4 }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="h3" sx={{ 
+                  fontWeight: 'bold', 
+                  background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1
+                }}>
+                  Incardible Dashboard
+                </Typography>
+                <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
+                  Complete overview of your AR Greeting Cards business
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+
+          {loading ? (
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              minHeight: '400px',
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 3,
+              backdropFilter: 'blur(10px)'
+            }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <CircularProgress size={60} sx={{ color: '#667eea', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary">
+                  Loading dashboard data...
+                </Typography>
+              </Box>
+            </Box>
+          ) : (
+            <>
+              {/* Statistics Cards */}
+              <Box sx={{ mb: 4 }}>
+                <StatisticsCards data={dashboardData} loading={loading} />
+              </Box>
+
+              {/* Main Content Grid */}
+              <Grid container spacing={4}>
+              {/* Left Column */}
+              <Grid item xs={12} lg={8}>
+                <Grid container spacing={4}>
+                  {/* Most Popular Card */}
+                  <Grid item xs={12}>
+                    <MostPopularCard data={dashboardData} loading={loading} />
+                  </Grid>
+
+                  {/* Order Statistics */}
+                  <Grid item xs={12}>
+                    <OrderStats data={orderData} loading={loading} />
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              {/* Right Column */}
+              <Grid item xs={12} lg={4}>
+                <Grid container spacing={4}>
+                  {/* Most Popular AR Template */}
+                  <Grid item xs={12}>
+                    <MostPopularARTemplate data={dashboardData?.popularArTemplates} loading={loading} />
+                  </Grid>
+
+                  {/* Website Traffic */}
+                  <Grid item xs={12}>
+                    <WebsiteTrafficStats data={trafficData} loading={loading} />
+                  </Grid>
+                </Grid>
+              </Grid>
+              </Grid>
+            </>
+          )}
+        </Box>
+      </Box>
     </>
   );
 };
