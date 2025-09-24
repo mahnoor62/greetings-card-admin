@@ -29,6 +29,10 @@ import ConfirmationDialog from '../components/confirmationDialogue';
 import Switch from '@mui/material/Switch';
 import { Layout as DashboardLayout } from '../layouts/dashboard/layout';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
+import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DescriptionIcon from '@mui/icons-material/Description';
 import Head from 'next/head';
 import { useAuth } from '../hooks/use-auth';
 import { useCardContext } from '../contexts/cardIdContext';
@@ -52,8 +56,15 @@ const UplaodCards = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // New filter state
   const [filteredCardsData, setFilteredCardsData] = useState([]); // Store filtered data
+  const [filterLoading, setFilterLoading] = useState(false); // Loading state for filter
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [categoryPopupOpen, setCategoryPopupOpen] = useState(false); // Category popup state
+  const [newCategoryName, setNewCategoryName] = useState(''); // New category name input
+  const [isAddingCategory, setIsAddingCategory] = useState(false); // Loading state for adding category
+  const [editingCategory, setEditingCategory] = useState(null); // Category being edited
+  const [editCategoryName, setEditCategoryName] = useState(''); // Edit category name input
+  const [isEditingCategory, setIsEditingCategory] = useState(false); // Loading state for editing category
   const { user } = useAuth();
   const token = user?.token;
 
@@ -71,6 +82,163 @@ const UplaodCards = () => {
     setCard(null);
     formik.resetForm();
     // setCard(null);
+  };
+
+  const handleCategoryPopupOpen = () => {
+    setCategoryPopupOpen(true);
+  };
+
+  const handleCategoryPopupClose = () => {
+    setCategoryPopupOpen(false);
+    setNewCategoryName('');
+    setEditingCategory(null);
+    setEditCategoryName('');
+    // Refresh categories in upload dialog when popup closes
+    // The category state is already updated, so upload dialog will show new categories
+  };
+
+  // Handle edit category click
+  const handleEditCategory = (category) => {
+    setEditingCategory(category);
+    setEditCategoryName(category.name);
+  };
+
+  // Cancel edit
+  const handleCancelEdit = () => {
+    setEditingCategory(null);
+    setEditCategoryName('');
+  };
+
+  // Add new category function
+  const addNewCategory = async () => {
+    if (!newCategoryName.trim()) {
+      toast.error('Please enter a category name');
+      return;
+    }
+
+    if (!token) {
+      toast.error('Authentication token not found');
+      return;
+    }
+
+    try {
+      setIsAddingCategory(true);
+      console.log('Adding category:', newCategoryName.trim());
+      console.log('Using token:', token);
+      
+      const response = await axios.post(`${BASE_URL}/api/admin/category/add`, {
+        name: newCategoryName.trim()
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token
+        }
+      });
+
+      console.log('Add category response:', response.data);
+      
+      if (response.data.success) {
+        const newCategory = response.data.data;
+        setCategories(prev => [newCategory, ...prev]);
+        toast.success('Category Created Successfully');
+        setNewCategoryName('');
+        // Don't close popup automatically - let user see the new category in the list
+        // setCategoryPopupOpen(false);
+      } else {
+        toast.error(response.data.msg || 'Failed to add category');
+      }
+    } catch (error) {
+      console.log('Error adding category:', error);
+      console.log('Error response:', error.response?.data);
+      toast.error(error.response?.data?.msg || error.message || 'Failed to add category');
+    } finally {
+      setIsAddingCategory(false);
+    }
+  };
+
+  // Edit category function
+  const editCategory = async () => {
+    if (!editCategoryName.trim()) {
+      toast.error('Please enter a category name');
+      return;
+    }
+
+    if (!token) {
+      toast.error('Authentication token not found');
+      return;
+    }
+
+    try {
+      setIsEditingCategory(true);
+      console.log('Editing category:', editingCategory._id, 'to:', editCategoryName.trim());
+      
+      const response = await axios.post(`${BASE_URL}/api/admin/category/edit`, {
+        id: editingCategory._id,
+        name: editCategoryName.trim()
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token
+        }
+      });
+
+      console.log('Edit category response:', response.data);
+      
+      if (response.data.success) {
+        setCategories(prev =>
+          prev.map(cat => cat._id === editingCategory._id ? { ...cat, name: editCategoryName.trim() } : cat)
+        );
+        toast.success('Category Updated Successfully');
+        setEditingCategory(null);
+        setEditCategoryName('');
+      } else {
+        toast.error(response.data.msg || 'Failed to update category');
+      }
+    } catch (error) {
+      console.log('Error editing category:', error);
+      console.log('Error response:', error.response?.data);
+      toast.error(error.response?.data?.msg || error.message || 'Failed to update category');
+    } finally {
+      setIsEditingCategory(false);
+    }
+  };
+
+  // Delete category function
+  const deleteCategory = async (id) => {
+    if (!token) {
+      toast.error('Authentication token not found');
+      return;
+    }
+
+    try {
+      console.log('Deleting category:', id);
+      
+      const response = await axios.delete(`${BASE_URL}/api/admin/category/destroy/${id}`, {
+        headers: {
+          'x-access-token': token
+        }
+      });
+      
+      console.log('Delete category response:', response.data);
+      
+      if (response.data.success) {
+        setCategories(prev => prev.filter(cat => cat._id !== id));
+        toast.success('Category deleted successfully');
+      } else {
+        toast.error(response.data.msg || 'Failed to delete category');
+      }
+    } catch (error) {
+      console.log('Error deleting category:', error);
+      console.log('Error response:', error.response?.data);
+      
+      // Check if the category was actually deleted (status 200 but error in response)
+      if (error.response?.status === 200) {
+        setCategories(prev => prev.filter(cat => cat._id !== id));
+        toast.success('Category deleted successfully');
+      } else {
+        toast.error(error.response?.data?.msg || error.message || 'Failed to delete category');
+      }
+    }
   };
 
   const handleDeleteConfirm = () => {
@@ -123,9 +291,11 @@ const UplaodCards = () => {
     try {
       if (filter === 'all') {
         setFilteredCardsData([]);
+        setFilterLoading(false);
         return;
       }
       
+      setFilterLoading(true);
       let endpoint = '';
       if (filter === 'popular') {
         endpoint = '/api/admin/statistics/filter/popular-cards';
@@ -142,6 +312,8 @@ const UplaodCards = () => {
     } catch (error) {
       console.log('Error fetching filtered cards:', error);
       setFilteredCardsData([]);
+    } finally {
+      setFilterLoading(false);
     }
   };
 
@@ -177,10 +349,10 @@ const UplaodCards = () => {
 
   // Determine which cards to use based on filter
   let cardsToFilter = cards;
-  if (filterType === 'popular' && filteredCardsData.length > 0) {
-    cardsToFilter = filteredCardsData;
-  } else if (filterType === 'ar-experience' && filteredCardsData.length > 0) {
-    cardsToFilter = filteredCardsData;
+  if (filterType === 'popular') {
+    cardsToFilter = filteredCardsData; // Use filtered data even if empty
+  } else if (filterType === 'ar-experience') {
+    cardsToFilter = filteredCardsData; // Use filtered data even if empty
   }
   
   // Apply search filter
@@ -357,7 +529,7 @@ const UplaodCards = () => {
       width: '100%',
       // force a logical min width only on small screens
       minWidth: { xs: 720, sm: 720, md: 'auto' }, // adjust 720 as needed
-      tableLayout: { xs: 'fixed', md: 'auto' }    // keeps columns readable on xs
+      tableLayout: { xs: 'fixed', md: 'fixed' }    // keeps columns readable on xs
     }}
   >
 {/* 
@@ -375,78 +547,88 @@ const UplaodCards = () => {
                   <TableCell colSpan={6} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
-                      alignItems: 'center',
-                      flexDirection: { md: 'row', xs: 'row' },
-                      justifyContent: 'space-between',
-                      width: '100%'
+                      alignItems: {md:'center', xs:'flex-start'},
+                      justifyContent:'space-between'
+,                      flexDirection: { md: 'row', xs: 'column' },
+                      width: '100%',
+                      gap:{xs:2, md:0}
+                      // position: 'relative'
                     }}>
 
-                      {/* Search Field */}
-                      <TextField
-                        variant="filled"
-                        placeholder="Search..."
-                        sx={{
-                          '& .MuiInputBase-input': {
-                            ml: 1,
-                            padding: '16px 0'
-                          },
-                          '& .MuiInputBase-root': {
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          },
-                          '& .MuiInputBase-input::placeholder': {
-                            color: 'rgba(71, 85, 105, 1)',
-                            opacity: 1
-                          },
-                          height: '55px',
-                          width: '100%',
-                          maxWidth: '400px',
-                          borderRadius: 1
-                        }}
-                        onChange={event => setSearchQuery(event.target.value)}
-                        InputProps={{
-                          endAdornment: (
-                            <Button variant="text" disabled
-                                    sx={{ background: 'transparent !important' }}>
-                              <SearchIcon sx={{ ml: 1.5, color: 'rgba(71, 85, 105, 1)' }}/>
-                            </Button>
-                          )
-                        }}
-                      />
-
-                      {/* Filter Dropdown */}
-                      <FormControl 
-                        variant="filled" 
-                        sx={{ 
-                          minWidth: 200, 
-                          ml: 2,
-                          '& .MuiInputBase-root': {
+                      {/* Search Field - Left Side */}
+                      <Box sx={{ flex: '0 0 auto' }}>
+                        <TextField
+                          variant="filled"
+                          placeholder="Search..."
+                          sx={{
+                            '& .MuiInputBase-input': {
+                              ml: 1,
+                              padding: '16px 0'
+                            },
+                            '& .MuiInputBase-root': {
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            },
+                            '& .MuiInputBase-input::placeholder': {
+                              color: 'rgba(71, 85, 105, 1)',
+                              opacity: 1
+                            },
                             height: '55px',
+                            width: '400px',
                             borderRadius: 1
-                          }
-                        }}
-                      >
-                        <InputLabel>Filter by</InputLabel>
-                        <Select
-                          value={filterType}
-                          onChange={(event) => setFilterType(event.target.value)}
-                          label="Filter by"
-                        >
-                          <MenuItem value="all">All Cards</MenuItem>
-                          <MenuItem value="popular">Popular Cards</MenuItem>
-                          <MenuItem value="ar-experience">Popular AR Experience</MenuItem>
-                        </Select>
-                      </FormControl>
+                          }}
+                          onChange={event => setSearchQuery(event.target.value)}
+                          InputProps={{
+                            endAdornment: (
+                              <Button variant="text" disabled
+                                      sx={{ background: 'transparent !important' }}>
+                                <SearchIcon sx={{ ml: 1.5, color: 'rgba(71, 85, 105, 1)' }}/>
+                              </Button>
+                            )
+                          }}
+                        />
+                      </Box>
 
-                      {/* Upload Icon */}
+                      {/* Filter Dropdown - Center */}
+                      <Box sx={{ 
+                        // position: 'absolute',
+                        // left: '50%',
+                        // transform: 'translateX(-50%)',
+                        // flex: '0 0 auto'
+                        // ,bgcolor:'red'
+                      }}>
+                        <FormControl 
+                          variant="filled" 
+                          sx={{ 
+                            minWidth: 200,
+                            '& .MuiInputBase-root': {
+                              height: '55px',
+                              borderRadius: 1
+                            }
+                          }}
+                        >
+                          <InputLabel>Filter by</InputLabel>
+                          <Select
+                            value={filterType}
+                            onChange={(event) => setFilterType(event.target.value)}
+                            label="Filter by"
+                          >
+                            <MenuItem value="all">All Cards</MenuItem>
+                            <MenuItem value="popular">Popular Cards</MenuItem>
+                            {/* <MenuItem value="ar-experience">Popular AR Experience</MenuItem> */}
+                          </Select>
+                        </FormControl>
+                      </Box>
+
+                      {/* Icons - Right Side */}
                       <Box
                         sx={{
-                          ml: 2,
-                          width: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'flex-end',
+                          // flex: '0 0 auto',
+                          // marginLeft: 'auto',
+                          // display: 'flex',
+                          // alignItems: 'center',
+                          gap: 1,
                           borderRadius: 1,
                           cursor: 'pointer'
                         }}
@@ -472,34 +654,40 @@ const UplaodCards = () => {
                         </Tooltip> */}
                         
                         {/* Category Image */}
-                        <Tooltip title="Category">
-                          <NextLink href="/category">
-                            <IconButton>
-                              <img 
-                                src="/category.png" 
-                                alt="Category" 
-                                style={{
-                                  width: 60,
-                                  height: 55,
-                                  objectFit: 'contain'
-                                }}
-                              />
-                            </IconButton>
-                          </NextLink>
-                        </Tooltip>
-                        
-                        {/* Upload Image */}
-                        <Tooltip title="Upload Card">
-                          <IconButton onClick={handleClickOpen}>
+                        {/* <Tooltip title="Manage Categories">
+                          <IconButton onClick={handleCategoryPopupOpen}>
                             <img 
-                              src="/upload.png" 
-                              alt="Upload" 
+                              src="/category.png" 
+                              alt="Category" 
                               style={{
                                 width: 60,
                                 height: 55,
                                 objectFit: 'contain'
                               }}
                             />
+                          </IconButton>
+                        </Tooltip> */}
+                        
+                        {/* Upload Card Icon */}
+                        <Tooltip title="Upload Card">
+                          <IconButton onClick={handleClickOpen}>
+                            <Box sx={{ position: 'relative' }}>
+                              <DescriptionIcon sx={{
+                                fontSize: 50,
+                                color: '#c165a0',
+                                transform: 'rotate(-5deg)'
+                              }} />
+                              <CloudUploadIcon sx={{
+                                fontSize: 20,
+                                color: '#c165a0',
+                                position: 'absolute',
+                                top: 5,
+                                right: 5,
+                                backgroundColor: 'white',
+                                borderRadius: '50%',
+                                padding: '2px'
+                              }} />
+                            </Box>
                           </IconButton>
                         </Tooltip>
 
@@ -532,18 +720,19 @@ const UplaodCards = () => {
                   }}>
                     Title
                   </TableCell>
-                  <TableCell sx={{ 
-                    width: { xs: '25%', md: '25%' },
-                    minWidth: { xs: '100px', md: '120px' }
-                  }}>
-                    Views
-                  </TableCell>
+          
                   <TableCell sx={{ 
                     textAlign: 'left', 
                     width: { xs: '20%', md: '25%' },
                     minWidth: { xs: '80px', md: '120px' }
                   }}>
                     Category
+                  </TableCell>
+                  <TableCell sx={{ 
+                    width: { xs: '25%', md: '25%' },
+                    minWidth: { xs: '100px', md: '120px' }
+                  }}>
+                    Views
                   </TableCell>
                   <TableCell sx={{ 
                     textAlign: 'left', 
@@ -562,10 +751,15 @@ const UplaodCards = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {loadingComplete ?
+                {loadingComplete || filterLoading ?
                   <TableRow align="center">
                     <TableCell colSpan={6} align="center">
                       <CircularProgress/>
+                      {filterLoading && (
+                        <Typography variant="body2" sx={{ mt: 1 }}>
+                          Loading {filterType === 'popular' ? 'popular cards' : filterType === 'ar-experience' ? 'AR experience cards' : 'cards'}...
+                        </Typography>
+                      )}
                     </TableCell>
                   </TableRow> :
                   (paginatedCards && paginatedCards.length > 0 ? (
@@ -599,17 +793,18 @@ const UplaodCards = () => {
                         }}>
                           {data.title}
                         </TableCell>
-                        <TableCell component="th" scope="row" sx={{
-                          width: { xs: '25%', md: '25%' },
-                          minWidth: { xs: '100px', md: '120px' }
-                        }}>
-                          {data.views}
-                        </TableCell>
+                       
                         <TableCell component="th" scope="row" sx={{
                           width: { xs: '20%', md: '25%' },
                           minWidth: { xs: '80px', md: '120px' }
                         }}>
                           {data.cardType?.join(', ')}
+                        </TableCell>
+                        <TableCell component="th" scope="row" sx={{
+                          width: { xs: '25%', md: '25%' },
+                          minWidth: { xs: '100px', md: '120px' }
+                        }}>
+                          {data.views}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{
                           width: { xs: '15%', md: '15%' },
@@ -652,8 +847,20 @@ const UplaodCards = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} align="center">
-                        No Cards Found
+                      <TableCell colSpan={6} align="center">
+                        {filterType === 'popular' ? (
+                          <Typography variant="body1" color="text.secondary">
+                            No popular cards found. Cards need to have sales data to appear here.
+                          </Typography>
+                        ) : filterType === 'ar-experience' ? (
+                          <Typography variant="body1" color="text.secondary">
+                            No popular AR experience cards found. Cards need to have AR customizations to appear here.
+                          </Typography>
+                        ) : (
+                          <Typography variant="body1" color="text.secondary">
+                            No Cards Found
+                          </Typography>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))
@@ -766,6 +973,33 @@ borderColor: 'divider'            }}
                                   />
                                 </Grid>
                               ))}
+                              
+                              {/* Add Category Button */}
+                              <Grid item xs={12} md={6}>
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  p: 1,
+                                  border: '2px dashed #c165a0',
+                                  borderRadius: 1,
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    borderColor: '#a0526b',
+                                    backgroundColor: '#fdf2f8'
+                                  }
+                                }} onClick={handleCategoryPopupOpen}>
+                                  <IconButton size="small" sx={{ mr: 1 }}>
+                                    <CategoryIcon sx={{
+                                      fontSize: 20,
+                                      color: '#c165a0',
+                                      fontWeight: 'bold'
+                                    }} />
+                                  </IconButton>
+                                  <Typography variant="body2" sx={{ color: '#c165a0', fontWeight: 500 }}>
+                                    Add New Category
+                                  </Typography>
+                                </Box>
+                              </Grid>
                             </Grid>
                           </FormGroup>
                           {formik.touched.cardType && formik.errors.cardType && (
@@ -839,6 +1073,150 @@ borderColor: 'divider'            }}
 
           </React.Fragment>
 
+          {/* Category Management Popup */}
+          <Dialog open={categoryPopupOpen} onClose={handleCategoryPopupClose} maxWidth="md" fullWidth>
+            <DialogTitle>Manage Categories</DialogTitle>
+            <DialogContent>
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Existing Categories
+                </Typography>
+                <Grid container spacing={2}>
+                  {category.map((cat) => (
+                    <Grid item xs={12} sm={6} md={4} key={cat._id}>
+                      <Box sx={{
+                        p: 2,
+                        border: '1px solid #e0e0e0',
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}>
+                        {editingCategory && editingCategory._id === cat._id ? (
+                          // Edit mode
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                            <TextField
+                              value={editCategoryName}
+                              onChange={(e) => setEditCategoryName(e.target.value)}
+                              size="small"
+                              variant="outlined"
+                              sx={{ flex: 1 }}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  editCategory();
+                                }
+                              }}
+                            />
+                            <IconButton 
+                              size="small" 
+                              color="primary"
+                              onClick={editCategory}
+                              disabled={isEditingCategory}
+                            >
+                              {isEditingCategory ? <CircularProgress size={16} /> : <EditIcon fontSize="small" />}
+                            </IconButton>
+                            <IconButton 
+                              size="small" 
+                              color="default"
+                              onClick={handleCancelEdit}
+                            >
+                              <Typography sx={{ fontSize: '12px', fontWeight: 'bold' }}>✕</Typography>
+                            </IconButton>
+                          </Box>
+                        ) : (
+                          // View mode
+                          <>
+                            <Typography variant="body1" sx={{ flex: 1 }}>{cat.name}</Typography>
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
+                              <IconButton 
+                                size="small" 
+                                color="primary"
+                                onClick={() => handleEditCategory(cat)}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton 
+                                size="small" 
+                                // color="#c165a0"
+                                onClick={() => deleteCategory(cat._id)}
+                              >
+                                <DeleteIcon fontSize="small"  sx={{color:'#c165a0'}}/>
+                              </IconButton>
+                            </Box>
+                          </>
+                        )}
+                      </Box>
+                    </Grid>
+                  ))}
+                  
+                  {/* Add New Category Section */}
+                  <Grid item xs={12}>
+                    <Box sx={{
+                      p: 2,
+                      border: '2px dashed #c165a0',
+                      borderRadius: 1,
+                      textAlign: 'center',
+                      transition: 'all 0.3s ease',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        borderColor: '#a0526b',
+                        backgroundColor: '#fdf2f8',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 12px rgba(193, 101, 160, 0.15)'
+                      }
+                    }}>
+                      <CategoryIcon sx={{
+                        fontSize: 40,
+                        color: '#c165a0',
+                        fontWeight: 'bold',
+                        marginBottom: '8px'
+                      }} />
+                      <Typography variant="h6" sx={{ color: '#c165a0', mb: 1 }}>
+                        Add New Category
+                      </Typography>
+                      <TextField
+                        placeholder="Add a category"
+                        variant="outlined"
+                        size="small"
+                        value={newCategoryName}
+                        onChange={(e) => setNewCategoryName(e.target.value)}
+                        sx={{ width: '200px', mb: 2 }}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            addNewCategory();
+                          }
+                        }}
+                      />
+                      <Box>
+                        <Button 
+                          variant="contained" 
+                          onClick={addNewCategory}
+                          disabled={isAddingCategory || !newCategoryName.trim()}
+                          sx={{ 
+                            mr: 1,
+                            backgroundColor: '#c165a0',
+                            color: 'white',
+                            '&:hover': {
+                              backgroundColor: '#a0526b'
+                            },
+                            '&:disabled': {
+                              backgroundColor: '#c165a0',
+                              color: 'white'
+                            }
+                          }}
+                        >
+                          {isAddingCategory ? 'Adding...' : 'Add Category'}
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCategoryPopupClose}>Close</Button>
+            </DialogActions>
+          </Dialog>
 
           <ConfirmationDialog
             open={isDialogOpen}

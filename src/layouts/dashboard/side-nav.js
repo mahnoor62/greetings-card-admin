@@ -147,7 +147,7 @@ export const SideNav = (props) => {
           <Button
             onClick={handleLogout}
             startIcon={(
-              <SvgIcon fontSize="small">
+              <SvgIcon fontSize="small" sx={{ color: '#c165a0' }}>
                 <ArrowTopRightOnSquareIcon />
               </SvgIcon>
             )}

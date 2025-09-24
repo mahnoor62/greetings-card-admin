@@ -106,7 +106,7 @@ const Dashboard = () => {
                   Incardible Dashboard
                 </Typography>
                 <Typography variant="h6" color="text.secondary" sx={{ fontWeight: 400 }}>
-                  Complete overview of your AR Greeting Cards business
+                  Complete overview of your incardible business
                 </Typography>
               </Box>
             </CardContent>

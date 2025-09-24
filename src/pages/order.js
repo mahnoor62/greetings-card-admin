@@ -150,11 +150,15 @@ const Transaction = () => {
             }
           }
         );
-        setTransactions(response.data.data);
+        setTransactions(response.data.data || []);
+        setLoadingComplete(false);
+      } else {
         setLoadingComplete(false);
       }
     } catch (error) {
       console.log(error);
+      setTransactions([]);
+      setLoadingComplete(false);
     }
     setLoading(false);
   };
@@ -1299,7 +1303,9 @@ const Transaction = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={9} align="center">
-                      No Order Found
+                      <Typography variant="body1" color="text.secondary" sx={{ py: 3 }}>
+                        No orders found. Orders will appear here once customers make purchases.
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 )}
