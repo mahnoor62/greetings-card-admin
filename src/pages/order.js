@@ -1471,10 +1471,10 @@ const Transaction = () => {
                     }}>
                       Cards
                     </Typography>
-                    <Grid container spacing={2} sx={{ justifyContent: 'center' }}>
+                    <Grid container spacing={2} sx={{ justifyContent: 'flex-start' }}>
                       {/* Front Design */}
                       {selectedCardDetails?.cardCustomizationId?.cardId?.frontDesign && (
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                           <Card sx={{ 
                             maxWidth: 300, 
                             mx: 'auto',
@@ -1513,7 +1513,7 @@ const Transaction = () => {
                       )}
                       {/* Back Design */}
                       {selectedCardDetails?.cardCustomizationId?.cardId?.backDesign && (
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                           <Card sx={{ 
                             maxWidth: 300, 
                             mx: 'auto',
@@ -1552,7 +1552,7 @@ const Transaction = () => {
                       )}
                       {/* Inside Left Design */}
                       {selectedCardDetails?.cardCustomizationId?.cardId?.insideLeftDesign && (
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                           <Card sx={{ 
                             maxWidth: 300, 
                             mx: 'auto',
@@ -1591,7 +1591,7 @@ const Transaction = () => {
                       )}
                       {/* Inside Right Design */}
                       {selectedCardDetails?.cardCustomizationId?.cardId?.insideRightDesign && (
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                           <Card sx={{ 
                             maxWidth: 300, 
                             mx: 'auto',
@@ -1880,7 +1880,7 @@ const Transaction = () => {
                       }}>
                          Video Content
                       </Typography>
-                      <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
+                      <Grid container spacing={3} sx={{ justifyContent: 'flex-start' }}>
                         <Grid item xs={12} sm={6} md={4}>
                           <Card sx={{ 
                             maxWidth: 300, 
