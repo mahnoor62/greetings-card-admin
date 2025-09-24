@@ -845,6 +845,9 @@ const Transaction = () => {
       const fontStyle = textObj.isItalic ? 'italic' : 'normal';
       const textDecoration = textObj.isUnderline ? 'underline' : 'none';
       
+      // Use only the exact font name from the data
+      const fontFamily = textObj.fontName ? `"${textObj.fontName}"` : '';
+      
       // Determine text alignment
       let textAlign = 'left';
       if (textObj.isCenterAligned) textAlign = 'center';
@@ -857,6 +860,7 @@ const Transaction = () => {
         font-style: ${fontStyle};
         text-decoration: ${textDecoration};
         text-align: ${textAlign};
+        font-family: ${fontFamily};
       `;
       
       return `<${elementType} style="${style}">${textObj.text}</${elementType}>`;
