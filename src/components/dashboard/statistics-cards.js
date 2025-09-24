@@ -114,7 +114,15 @@ const StatisticsCards = ({ data, loading }) => {
           subtitle="Registered users"
         />
       </Grid>
-
+      <Grid item xs={12} sm={6} md={3}>
+        <StatCard
+          title="Total Visitors"
+          value={stats.totalVisitors || 0}
+          icon={<Visibility />}
+          color="secondary.main"
+          subtitle="Website visitors"
+        />
+      </Grid>
 
       {/* Total Revenue */}
       <Grid item xs={12} sm={6} md={3}>
@@ -139,15 +147,7 @@ const StatisticsCards = ({ data, loading }) => {
       </Grid>
 
       {/* Total Visitors */}
-      <Grid item xs={12} sm={6} md={3}>
-        <StatCard
-          title="Total Visitors"
-          value={stats.totalVisitors || 0}
-          icon={<Visibility />}
-          color="secondary.main"
-          subtitle="Website visitors"
-        />
-      </Grid>
+     
     </Grid>
   );
 };

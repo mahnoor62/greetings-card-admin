@@ -87,25 +87,25 @@ const WebsiteTrafficStats = ({ data, loading }) => {
         </Box>
 
         <Grid container spacing={2}>
-          {/* Total Visitors */}
+          {/* Total Registered Users */}
           <Grid item xs={12} sm={6}>
             <TrafficStatCard
-              title="Total Visitors"
-              value={traffic.totalVisitors || 0}
+              title="Registered Users"
+              value={traffic.totalRegisteredUsers || 0}
               icon={<People />}
               color="primary.main"
-              subtitle="Registered users"
+              subtitle="Users with accounts"
             />
           </Grid>
 
-          {/* New Visitors */}
+          {/* Total Page Views */}
           <Grid item xs={12} sm={6}>
             <TrafficStatCard
-              title="New Visitors"
-              value={traffic.newVisitors || 0}
+              title="Total Viewers"
+              value={traffic.totalPageViews || 0}
               icon={<PersonAdd />}
               color="info.main"
-              subtitle="This period"
+              subtitle="Website viewers"
             />
           </Grid>
 

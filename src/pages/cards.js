@@ -591,7 +591,7 @@ const UplaodCards = () => {
                       </Box>
 
                       {/* Filter Dropdown - Center */}
-                      <Box sx={{ 
+                      {/* <Box sx={{ 
                         // position: 'absolute',
                         // left: '50%',
                         // transform: 'translateX(-50%)',
@@ -617,9 +617,9 @@ const UplaodCards = () => {
                             <MenuItem value="all">All Cards</MenuItem>
                             <MenuItem value="popular">Popular Cards</MenuItem>
                             {/* <MenuItem value="ar-experience">Popular AR Experience</MenuItem> */}
-                          </Select>
-                        </FormControl>
-                      </Box>
+                          {/* </Select> */}
+                        {/* </FormControl> */}
+                      {/* </Box>  */}
 
                       {/* Icons - Right Side */}
                       <Box
@@ -1154,35 +1154,34 @@ borderColor: 'divider'            }}
                   {/* Add New Category Section */}
                   <Grid item xs={12}>
                     <Box sx={{
-                      p: 2,
+                      p: 3,
                       border: '2px dashed #c165a0',
-                      borderRadius: 1,
+                      borderRadius: 2,
                       textAlign: 'center',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        borderColor: '#a0526b',
-                        backgroundColor: '#fdf2f8',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 12px rgba(193, 101, 160, 0.15)'
-                      }
+                      backgroundColor: '#fafafa'
                     }}>
-                      <CategoryIcon sx={{
-                        fontSize: 40,
-                        color: '#c165a0',
-                        fontWeight: 'bold',
-                        marginBottom: '8px'
-                      }} />
-                      <Typography variant="h6" sx={{ color: '#c165a0', mb: 1 }}>
+                      <Typography variant="h5" sx={{ 
+                        color: '#000000', 
+                        mb: 2,
+                        fontWeight: 'bold'
+                      }}>
                         Add New Category
                       </Typography>
                       <TextField
-                        placeholder="Add a category"
+                        placeholder="Enter category name"
                         variant="outlined"
-                        size="small"
+                        size="medium"
                         value={newCategoryName}
                         onChange={(e) => setNewCategoryName(e.target.value)}
-                        sx={{ width: '200px', mb: 2 }}
+                        sx={{ 
+                          width: '100%', 
+                          maxWidth: '400px',
+                          mb: 2,
+                          '& .MuiOutlinedInput-root': {
+                            fontSize: '16px',
+                            padding: '12px 16px'
+                          }
+                        }}
                         onKeyPress={(e) => {
                           if (e.key === 'Enter') {
                             addNewCategory();

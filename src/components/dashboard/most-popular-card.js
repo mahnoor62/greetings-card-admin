@@ -232,7 +232,7 @@ const MostPopularCard = ({ data, loading }) => {
                   fontWeight: 'bold',
                   textAlign: 'center'
                 }}>
-                  🏆 #1 Best Seller
+                  🏆 #1 Top Best Sell
                 </Typography>
               </Box>
             </Box>

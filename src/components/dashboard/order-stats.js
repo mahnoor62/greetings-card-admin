@@ -100,16 +100,6 @@ const OrderStats = ({ data, loading }) => {
           </Grid>
 
 
-          {/* Shipped Orders */}
-          <Grid item xs={12} sm={6} md={3}>
-            <OrderStatCard
-              title="Shipped"
-              value={orders.shippedOrders || 0}
-              icon={<CheckCircle />}
-              color="success.main"
-              subtitle="Completed deliveries"
-            />
-          </Grid>
 
           {/* Standard Shipping */}
           <Grid item xs={12} sm={6} md={3}>
@@ -130,6 +120,17 @@ const OrderStats = ({ data, loading }) => {
               icon={<LocalShipping />}
               color="warning.main"
               subtitle={`${orders.expressShippingRate || 0}% of orders`}
+            />
+          </Grid>
+          
+          {/* Shipped Orders */}
+          <Grid item xs={12} sm={6} md={3}>
+            <OrderStatCard
+              title="Shipped"
+              value={orders.shippedOrders || 0}
+              icon={<CheckCircle />}
+              color="success.main"
+              subtitle="Completed deliveries"
             />
           </Grid>
         </Grid>
