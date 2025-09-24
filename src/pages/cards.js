@@ -142,8 +142,8 @@ const UplaodCards = () => {
         setCategories(prev => [newCategory, ...prev]);
         toast.success('Category Created Successfully');
         setNewCategoryName('');
-        // Don't close popup automatically - let user see the new category in the list
-        // setCategoryPopupOpen(false);
+        // Close popup after successful category creation
+        setCategoryPopupOpen(false);
       } else {
         toast.error(response.data.msg || 'Failed to add category');
       }
@@ -729,6 +729,7 @@ const UplaodCards = () => {
                     Category
                   </TableCell>
                   <TableCell sx={{ 
+                    textAlign: 'center',
                     width: { xs: '25%', md: '25%' },
                     minWidth: { xs: '100px', md: '120px' }
                   }}>
@@ -801,6 +802,7 @@ const UplaodCards = () => {
                           {data.cardType?.join(', ')}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{
+                          textAlign: 'center',
                           width: { xs: '25%', md: '25%' },
                           minWidth: { xs: '100px', md: '120px' }
                         }}>

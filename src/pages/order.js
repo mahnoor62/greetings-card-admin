@@ -739,11 +739,12 @@ const Transaction = () => {
     const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
 
     // sirf front aur back lena hai
+    const arTemplateData = transaction?.cardCustomizationId?.arTemplateData;
     const front = {
       src: makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
-      heading: transaction?.cardCustomizationId?.arTemplateData?.mainHeadingText,
-      para1: transaction?.cardCustomizationId?.arTemplateData?.paragraph1Text,
-      para2: transaction?.cardCustomizationId?.arTemplateData?.paragraph2Text
+      heading: arTemplateData?.mainHeading,
+      para1: arTemplateData?.paragraph1,
+      para2: arTemplateData?.paragraph2
     };
     const back = {
       src: makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign),
@@ -825,17 +826,53 @@ const Transaction = () => {
   }
 </style>`;
 
+    // Helper function to convert RGB values to CSS color
+    const rgbToCss = (colorObj) => {
+      if (!colorObj || typeof colorObj.r === 'undefined') return 'black';
+      const r = Math.round(colorObj.r * 255);
+      const g = Math.round(colorObj.g * 255);
+      const b = Math.round(colorObj.b * 255);
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+
+    // Helper function to apply text styling
+    const applyTextStyle = (textObj, elementType = 'p') => {
+      if (!textObj || !textObj.text) return '';
+      
+      const color = rgbToCss(textObj.color);
+      const fontSize = textObj.fontSize ? `${textObj.fontSize}pt` : '12pt';
+      const fontWeight = textObj.isBold ? 'bold' : 'normal';
+      const fontStyle = textObj.isItalic ? 'italic' : 'normal';
+      const textDecoration = textObj.isUnderline ? 'underline' : 'none';
+      
+      // Determine text alignment
+      let textAlign = 'left';
+      if (textObj.isCenterAligned) textAlign = 'center';
+      else if (textObj.isRightAligned) textAlign = 'right';
+      
+      const style = `
+        color: ${color};
+        font-size: ${fontSize};
+        font-weight: ${fontWeight};
+        font-style: ${fontStyle};
+        text-decoration: ${textDecoration};
+        text-align: ${textAlign};
+      `;
+      
+      return `<${elementType} style="${style}">${textObj.text}</${elementType}>`;
+    };
+
     const makeCardHTML = (c) => `
     <div class="card">
       ${(c.heading || c.para1 || c.para2) ? `
         <div class="overlay-text">
           <div class="overlay-inner">
-            ${c.heading ? `<h2 class="stroke">${c.heading}</h2>` : ``}
-            ${c.para1 ? `<p class="stroke">${c.para1}</p>` : ``}
-            ${c.para2 ? `<p class="stroke">${c.para2}</p>` : ``}
+            ${c.heading ? applyTextStyle(c.heading, 'h2') : ''}
+            ${c.para1 ? applyTextStyle(c.para1, 'p') : ''}
+            ${c.para2 ? applyTextStyle(c.para2, 'p') : ''}
           </div>
-        </div>` : ``}
-      ${c.qr ? `<div class="qr"><div id="qr-slot"></div></div>` : ``}
+        </div>` : ''}
+      ${c.qr ? `<div class="qr"><div id="qr-slot"></div></div>` : ''}
     </div>
   `;
 
