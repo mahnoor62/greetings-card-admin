@@ -15,7 +15,8 @@ import {
   TrendingUp,
   VerifiedUser,
   Google,
-  PersonAdd
+  PersonAdd,
+  Visibility
 } from '@mui/icons-material';
 
 const TrafficStatCard = ({ title, value, icon, color, subtitle, trend }) => (
@@ -76,7 +77,12 @@ const WebsiteTrafficStats = ({ data, loading }) => {
       backdropFilter: 'blur(10px)',
       borderRadius: 3,
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-      border: '1px solid rgba(255, 255, 255, 0.2)'
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+      }
     }}>
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -100,12 +106,20 @@ const WebsiteTrafficStats = ({ data, loading }) => {
 
           {/* Total Page Views */}
           <Grid item xs={12} sm={6}>
-            <TrafficStatCard
+            {/* <TrafficStatCard
               title="Total Viewers"
               value={traffic.totalPageViews || 0}
               icon={<PersonAdd />}
               color="info.main"
               subtitle="Website viewers"
+            /> */}
+    
+            <TrafficStatCard
+              title="Unique Visitors"
+              value={traffic.totalVisitors || 0}
+              icon={<Visibility />}
+              color="info.main"
+              subtitle="Website visitors"
             />
           </Grid>
 

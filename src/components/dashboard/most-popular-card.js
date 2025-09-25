@@ -13,7 +13,10 @@ import {
   Star, 
   AttachMoney, 
   ShoppingCart,
-  Visibility
+  Visibility,
+  CurrencyExchange,
+  AccountBalance,
+  Receipt
 } from '@mui/icons-material';
 
 const MostPopularCard = ({ data, loading }) => {
@@ -57,7 +60,7 @@ const MostPopularCard = ({ data, loading }) => {
         console.log("⚠️ This card has no sales data - showing views-based ranking");
       } else {
         console.log("✅ This card has actual sales data!");
-        console.log(`📊 Sales Summary: ${mostPopularCard.salesCount} times sold, ${mostPopularCard.totalQuantitySold} units, $${mostPopularCard.totalRevenue} revenue`);
+        console.log(`📊 Sales Summary: ${mostPopularCard.salesCount} times sold, ${mostPopularCard.totalQuantitySold} units, AUD ${mostPopularCard.totalRevenue} revenue`);
         console.log(`🎯 This is the #1 best selling card based on actual sales performance!`);
       }
   }
@@ -147,9 +150,9 @@ const MostPopularCard = ({ data, loading }) => {
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <AttachMoney sx={{ fontSize: 20, mr: 1, color: 'success.main' }} />
+                    <CurrencyExchange sx={{ fontSize: 20, mr: 1, color: 'success.main' }} />
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main' }}>
-                      ${mostPopularCard.totalRevenue || 0} Revenue
+                      AUD {mostPopularCard.totalRevenue || 0} Revenue
                     </Typography>
                   </Box>
                 </Grid>
@@ -171,9 +174,10 @@ const MostPopularCard = ({ data, loading }) => {
                 </Grid>
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <AttachMoney sx={{ fontSize: 20, mr: 1, color: 'error.main' }} />
+                    {/* <Receipt sx={{ fontSize: 20, mr: 1, color: 'error.main' }} /> */}
+                    <CurrencyExchange sx={{ fontSize: 20, mr: 1, color: 'error.main' }} />
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                      ${mostPopularCard.price || 0} Price
+                      A${mostPopularCard.price || 0} Price
                     </Typography>
                   </Box>
                 </Grid>
@@ -192,8 +196,8 @@ const MostPopularCard = ({ data, loading }) => {
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   This card has been sold <strong>{mostPopularCard.salesCount} times</strong> with a total of{' '}
-                  <strong>{mostPopularCard.totalQuantitySold} units</strong> generating{' '}
-                  <strong>${mostPopularCard.totalRevenue}</strong> in revenue.
+                  <strong>{mostPopularCard.totalQuantitySold} Quantity</strong> generating{' '}
+                  <strong>AUD {mostPopularCard.totalRevenue}</strong> in revenue.
                 </Typography>
               </Box>
 

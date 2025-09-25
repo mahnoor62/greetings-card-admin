@@ -77,7 +77,12 @@ const OrderStats = ({ data, loading }) => {
       backdropFilter: 'blur(10px)',
       borderRadius: 3,
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-      border: '1px solid rgba(255, 255, 255, 0.2)'
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      transition: 'all 0.3s ease',
+      '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+      }
     }}>
       <CardContent sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
@@ -89,7 +94,7 @@ const OrderStats = ({ data, loading }) => {
 
         <Grid container spacing={2}>
           {/* Total Orders */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2.4}>
             <OrderStatCard
               title="Total Orders"
               value={orders.totalOrders || 0}
@@ -99,10 +104,30 @@ const OrderStats = ({ data, loading }) => {
             />
           </Grid>
 
+          {/* Shipped Orders */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <OrderStatCard
+              title="Shipped"
+              value={orders.shippedOrders || 0}
+              icon={<CheckCircle />}
+              color="success.main"
+              subtitle={`${orders.shippingCompletionRate || 0}% completion rate`}
+            />
+          </Grid>
 
+          {/* Pending Shipping Orders */}
+          <Grid item xs={12} sm={6} md={2.4}>
+            <OrderStatCard
+              title="Pending Shipping"
+              value={orders.pendingShippingOrders || 0}
+              icon={<Pending />}
+              color="warning.main"
+              subtitle="Awaiting shipment"
+            />
+          </Grid>
 
           {/* Standard Shipping */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2.4}>
             <OrderStatCard
               title="Standard Shipping"
               value={orders.standardShippingOrders || 0}
@@ -113,7 +138,7 @@ const OrderStats = ({ data, loading }) => {
           </Grid>
 
           {/* Express Shipping */}
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2.4}>
             <OrderStatCard
               title="Express Shipping"
               value={orders.expressShippingOrders || 0}
@@ -123,16 +148,7 @@ const OrderStats = ({ data, loading }) => {
             />
           </Grid>
           
-          {/* Shipped Orders */}
-          <Grid item xs={12} sm={6} md={3}>
-            <OrderStatCard
-              title="Shipped"
-              value={orders.shippedOrders || 0}
-              icon={<CheckCircle />}
-              color="success.main"
-              subtitle="Completed deliveries"
-            />
-          </Grid>
+       
         </Grid>
 
         <Divider sx={{ my: 2 }} />

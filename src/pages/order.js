@@ -31,7 +31,9 @@ import {
   FormControlLabel,
   Checkbox,
   FormHelperText,
-  DialogActions, useTheme, useMediaQuery, Card, CardMedia, Divider
+  DialogActions, useTheme, useMediaQuery, Card, CardMedia, Divider,
+  Select,
+  MenuItem
 } from '@mui/material';
 import TablePagination from '@mui/material/TablePagination';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -66,9 +68,10 @@ const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
   // search bar stats
   const [searchQuery, setSearchQuery] = useState('');
+  const [shippingFilter, setShippingFilter] = useState('all');
   // pagination stats
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [card, setCard] = useState(null);
   const [openDialogue, setOpenDialogue] = useState(false);
@@ -78,6 +81,8 @@ const Transaction = () => {
   const [selectedTransactionDetails, setSelectedTransactionDetails] = useState(null);
   const [addressDetailsModal, setAddressDetailsModal] = useState(false);
   const [selectedAddressDetails, setSelectedAddressDetails] = useState(null);
+  const [shippingConfirmationDialog, setShippingConfirmationDialog] = useState(false);
+  const [selectedTransactionForShipping, setSelectedTransactionForShipping] = useState(null);
 
   const handleOpenCardDetails = (transaction) => {
     setSelectedCardDetails(transaction);
@@ -109,6 +114,53 @@ const Transaction = () => {
     setSelectedAddressDetails(null);
   };
 
+  const handleShippingStatusChange = (transaction, newStatus) => {
+    if (newStatus === 'shipped' && !transaction.isShipped) {
+      setSelectedTransactionForShipping(transaction);
+      setShippingConfirmationDialog(true);
+    }
+  };
+
+  const handleConfirmShipping = async () => {
+    if (!selectedTransactionForShipping) return;
+
+    const token = window.localStorage.getItem('token');
+    try {
+      const response = await axios.put(
+        `${BASE_URL}/api/transactions/update-shipping-status/${selectedTransactionForShipping._id}`,
+        { isShipped: true },
+        {
+          headers: {
+            'x-access-token': token
+          }
+        }
+      );
+
+      if (response.data.success) {
+        // Update the transaction in the local state
+        setTransactions(prevTransactions =>
+          prevTransactions.map(transaction =>
+            transaction._id === selectedTransactionForShipping._id
+              ? { ...transaction, isShipped: true }
+              : transaction
+          )
+        );
+        toast.success('Order marked as shipped successfully!');
+      }
+    } catch (error) {
+      console.error('Error updating shipping status:', error);
+      toast.error('Failed to update shipping status');
+    } finally {
+      setShippingConfirmationDialog(false);
+      setSelectedTransactionForShipping(null);
+    }
+  };
+
+  const handleCancelShipping = () => {
+    setShippingConfirmationDialog(false);
+    setSelectedTransactionForShipping(null);
+  };
+
   const getCard = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/api/transactions/get-single-transaction-detail/${id}`,
@@ -133,6 +185,11 @@ const Transaction = () => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  // Reset page when shipping filter changes
+  useEffect(() => {
+    setPage(0);
+  }, [shippingFilter]);
 
   // api function
   const getTransactions = async () => {
@@ -178,13 +235,25 @@ const Transaction = () => {
   console.log("transactions", transactions)
 
 //filter function
-  const filtered = applyFilter(transactions, searchQuery, [
+  let filtered = applyFilter(transactions, searchQuery, [
     'paypal_order_id',
     'cardCustomizationId.userId.firstName',
     'cardCustomizationId.userId.email',
     'status',
     'title'
   ]);
+
+  // Apply shipping status filter
+  if (shippingFilter !== 'all') {
+    filtered = filtered.filter(transaction => {
+      if (shippingFilter === 'shipped') {
+        return transaction.isShipped === true;
+      } else if (shippingFilter === 'shipping') {
+        return transaction.isShipped === false;
+      }
+      return true;
+    });
+  }
   const paginatedTransactions = applyPagination(filtered, page, rowsPerPage);
   const totalCount = filtered.length;
 
@@ -1088,6 +1157,42 @@ const Transaction = () => {
           }}>Orders</Typography>
            <Paper sx={{ width: '100%', overflow: 'hidden' }}>
 
+          {/* Filter Status Indicator */}
+          {/* <Box sx={{ 
+            p: 2, 
+            borderBottom: 1, 
+            borderColor: 'divider',
+            backgroundColor: 'rgba(248, 250, 252, 0.8)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 1
+          }}> */}
+            {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}> */}
+              {/* <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                Showing {totalCount} of {transactions.length} orders
+              </Typography> */}
+              {/* {shippingFilter !== 'all' && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: shippingFilter === 'shipped' ? '#22c55e' : '#f59e0b'
+                  }} />
+                  <Typography variant="body2" sx={{ 
+                    color: 'text.secondary', 
+                    fontWeight: 500,
+                    textTransform: 'capitalize'
+                  }}>
+                    Filtered by: {shippingFilter === 'shipping' ? 'In Shipping' : shippingFilter}
+                  </Typography>
+                </Box>
+              )} */}
+            {/* </Box> */}
+          {/* </Box> */}
+
 <TableContainer
   component={Paper}
   sx={{
@@ -1128,9 +1233,10 @@ const Transaction = () => {
                     <Box sx={{
                       display: 'flex',
                       alignItems: {md:'flex-end', xs:'flex-start'},
-                      flexDirection: { md: 'row', xs: 'column' },
-                      // justifyContent: 'center',
-                      width: '100%'
+                      flexDirection: { md: 'row', xs: 'row' },
+                      justifyContent: 'space-between',
+                      width: '100%',
+                      gap: 2
                     }}>
 
                       {/* Search Field */}
@@ -1154,7 +1260,7 @@ const Transaction = () => {
                           },
                           height: '55px',
                           width: '100%',  // take as much space as possible
-                          maxWidth: '400px',  // limit max width if needed
+                          maxWidth: '350px',  // reduced max width to accommodate filter
                           borderRadius: 1
                         }}
                         onChange={event => setSearchQuery(event.target.value)}
@@ -1168,6 +1274,70 @@ const Transaction = () => {
                         }}
                       />
 
+                      {/* Shipping Status Filter in Table Header */}
+                      <FormControl 
+                        variant="outlined" 
+                        size="small"
+                        sx={{ 
+                          minWidth: 150,
+                          // borderRadius: 1,
+                          height: '55px',
+                          '& .MuiInputBase-root': {
+                            height: '55px',
+                            // backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            borderRadius: 2
+                          },
+                          '& .MuiInputBase-input': {
+                            padding: '16px 12px',
+                            color: 'rgba(71, 85, 105, 1)'
+                          }
+                        }}
+                      >
+                        <Select
+                          value={shippingFilter}
+                          onChange={(e) => setShippingFilter(e.target.value)}
+                          displayEmpty
+                          sx={{
+                            '& .MuiSelect-select': {
+                              color: 'rgba(71, 85, 105, 1)',
+                              fontWeight: 500
+                            }
+                          }}
+                        >
+                          <MenuItem value="all">
+                            <Typography sx={{ color: 'rgba(71, 85, 105, 1)', fontWeight: 500 }}>
+                              All Orders
+                            </Typography>
+                          </MenuItem>
+                          <MenuItem value="shipping">
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                backgroundColor: '#f59e0b'
+                              }} />
+                              <Typography sx={{ color: 'rgba(71, 85, 105, 1)', fontWeight: 500 }}>
+                                In Shipping
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="shipped">
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Box sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                backgroundColor: '#22c55e'
+                              }} />
+                              <Typography sx={{ color: 'rgba(71, 85, 105, 1)', fontWeight: 500 }}>
+                                Shipped
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+
                     </Box>
                   </TableCell>
 
@@ -1178,7 +1348,7 @@ const Transaction = () => {
                   <TableCell sx={{ textAlign: 'left' }}>Order Details</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Card Title</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Address</TableCell>
-                  <TableCell sx={{ textAlign: 'left' }}>Shipping</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Shipping Status</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Order Date</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Action</TableCell>
                 </TableRow>
@@ -1203,7 +1373,7 @@ const Transaction = () => {
                           <br/>
                           {data?.cardCustomizationId?.userId?.email}
                         </TableCell>
-                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '150px' }}>
+                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '130px' }}>
                           <Box sx={{ 
                             display: 'flex', 
                             alignItems: 'center',
@@ -1231,7 +1401,7 @@ const Transaction = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '200px' }}>
+                        <TableCell component="th" scope="row" sx={{ textAlign: 'left', minWidth: '190px' }}>
                           <Box sx={{ 
                             display: 'flex', 
                             alignItems: 'center',
@@ -1288,32 +1458,57 @@ const Transaction = () => {
                           </Box>
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{ textAlign: 'left' }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            gap: 1
-                          }}>
-                            <Box sx={{
-                              px: 2,
-                              py: 1,
-                              borderRadius: 1,
-                              backgroundColor: data?.expressShipping === true ? '#f0f9ff' : '#f0fdf4',
-                              border: '1px solid',
-                              borderColor: data?.expressShipping === true ? '#0ea5e9' : '#22c55e',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 1
-                            }}>
-                              <Typography sx={{ 
-                                color: data?.expressShipping === true ? '#0ea5e9' : '#22c55e',
-                                fontWeight: 600,
-                                fontSize: '0.875rem',
-                                textTransform: 'capitalize'
-                              }}>
-                                {data?.expressShipping === true ? 'Express' : 'Standard'}
-                              </Typography>
-                            </Box>
-                          </Box>
+                          <FormControl size="small" sx={{ minWidth: 100 }}>
+                            <Select
+                              value={data?.isShipped ? 'shipped' : 'shipping'}
+                              onChange={(e) => handleShippingStatusChange(data, e.target.value)}
+                              disabled={data?.isShipped}
+                              sx={{
+                                '& .MuiSelect-select': {
+                                  py: 1,
+                                  px: 2,
+                                  borderRadius: 1,
+                                  backgroundColor: data?.isShipped ? '#f0fdf4' : '#fef3c7',
+                                  border: '1px solid',
+                                  borderColor: data?.isShipped ? '#22c55e' : '#f59e0b',
+                                  color: data?.isShipped ? '#22c55e' : '#f59e0b',
+                                  fontWeight: 600,
+                                  fontSize: '0.875rem',
+                                  textTransform: 'capitalize'
+                                },
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                  border: 'none'
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                  border: 'none'
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                  border: 'none'
+                                }
+                              }}
+                            >
+                              <MenuItem value="shipping" disabled>
+                                <Typography sx={{ 
+                                  color: '#f59e0b',
+                                  fontWeight: 600,
+                                  fontSize: '0.875rem',
+                                  textTransform: 'capitalize'
+                                }}>
+                                  In Shipping
+                                </Typography>
+                              </MenuItem>
+                              <MenuItem value="shipped">
+                                <Typography sx={{ 
+                                  color: '#22c55e',
+                                  fontWeight: 600,
+                                  fontSize: '0.875rem',
+                                  textTransform: 'capitalize'
+                                }}>
+                                  Shipped
+                                </Typography>
+                              </MenuItem>
+                            </Select>
+                          </FormControl>
                         </TableCell>
                         <TableCell component="th" scope="row">
                           {formatDateTime(data?.paid_at)}
@@ -2095,7 +2290,6 @@ const Transaction = () => {
                 </Typography>
               </Box>
             </DialogTitle>
-            <Container>
             <DialogContent sx={{ 
               p: 0,
               backgroundColor: '#ffffff',
@@ -2122,7 +2316,7 @@ const Transaction = () => {
                   display: 'flex', 
                   flexDirection: 'column', 
                   gap: 3,
-                  p: 3,
+                  p: 4,
                   px: 4
                 }}>
                   {/* Transaction ID & Status */}
@@ -2177,7 +2371,7 @@ const Transaction = () => {
                           </Box>
                         </Box>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      {/* <Grid item xs={12} sm={6}>
                         <Box sx={{ 
                           p: 2,
                           backgroundColor: '#ffffff',
@@ -2220,6 +2414,100 @@ const Transaction = () => {
                               fontSize: '0.75rem'
                             }}>
                               {selectedTransactionDetails?.status}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid> */}
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1.5,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Shipping Status
+                          </Typography>
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: 2,
+                            py: '8px',
+                            borderRadius: '6px',
+                            backgroundColor: selectedTransactionDetails?.isShipped ? '#f0fdf4' : '#fef3c7',
+                            border: '1px solid',
+                            borderColor: selectedTransactionDetails?.isShipped ? '#22c55e' : '#f59e0b',
+                            flex: 1,
+                            justifyContent: 'flex-start'
+                          }}>
+                            <Box sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              backgroundColor: selectedTransactionDetails?.isShipped ? '#22c55e' : '#f59e0b',
+                              mr: 1
+                            }} />
+                            <Typography sx={{ 
+                              color: selectedTransactionDetails?.isShipped ? '#22c55e' : '#f59e0b',
+                              fontWeight: 600,
+                              textTransform: 'capitalize',
+                              fontSize: '0.75rem'
+                            }}>
+                              {selectedTransactionDetails?.isShipped ? 'Shipped' : 'In Shipping'}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1.5,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Estimated Shipping Days
+                          </Typography>
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            px: 2,
+                            py: '8px',
+                            borderRadius: '6px',
+                            backgroundColor: selectedTransactionDetails?.expressShipping ? '#f0f9ff' : '#f8fafc',
+                            border: '1px solid',
+                            borderColor: selectedTransactionDetails?.expressShipping ? '#0ea5e9' : '#e5e7eb',
+                            flex: 1,
+                            justifyContent: 'flex-start'
+                          }}>
+                            <Typography sx={{ 
+                              color: selectedTransactionDetails?.expressShipping ? '#0ea5e9' : '#374151',
+                              fontWeight: 600,
+                              fontSize: '0.75rem'
+                            }}>
+                              {selectedTransactionDetails?.expressShipping ? '1-3 days (Express)' : `${selectedTransactionDetails?.shippingDays || '7-10'} days`}
                             </Typography>
                           </Box>
                         </Box>
@@ -2570,7 +2858,7 @@ const Transaction = () => {
                   </Box>
                 </Box>
               )}
-            </DialogContent></Container>
+            </DialogContent>
             <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
               <Button 
                 onClick={handleCloseTransactionDetails} 
@@ -2829,7 +3117,7 @@ const Transaction = () => {
                         Customer Information
                       </Typography>
                       <Grid container spacing={2} alignItems="stretch">
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12}>
                           <Box sx={{ 
                             p: 2,
                             backgroundColor: '#ffffff',
@@ -2857,39 +3145,6 @@ const Transaction = () => {
                               alignItems: 'center'
                             }}>
                               {selectedAddressDetails.cardCustomizationId.userId.firstName} {selectedAddressDetails.cardCustomizationId.userId.lastName}
-                            </Typography>
-                          </Box>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <Box sx={{ 
-                            p: 2,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 2,
-                            border: '1px solid #e5e7eb',
-                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}>
-                            <Typography variant="subtitle2" sx={{ 
-                              fontWeight: 600, 
-                              mb: 1,
-                              color: '#374151',
-                              fontSize: '0.75rem',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.05em'
-                            }}>
-                              Account Status
-                            </Typography>
-                            <Typography sx={{ 
-                              color: selectedAddressDetails.cardCustomizationId.userId.isVerified ? '#0ea5e9' : '#ef4444',
-                              fontWeight: 500,
-                              fontSize: '0.9rem',
-                              flex: 1,
-                              display: 'flex',
-                              alignItems: 'center'
-                            }}>
-                              {selectedAddressDetails.cardCustomizationId.userId.isVerified ? 'Verified' : 'Unverified'}
                             </Typography>
                           </Box>
                         </Grid>
@@ -2999,6 +3254,79 @@ const Transaction = () => {
                 }}
               >
                 Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Shipping Confirmation Dialog */}
+          <Dialog
+            open={shippingConfirmationDialog}
+            onClose={handleCancelShipping}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle sx={{ 
+              backgroundColor: '#f8fafc', 
+              borderBottom: '1px solid #e5e7eb',
+              fontWeight: 600,
+              color: '#1f2937'
+            }}>
+              Confirm Shipping Status
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+              <Typography sx={{ mb: 2, color: '#374151', mt:3 }}>
+                Are you sure you want to mark this order as shipped?
+              </Typography>
+              {selectedTransactionForShipping && (
+                <Box sx={{ 
+                  p: 2, 
+                  backgroundColor: '#f9fafb', 
+                  borderRadius: 1,
+                  border: '1px solid #e5e7eb'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                    Order Details:
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                    Transaction ID: {selectedTransactionForShipping._id}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                    Card Title: {selectedTransactionForShipping.title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                    Delivery Address: {selectedTransactionForShipping.delivery_address}
+                  </Typography>
+                </Box>
+              )}
+            </DialogContent>
+            <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
+              <Button
+                onClick={handleCancelShipping}
+                variant="outlined"
+                sx={{
+                  borderColor: '#d1d5db',
+                  color: '#6b7280',
+                  '&:hover': {
+                    borderColor: '#9ca3af',
+                    backgroundColor: '#f9fafb'
+                  }
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmShipping}
+                variant="contained"
+                sx={{
+                  backgroundColor: '#c165a0',
+                  color:'white',
+                  '&:hover': {
+                    backgroundColor: '#c165a0',
+                    color:'white'
+                  }
+                }}
+              >
+                Confirm Shipped
               </Button>
             </DialogActions>
           </Dialog>

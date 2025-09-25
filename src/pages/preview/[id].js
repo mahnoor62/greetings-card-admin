@@ -369,9 +369,28 @@ const Id = () => {
             width: '100%',
             display: 'flex',
             justifyContent: { xs: 'center', md: 'flex-end' },
+            alignItems: 'center',
+            gap: 2,
             pr: 3
           }}
         >
+          <Button
+            onClick={() => router.push('/dashboard')}
+            sx={{
+              mt: { xs: 10, md: 0 },
+              textAlign: 'center',
+              backgroundColor: '#d9d9d9 !important',
+              color: 'black',
+              minWidth: { md: 150, xs: 100 },
+              '&:hover': {
+                backgroundColor: '#d9d9d9 !important',
+                color: 'black',
+              }
+            }}
+            variant="contained"
+          >
+            Dashboard
+          </Button>
           <Button
             onClick={() => router.back()}
             sx={{
