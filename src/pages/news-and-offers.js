@@ -396,7 +396,7 @@ const NewsAndOffers = () => {
         );
 
         if (data?.success) {
-          toast.success('New and offers send to the subscibeers successfully!');
+          toast.success('New and offers send to the subscribers successfully!');
           helpers.resetForm();
         } else {
           toast.error(data?.message || 'Failed to send');

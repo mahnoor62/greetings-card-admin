@@ -160,7 +160,7 @@ export const TopNav = (props) => {
                       onClick={accountPopover.handleOpen}
                       ref={accountPopover.anchorRef}
                       sx={{
-                        display: isCardCustomization || isDashboard || isPreview  || isUploadCards  ? 'block' : 'none',
+                        display: (isCardCustomization || isPreview || isUploadCards) ? 'block' : 'none',
                         cursor: 'pointer',
                         height: 40,
                         width: 40

@@ -126,7 +126,7 @@ export const GameSidebar = (props) => {
         open
         PaperProps={{
           sx: {
-            backgroundColor: 'neutral.800',
+            backgroundColor: '#1a1d25',
             color: 'common.white',
             width: 280,
             position: 'initial'
@@ -146,7 +146,7 @@ export const GameSidebar = (props) => {
       open={open}
       PaperProps={{
         sx: {
-          backgroundColor: 'neutral.800',
+          backgroundColor: '#1a1d25',
           color: 'common.white',
           width: 280
         }
