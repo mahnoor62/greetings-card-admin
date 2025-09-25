@@ -903,6 +903,7 @@ const Transaction = () => {
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
     script.onload = () => {
       const qrValue = `${AR_EXPERIENCE_LINK}/?templateId=${transaction?.cardCustomizationId?._id}`;
+      console.log("qrValue", qrValue)
       const slot = winRef.document.getElementById('qr-slot');
       if (slot && winRef.QRCode) {
         const qr = new winRef.QRCode(slot, {
