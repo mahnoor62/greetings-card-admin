@@ -21,25 +21,40 @@ import {
 
 const TrafficStatCard = ({ title, value, icon, color, subtitle, trend }) => (
   <Card sx={{ height: '100%' }}>
-    <CardContent>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Box sx={{ color, mr: 1 }}>
-          {icon}
-        </Box>
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          {title}
-        </Typography>
+    <CardContent sx={{ textAlign: 'center' }}>
+      {/* Icon on top */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        mb: 2,
+        '& svg': { 
+          fontSize: '1.5rem',
+          color: color
+        }
+      }}>
+        {icon}
       </Box>
-      <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 1 }}>
+      
+      {/* Title */}
+      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+        {title}
+      </Typography>
+      
+      {/* Value */}
+      <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
         {value}
       </Typography>
+      
+      {/* Subtitle */}
       {subtitle && (
         <Typography variant="body2" color="text.secondary">
           {subtitle}
         </Typography>
       )}
+      
+      {/* Trend */}
       {trend && (
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1 }}>
           <TrendingUp sx={{ fontSize: 16, color: 'success.main', mr: 0.5 }} />
           <Typography variant="body2" color="success.main">
             {trend}
@@ -94,7 +109,7 @@ const WebsiteTrafficStats = ({ data, loading }) => {
 
         <Grid container spacing={2}>
           {/* Total Registered Users */}
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12} md={12} lg={6}>
             <TrafficStatCard
               title="Registered Users"
               value={traffic.totalRegisteredUsers || 0}
@@ -141,7 +156,7 @@ const WebsiteTrafficStats = ({ data, loading }) => {
               value={`${traffic.conversionRate || 0}%`}
               icon={<TrendingUp />}
               color="warning.main"
-              subtitle="Buyers / Total Visitors"
+              subtitle="Buyers / Total Register Users"
             />
           </Grid>
         </Grid>

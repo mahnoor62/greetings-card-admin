@@ -101,7 +101,7 @@ const MostPopularARTemplate = ({ data, loading }) => {
               fontWeight: 'bold'
             }}
           >
-            {mostPopularTemplate.templateIndex}
+            {mostPopularTemplate.templateIndex === 0 ? 1 : mostPopularTemplate.templateIndex}
           </Avatar>
           
           <Typography variant="h4" sx={{ 
@@ -116,7 +116,7 @@ const MostPopularARTemplate = ({ data, loading }) => {
           </Typography>
           
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Template No: {mostPopularTemplate.templateIndex}
+            Template No: {mostPopularTemplate.templateIndex === 0 ? 1 : mostPopularTemplate.templateIndex}
           </Typography>
 
           {/* Times Used - Centered below template info */}

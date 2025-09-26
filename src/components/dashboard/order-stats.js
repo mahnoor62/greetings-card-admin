@@ -94,7 +94,7 @@ const OrderStats = ({ data, loading }) => {
 
         <Grid container spacing={2}>
           {/* Total Orders */}
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={4}>
             <OrderStatCard
               title="Total Orders"
               value={orders.totalOrders || 0}
@@ -105,7 +105,7 @@ const OrderStats = ({ data, loading }) => {
           </Grid>
 
           {/* Shipped Orders */}
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={4}>
             <OrderStatCard
               title="Shipped"
               value={orders.shippedOrders || 0}
@@ -116,7 +116,7 @@ const OrderStats = ({ data, loading }) => {
           </Grid>
 
           {/* Pending Shipping Orders */}
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={4}>
             <OrderStatCard
               title="Pending Shipping"
               value={orders.pendingShippingOrders || 0}
@@ -127,7 +127,7 @@ const OrderStats = ({ data, loading }) => {
           </Grid>
 
           {/* Standard Shipping */}
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={4}>
             <OrderStatCard
               title="Standard Shipping"
               value={orders.standardShippingOrders || 0}
@@ -138,7 +138,7 @@ const OrderStats = ({ data, loading }) => {
           </Grid>
 
           {/* Express Shipping */}
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={4}>
             <OrderStatCard
               title="Express Shipping"
               value={orders.expressShippingOrders || 0}
