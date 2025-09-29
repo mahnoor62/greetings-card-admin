@@ -254,7 +254,6 @@ const Transaction = () => {
   let filtered = applyFilter(transactions, searchQuery, [
     'payment_intent',
     'checkout_id',
-    'coupon_code',
     'cardCustomizationId.userId.firstName',
     'cardCustomizationId.userId.email',
     'status',
@@ -2503,88 +2502,6 @@ const Transaction = () => {
                               whiteSpace: 'pre-wrap'
                             }}>
                               {selectedTransactionDetails?.checkout_id || 'N/A'}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Box sx={{ 
-                          p: 2,
-                          backgroundColor: '#ffffff',
-                          borderRadius: 2,
-                          border: '1px solid #e5e7eb',
-                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column'
-                        }}>
-                          <Typography variant="subtitle2" sx={{ 
-                            fontWeight: 600, 
-                            mb: 1.5,
-                            color: '#374151',
-                            fontSize: '0.75rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em'
-                          }}>
-                            Coupon Code
-                          </Typography>
-                          <Box sx={{
-                            backgroundColor: '#f9fafb',
-                            padding: '8px 12px',
-                            borderRadius: 1,
-                            border: '1px solid #e5e7eb',
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                            <Typography sx={{ 
-                              fontFamily: 'monospace', 
-                              fontWeight: 500,
-                              color: '#111827',
-                              fontSize: '0.875rem'
-                            }}>
-                              {selectedTransactionDetails?.coupon_code || 'No coupon applied'}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Box sx={{ 
-                          p: 2,
-                          backgroundColor: '#ffffff',
-                          borderRadius: 2,
-                          border: '1px solid #e5e7eb',
-                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                          height: '100%',
-                          display: 'flex',
-                          flexDirection: 'column'
-                        }}>
-                          <Typography variant="subtitle2" sx={{ 
-                            fontWeight: 600, 
-                            mb: 1.5,
-                            color: '#374151',
-                            fontSize: '0.75rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em'
-                          }}>
-                            Discount Amount
-                          </Typography>
-                          <Box sx={{
-                            backgroundColor: '#f9fafb',
-                            padding: '8px 12px',
-                            borderRadius: 1,
-                            border: '1px solid #e5e7eb',
-                            flex: 1,
-                            display: 'flex',
-                            alignItems: 'center'
-                          }}>
-                            <Typography sx={{ 
-                              fontFamily: 'monospace', 
-                              fontWeight: 500,
-                              color: '#111827',
-                              fontSize: '0.875rem'
-                            }}>
-                              ${selectedTransactionDetails?.discount_amount || 0}
                             </Typography>
                           </Box>
                         </Box>
