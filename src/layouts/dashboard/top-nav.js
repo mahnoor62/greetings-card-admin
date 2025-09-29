@@ -13,7 +13,7 @@ import {
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import { usePopover } from 'src/hooks/use-popover';
-import { AccountPopover } from './account-popover';
+import { AccountPopover } from './account-popover.js';
 import NextLink from 'next/link';
 import * as React from 'react';
 import ChartBarIcon from '@heroicons/react/24/solid/ChartBarIcon';

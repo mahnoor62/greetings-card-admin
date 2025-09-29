@@ -93,7 +93,8 @@ const ExpressShippingUsers = () => {
     'state',
     'postal_code',
     'phone_number',
-    'paypal_order_id'
+    'payment_intent',
+    'checkout_id'
   ]);
 
   const paginatedUsers = applyPagination(filteredUsers, page, rowsPerPage);
@@ -276,8 +277,14 @@ const ExpressShippingUsers = () => {
                            </Box>
                          </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                            {user.paypal_order_id || 'N/A'}
+                          <Typography variant="body2" sx={{ 
+                            fontFamily: 'monospace',
+                            wordBreak: 'break-all',
+                            overflowWrap: 'break-word',
+                            whiteSpace: 'pre-wrap',
+                            maxWidth: '200px'
+                          }}>
+                            {user.payment_intent || 'N/A'}
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -524,7 +531,7 @@ const ExpressShippingUsers = () => {
                     📞 Contact Information
                   </Typography>
                   <Grid container spacing={2} alignItems="stretch">
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12}>
                       <Box sx={{ 
                         p: 2,
                         backgroundColor: '#ffffff',
@@ -557,7 +564,7 @@ const ExpressShippingUsers = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12}>
                       <Box sx={{ 
                         p: 2,
                         backgroundColor: '#ffffff',
@@ -676,6 +683,208 @@ const ExpressShippingUsers = () => {
                         </Typography>
                       </Box>
                     </Grid>
+                  </Grid>
+                </Box>
+
+                <Divider />
+
+                {/* Shipping Information */}
+                <Box>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600, 
+                    color: '#111827',
+                    mb: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    📦 Shipping Information
+                  </Typography>
+                  
+                  {/* Current Status Row - Upper */}
+                  <Grid container spacing={2} alignItems="stretch" sx={{ mb: 2 }}>
+                    <Grid item xs={12}>
+                      <Box sx={{ 
+                        p: 2,
+                        backgroundColor: '#ffffff',
+                        borderRadius: 2,
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        minHeight: '120px',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}>
+                        <Typography variant="subtitle2" sx={{ 
+                          fontWeight: 600, 
+                          mb: 1,
+                          color: '#374151',
+                          fontSize: '0.75rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>
+                          Current Status
+                        </Typography>
+                        <Box sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          px: 2,
+                          py: '8px',
+                          borderRadius: '6px',
+                          backgroundColor: selectedAddressData?.shippingStatus === 'shipped' ? '#f0fdf4' : 
+                                         selectedAddressData?.shippingStatus === 'in_shipping' ? '#fef3c7' : '#f3f4f6',
+                          border: '1px solid',
+                          borderColor: selectedAddressData?.shippingStatus === 'shipped' ? '#22c55e' : 
+                                      selectedAddressData?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
+                          flex: 1
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              backgroundColor: selectedAddressData?.shippingStatus === 'shipped' ? '#22c55e' : 
+                                             selectedAddressData?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
+                              mr: 1
+                            }} />
+                            <Typography sx={{ 
+                              color: selectedAddressData?.shippingStatus === 'shipped' ? '#22c55e' : 
+                                     selectedAddressData?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
+                              fontWeight: 600,
+                              textTransform: 'capitalize',
+                              fontSize: '0.9rem'
+                            }}>
+                              {selectedAddressData?.shippingStatus === 'shipped' ? 'Shipped' : 
+                               selectedAddressData?.shippingStatus === 'in_shipping' ? 'In Shipping' : 'Processing'}
+                            </Typography>
+                          </Box>
+                          <Typography sx={{ 
+                            color: selectedAddressData?.shippingStatus === 'shipped' ? '#22c55e' : 
+                                   selectedAddressData?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
+                            fontWeight: 500,
+                            fontSize: '0.8rem'
+                          }}>
+                            {selectedAddressData?.shippingStatus === 'shipped' && selectedAddressData?.shippedDate ? 
+                              `Shipped on ${new Date(selectedAddressData.shippedDate).toLocaleDateString()}` :
+                             selectedAddressData?.shippingStatus === 'in_shipping' && selectedAddressData?.inShippingDate ? 
+                              `In shipping since ${new Date(selectedAddressData.inShippingDate).toLocaleDateString()}` :
+                             `Processing since ${new Date(selectedAddressData.createdAt).toLocaleDateString()}`
+                            }
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  </Grid>
+
+                  {/* Dates Row - Bottom - 2 dates per row */}
+                  <Grid container spacing={2} alignItems="stretch">
+                    {/* Processing Date - Always show */}
+                    <Grid item xs={12} sm={6}>
+                      <Box sx={{ 
+                        p: 2,
+                        backgroundColor: '#ffffff',
+                        borderRadius: 2,
+                        border: '1px solid #e5e7eb',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        minHeight: '120px',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}>
+                        <Typography variant="subtitle2" sx={{ 
+                          fontWeight: 600, 
+                          mb: 1,
+                          color: '#374151',
+                          fontSize: '0.75rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}>
+                          Processing Date
+                        </Typography>
+                        <Typography sx={{ 
+                          color: '#111827',
+                          fontWeight: 500,
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}>
+                          {new Date(selectedAddressData.createdAt).toLocaleString()}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    
+                    {selectedAddressData?.inShippingDate && (
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          minHeight: '120px',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            In Shipping Date
+                          </Typography>
+                          <Typography sx={{ 
+                            color: '#111827',
+                            fontWeight: 500,
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            {new Date(selectedAddressData.inShippingDate).toLocaleString()}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    )}
+                    
+                    {selectedAddressData?.shippedDate && (
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          minHeight: '120px',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Shipped Date
+                          </Typography>
+                          <Typography sx={{ 
+                            color: '#111827',
+                            fontWeight: 500,
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            {new Date(selectedAddressData.shippedDate).toLocaleString()}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    )}
                   </Grid>
                 </Box>
               </Box>

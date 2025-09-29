@@ -252,7 +252,8 @@ const Transaction = () => {
 
 //filter function
   let filtered = applyFilter(transactions, searchQuery, [
-    'paypal_order_id',
+    'payment_intent',
+    'checkout_id',
     'cardCustomizationId.userId.firstName',
     'cardCustomizationId.userId.email',
     'status',
@@ -2436,7 +2437,7 @@ const Transaction = () => {
                             textTransform: 'uppercase',
                             letterSpacing: '0.05em'
                           }}>
-                            PayPal Order ID
+                            Payment Intent ID
                           </Typography>
                           <Box sx={{
                             backgroundColor: '#f9fafb',
@@ -2451,9 +2452,56 @@ const Transaction = () => {
                               fontFamily: 'monospace', 
                               fontWeight: 500,
                               color: '#111827',
-                              fontSize: '0.875rem'
+                              fontSize: '0.875rem',
+                              wordBreak: 'break-all',
+                              overflowWrap: 'break-word',
+                              whiteSpace: 'pre-wrap'
                             }}>
-                              {selectedTransactionDetails?.paypal_order_id || 'N/A'}
+                              {selectedTransactionDetails?.payment_intent || 'N/A'}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1.5,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Stripe Checkout ID
+                          </Typography>
+                          <Box sx={{
+                            backgroundColor: '#f9fafb',
+                            padding: '8px 12px',
+                            borderRadius: 1,
+                            border: '1px solid #e5e7eb',
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            <Typography sx={{ 
+                              fontFamily: 'monospace', 
+                              fontWeight: 500,
+                              color: '#111827',
+                              fontSize: '0.875rem',
+                              wordBreak: 'break-all',
+                              overflowWrap: 'break-word',
+                              whiteSpace: 'pre-wrap'
+                            }}>
+                              {selectedTransactionDetails?.checkout_id || 'N/A'}
                             </Typography>
                           </Box>
                         </Box>
@@ -3092,7 +3140,7 @@ const Transaction = () => {
                       📞 Contact Information
                     </Typography>
                     <Grid container spacing={2} alignItems="stretch">
-                      <Grid item xs={12} sm={6}>
+                      <Grid item xs={12}>
                         <Box sx={{ 
                           p: 2,
                           backgroundColor: '#ffffff',
@@ -3126,7 +3174,7 @@ const Transaction = () => {
                         </Box>
                       </Grid>
                       {selectedAddressDetails?.cardCustomizationId?.userId?.email && (
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12}>
                           <Box sx={{ 
                             p: 2,
                             backgroundColor: '#ffffff',
@@ -3217,16 +3265,19 @@ const Transaction = () => {
                   {/* Shipping Information */}
                   <Box>
                     <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      Shipping Information
+                      📦 Shipping Information
                     </Typography>
-                    <Grid container spacing={2} alignItems="stretch">
-                      <Grid item xs={12} sm={6}>
+                    
+                    {/* Current Status Row - Upper */}
+                    <Grid container spacing={2} alignItems="stretch" sx={{ mb: 2 }}>
+                      <Grid item xs={12}>
                         <Box sx={{ 
                           p: 2,
                           backgroundColor: '#ffffff',
                           borderRadius: 2,
                           border: '1px solid #e5e7eb',
                           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          minHeight: '120px',
                           height: '100%',
                           display: 'flex',
                           flexDirection: 'column'
@@ -3239,11 +3290,12 @@ const Transaction = () => {
                             textTransform: 'uppercase',
                             letterSpacing: '0.05em'
                           }}>
-                            Shipping Status
+                            Current Status
                           </Typography>
                           <Box sx={{
                             display: 'flex',
                             alignItems: 'center',
+                            justifyContent: 'space-between',
                             px: 2,
                             py: '8px',
                             borderRadius: '6px',
@@ -3252,30 +3304,84 @@ const Transaction = () => {
                             border: '1px solid',
                             borderColor: selectedAddressDetails?.shippingStatus === 'shipped' ? '#22c55e' : 
                                         selectedAddressDetails?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
-                            flex: 1,
-                            justifyContent: 'flex-start'
+                            flex: 1
                           }}>
-                            <Box sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: '50%',
-                              backgroundColor: selectedAddressDetails?.shippingStatus === 'shipped' ? '#22c55e' : 
-                                             selectedAddressDetails?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
-                              mr: 1
-                            }} />
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Box sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                backgroundColor: selectedAddressDetails?.shippingStatus === 'shipped' ? '#22c55e' : 
+                                               selectedAddressDetails?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
+                                mr: 1
+                              }} />
+                              <Typography sx={{ 
+                                color: selectedAddressDetails?.shippingStatus === 'shipped' ? '#22c55e' : 
+                                       selectedAddressDetails?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
+                                fontWeight: 600,
+                                textTransform: 'capitalize',
+                                fontSize: '0.9rem'
+                              }}>
+                                {selectedAddressDetails?.shippingStatus === 'shipped' ? 'Shipped' : 
+                                 selectedAddressDetails?.shippingStatus === 'in_shipping' ? 'In Shipping' : 'Processing'}
+                              </Typography>
+                            </Box>
                             <Typography sx={{ 
                               color: selectedAddressDetails?.shippingStatus === 'shipped' ? '#22c55e' : 
                                      selectedAddressDetails?.shippingStatus === 'in_shipping' ? '#f59e0b' : '#6b7280',
-                              fontWeight: 600,
-                              textTransform: 'capitalize',
-                              fontSize: '0.75rem'
+                              fontWeight: 500,
+                              fontSize: '0.8rem'
                             }}>
-                              {selectedAddressDetails?.shippingStatus === 'shipped' ? 'Shipped' : 
-                               selectedAddressDetails?.shippingStatus === 'in_shipping' ? 'In Shipping' : 'Processing'}
+                              {selectedAddressDetails?.shippingStatus === 'shipped' && selectedAddressDetails?.shippedDate ? 
+                                `Shipped on ${new Date(selectedAddressDetails.shippedDate).toLocaleDateString()}` :
+                               selectedAddressDetails?.shippingStatus === 'in_shipping' && selectedAddressDetails?.inShippingDate ? 
+                                `In shipping since ${new Date(selectedAddressDetails.inShippingDate).toLocaleDateString()}` :
+                               `Processing since ${new Date(selectedAddressDetails.createdAt).toLocaleDateString()}`
+                              }
                             </Typography>
                           </Box>
                         </Box>
                       </Grid>
+                    </Grid>
+
+                    {/* Dates Row - Bottom - 2 dates per row */}
+                    <Grid container spacing={2} alignItems="stretch">
+                      {/* Processing Date - Always show */}
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          minHeight: '120px',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Processing Date
+                          </Typography>
+                          <Typography sx={{ 
+                            color: '#111827',
+                            fontWeight: 500,
+                            flex: 1,
+                            display: 'flex',
+                            alignItems: 'center'
+                          }}>
+                            {new Date(selectedAddressDetails.createdAt).toLocaleString()}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      
                       {selectedAddressDetails?.inShippingDate && (
                         <Grid item xs={12} sm={6}>
                           <Box sx={{ 
@@ -3284,6 +3390,7 @@ const Transaction = () => {
                             borderRadius: 2,
                             border: '1px solid #e5e7eb',
                             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            minHeight: '120px',
                             height: '100%',
                             display: 'flex',
                             flexDirection: 'column'
@@ -3310,6 +3417,7 @@ const Transaction = () => {
                           </Box>
                         </Grid>
                       )}
+                      
                       {selectedAddressDetails?.shippedDate && (
                         <Grid item xs={12} sm={6}>
                           <Box sx={{ 
@@ -3318,6 +3426,7 @@ const Transaction = () => {
                             borderRadius: 2,
                             border: '1px solid #e5e7eb',
                             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            minHeight: '120px',
                             height: '100%',
                             display: 'flex',
                             flexDirection: 'column'
