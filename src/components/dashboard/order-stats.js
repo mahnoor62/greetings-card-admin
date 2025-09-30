@@ -160,7 +160,7 @@ const OrderStats = ({ data, loading }) => {
               Revenue Statistics
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              {/* <Grid item xs={12} sm={6}>
                 <Box sx={{ 
                   textAlign: 'center', 
                   p: 2, 
@@ -176,14 +176,16 @@ const OrderStats = ({ data, loading }) => {
                     Total Revenue
                   </Typography>
                 </Box>
-              </Grid>
+              </Grid> */}
               <Grid item xs={12} sm={6}>
-                <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
-                  <CardGiftcard sx={{ fontSize: 32, color: 'warning.main', mb: 1 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'warning.main' }}>
+                <Box sx={{ textAlign: 'center', p: 2, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: 1 }}>
+                {/* <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.light', borderRadius: 1 }}> */}
+                  <CardGiftcard sx={{ fontSize: 32, color: 'white', mb: 1 }} />
+                  {/* <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'warning.main' }}> */}
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white' }}>
                     {orders.revenue.totalQuantity || 0}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="white">
                     Total Cards Sold
                   </Typography>
                 </Box>

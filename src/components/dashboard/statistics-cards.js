@@ -83,7 +83,7 @@ const StatCard = ({ title, value, icon, color, trend, subtitle }) => (
   </Card>
 );
 
-const StatisticsCards = ({ data, loading }) => {
+const StatisticsCards = ({ data, loading, orderData }) => {
   if (loading) {
     return (
       <Grid container spacing={3}>
@@ -101,6 +101,7 @@ const StatisticsCards = ({ data, loading }) => {
   }
 
   const stats = data?.overview || {};
+  const orders = orderData || {};
 
   return (
     <Grid container spacing={3}>
@@ -125,7 +126,7 @@ const StatisticsCards = ({ data, loading }) => {
       </Grid>
 
       {/* Total Revenue */}
-      <Grid item xs={12} sm={6} md={3}>
+      {/* <Grid item xs={12} sm={6} md={3}>
         <StatCard
           title="Total Revenue"
           value={`$${stats.totalRevenue || 0}`}
@@ -133,7 +134,16 @@ const StatisticsCards = ({ data, loading }) => {
           color="success.main"
           subtitle="Total sales"
         />
-      </Grid>
+      </Grid> */}
+            {/* <Grid item xs={12} sm={6} md={3}>
+        <StatCard
+          title="Total Orde"
+          value={`$${order.revenue.totalQuantity || 0}`}
+          icon={<AttachMoney />}
+          color="success.main"
+          subtitle="Total sales"
+        />
+      </Grid> */}
 
       {/* Total Transactions */}
       <Grid item xs={12} sm={6} md={3}>
@@ -146,7 +156,16 @@ const StatisticsCards = ({ data, loading }) => {
         />
       </Grid>
 
-      {/* Total Visitors */}
+      {/* Pending Orders */}
+      <Grid item xs={12} sm={6} md={3}>
+        <StatCard
+          title="Pending Orders"
+          value={orders.pendingShippingOrders || 0}
+          icon={<ShoppingCart />}
+          color="warning.main"
+          subtitle="Orders awaiting processing"
+        />
+      </Grid>
      
     </Grid>
   );

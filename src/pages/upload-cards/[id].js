@@ -512,13 +512,13 @@ const Page = () => {
     // Set maximum size to 1MB (in bytes)
     const maxSizeInBytes = 1 * 1024 * 1024;
 
-    if (sizeInBytes > maxSizeInBytes) {
-      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
-        {
-          duration: 3000
-        });
-      return;
-    }
+    // if (sizeInBytes > maxSizeInBytes) {
+    //   toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+    //     {
+    //       duration: 3000
+    //     });
+    //   return;
+    // }
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();

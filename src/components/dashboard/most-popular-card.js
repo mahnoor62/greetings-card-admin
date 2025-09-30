@@ -148,14 +148,14 @@ const MostPopularCard = ({ data, loading }) => {
                     </Typography>
                   </Box>
                 </Grid>
-                <Grid item xs={6}>
+                {/* <Grid item xs={6}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <CurrencyExchange sx={{ fontSize: 20, mr: 1, color: 'success.main' }} />
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'success.main' }}>
                       AUD {mostPopularCard.totalRevenue || 0} Revenue
                     </Typography>
                   </Box>
-                </Grid>
+                </Grid> */}
                 <Grid item xs={6}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <ShoppingCart sx={{ fontSize: 20, mr: 1, color: 'secondary.main' }} />

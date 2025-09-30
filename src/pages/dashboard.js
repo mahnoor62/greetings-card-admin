@@ -23,6 +23,7 @@ import MostPopularCard from '../components/dashboard/most-popular-card';
 import MostPopularARTemplate from '../components/dashboard/most-popular-ar-template';
 import WebsiteTrafficStats from '../components/dashboard/website-traffic-stats';
 import OrderStats from '../components/dashboard/order-stats';
+import TopBuyingUser from '../components/dashboard/top-buying-user';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME;
@@ -31,6 +32,7 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [trafficData, setTrafficData] = useState(null);
   const [orderData, setOrderData] = useState(null);
+  const [topBuyingUsers, setTopBuyingUsers] = useState(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const token = user?.token;
@@ -56,6 +58,12 @@ const Dashboard = () => {
         headers: { 'x-access-token': token }
       });
       setOrderData(orderResponse.data.data);
+
+      // Fetch top buying users
+      const topBuyingUsersResponse = await axios.get(`${BASE_URL}/api/admin/statistics/top-buying-users?limit=1`, {
+        headers: { 'x-access-token': token }
+      });
+      setTopBuyingUsers(topBuyingUsersResponse.data.data);
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -139,7 +147,7 @@ const Dashboard = () => {
             <>
               {/* Statistics Cards */}
               <Box sx={{ mb: 4 }}>
-                <StatisticsCards data={dashboardData} loading={loading} />
+                <StatisticsCards data={dashboardData} loading={loading} orderData={orderData} />
               </Box>
 
               {/* Main Content Grid */}
@@ -170,6 +178,11 @@ const Dashboard = () => {
                   {/* Website Traffic */}
                   <Grid item xs={12}>
                     <WebsiteTrafficStats data={trafficData} loading={loading} />
+                  </Grid>
+
+                  {/* Top Buying User */}
+                  <Grid item xs={12}>
+                    <TopBuyingUser data={topBuyingUsers} loading={loading} />
                   </Grid>
                 </Grid>
               </Grid>
