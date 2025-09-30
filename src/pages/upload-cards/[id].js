@@ -35,10 +35,12 @@ const Page = () => {
   const [backLoading, setBackLoading] = useState(false);
   const [insideLeftLoading, setInsideLeftLoading] = useState(false);
   const [insideRightLoading, setInsideRightLoading] = useState(false);
+  const [envelopeLoading, setEnvelopeLoading] = useState(false);
 
   const [backImage, setBackImage] = useState(false);
   const [insideLeftImage, setInsideLeftImage] = useState(false);
   const [insideRightImage, setInsideRightImage] = useState(false);
+  const [envelopeImage, setEnvelopeImage] = useState(false);
   const { id } = router.query;
 
 
@@ -481,6 +483,108 @@ const Page = () => {
     }
   }, [insideRightImage]);
 
+  // Envelope upload functionality
+  const handleDropForEnvelope = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      processImageEnvelope(file);
+    }
+  };
+
+  const handleEnvelopeImage = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      processImageEnvelope(file);
+    }
+  };
+
+  const processImageEnvelope = (file) => {
+    const sizeInBytes = file.size;
+    const sizeInKB = sizeInBytes / 1024;
+    const sizeInMB = sizeInKB / 1024;
+
+    // Format size string for user-friendly display
+    const sizeString = sizeInMB >= 1
+      ? `${sizeInMB.toFixed(2)} MB`
+      : `${sizeInKB.toFixed(2)} KB`;
+
+    // Set maximum size to 1MB (in bytes)
+    const maxSizeInBytes = 1 * 1024 * 1024;
+
+    if (sizeInBytes > maxSizeInBytes) {
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+        {
+          duration: 3000
+        });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+      img.onload = () => {
+        const width = img.width;
+        const height = img.height;
+
+        const aspectRatio = height / width; // A5 is ~1.414
+        const expectedRatio = 1.414;
+        const tolerance = 0.05; // Allow slight margin for error
+
+        if (Math.abs(aspectRatio - expectedRatio) > tolerance) {
+          toast.error('Please upload an image with A5 aspect ratio (approx 1:1.414)');
+          return;
+        }
+
+        formikForEnvelope.setFieldValue('envelope', file);
+        setEnvelopeImage(file);
+      };
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const formikForEnvelope = useFormik({
+    initialValues: {
+      envelope: ''
+    },
+
+    validationSchema: yup.object({
+      // image: yup.string().required('Image of gallery is required'),
+    }),
+    onSubmit: async (values, { resetForm }) => {
+      setEnvelopeLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('envelope', envelopeImage);
+
+        const response = await axios.post(`${BASE_URL}/api/cards/upload-envelope`,
+          formData,
+          {
+            headers: {
+              'x-access-token': token,
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+
+        toast.success('Envelope uploaded successfully.');
+        formikForEnvelope.resetForm();
+        setEnvelopeLoading(false);
+        document.getElementById('envelope').value = '';
+      } catch (error) {
+        console.log('error in uploaded envelope', error);
+        toast.error(error.response.data.msg);
+        setEnvelopeLoading(false);
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (envelopeImage) {
+      formikForEnvelope.handleSubmit();
+    }
+  }, [envelopeImage]);
+
   const handleNextClick = () => {
     // if (!image || !backImage || !insideLeftImage || !insideRightImage) {
     // if (!image || !insideLeftImage || !insideRightImage) {
@@ -536,6 +640,9 @@ const Page = () => {
     ? `${BASE_URL}/${card.insideRightDesign.replace(
       /\\/g,
       '/')}`
+    : null;
+  const existingEnvelopeUrl = card?.envelope
+    ? `${BASE_URL}/${card.envelope.replace(/\\/g, '/')}`
     : null;
 
 
@@ -948,6 +1055,91 @@ const Page = () => {
                 </Box>
               </Box>
             </Grid>
+            <Grid item xs={6} md={3}>
+              <Card sx={{
+                bgcolor: '#f0f3f8',
+                height: 400,
+                position:'relative',
+                borderRadius: 0
+              }}>
+                <Box sx={{display:'flex', justifyContent:'flex-start', alignItems:'center',position:'absolute',cursor:'pointer', mt:{md:1, xs:0.2}, ml:{md:1, xs:0.5}}}>
+                  <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
+                    <ErrorOutlineIcon/>
+                  </Tooltip>
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: '100%',
+                    py: 3
+                  }}
+                >
+                  {/* Image at Top */}
+                  <Box
+                    onDrop={handleDropForEnvelope}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragLeave={(e) => e.preventDefault()}
+                    component="img"
+                    src={
+                      envelopeImage
+                        ? URL.createObjectURL(envelopeImage)
+                        : existingEnvelopeUrl || `${WEB_URL}/drag.png`
+                    }
+                    alt="Drag Icon"
+                    sx={{
+                      width: envelopeImage || existingEnvelopeUrl ? 150 : 100,
+                      height: envelopeImage || existingEnvelopeUrl ? 200 : 100
+                    }}
+                  />
+
+                  {/* Text in Center */}
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="body1" sx={{ color: 'black', fontWeight: 900 }}>
+                      Drag & drop <span style={{ color: '#c09b9b' }}>image</span>
+                    </Typography>
+                  </CardContent>
+
+                  {/* Button at Bottom */}
+                  <CardActions>
+                    <Button
+                      variant="contained"
+                      disabled={envelopeLoading}
+                      onClick={() => document.getElementById('envelope').click()}
+                      sx={{
+                        minWidth: { md: 150, xs: 100 },
+                        backgroundColor: '#c09b9b !important',
+                        color: '#1a1d25',
+                        fontWeight: 700,
+                        borderRadius: '999px',
+                        '&:hover': {
+                          backgroundColor: '#c09b9b !important',
+                          color: '#1a1d25'
+                        }
+                      }}
+                    >
+                      {envelopeLoading ? <CircularProgress size={24} sx={{ color: '#1a1d25' }}/> : 'Upload'}
+                    </Button>
+                  </CardActions>
+                </Box>
+              </Card>
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                mt: { md: 5, xs: 2 },
+                gap: 1
+              }}>
+                <AddCircleRoundedIcon onClick={() => document.getElementById('envelope').click()}
+                                      sx={{ color: 'grey' }}/>
+                <Typography variant=" body1" sx={{ color: 'black' }}>
+                  Envelope
+                </Typography>
+              </Box>
+            </Grid>
           </Grid>
 
         </Container>
@@ -1039,6 +1231,13 @@ const Page = () => {
           type="file"
           style={{ display: 'none' }}
           onChange={handleInsideRightImage}
+        />
+        <input
+          accept="image/*"
+          id="envelope"
+          type="file"
+          style={{ display: 'none' }}
+          onChange={handleEnvelopeImage}
         />
       </Box>
 
