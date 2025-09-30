@@ -181,9 +181,9 @@ const Dashboard = () => {
                   </Grid>
 
                   {/* Top Buying User */}
-                  <Grid item xs={12}>
+                  {/* <Grid item xs={12}>
                     <TopBuyingUser data={topBuyingUsers} loading={loading} />
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </Grid>
               </Grid>
