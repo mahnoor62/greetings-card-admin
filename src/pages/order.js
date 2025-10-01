@@ -85,6 +85,7 @@ const Transaction = () => {
   const [selectedTransactionForShipping, setSelectedTransactionForShipping] = useState(null);
   const [shippingAction, setShippingAction] = useState(null);
   const [trackingId, setTrackingId] = useState('');
+  const [shippingCompany, setShippingCompany] = useState('');
   const [isProcessingShipping, setIsProcessingShipping] = useState(false);
 
   const handleOpenCardDetails = (transaction) => {
@@ -132,8 +133,8 @@ const Transaction = () => {
   const handleConfirmShipping = async () => {
     if (!selectedTransactionForShipping || !shippingAction) return;
 
-    // If shipping action is 'shipped', validate tracking ID
-    if (shippingAction === 'shipped' && !trackingId.trim()) {
+    // If shipping action is 'in_shipping', tracking ID is required
+    if (shippingAction === 'in_shipping' && !trackingId.trim()) {
       toast.error('Please enter a tracking ID');
       return;
     }
@@ -143,11 +144,15 @@ const Transaction = () => {
     try {
       let response;
       
-      // If shipped, use the add-tracking-id endpoint
-      if (shippingAction === 'shipped') {
+      // If in_shipping and tracking ID is provided, use add-tracking-id endpoint to send email
+      if (shippingAction === 'in_shipping' && trackingId.trim()) {
         response = await axios.put(
           `${BASE_URL}/api/transactions/add-tracking-id/${selectedTransactionForShipping._id}`,
-          { trackingId: trackingId.trim() },
+          { 
+            trackingId: trackingId.trim(),
+            shippingCompany: shippingCompany.trim(),
+            shippingStatus: 'in_shipping'
+          },
           {
             headers: {
               'x-access-token': token
@@ -176,7 +181,8 @@ const Transaction = () => {
                   ...transaction, 
                   shippingStatus: shippingAction,
                   isShipped: shippingAction === 'shipped',
-                  trackingId: shippingAction === 'shipped' ? trackingId : transaction.trackingId,
+                  trackingId: trackingId.trim() ? trackingId : transaction.trackingId,
+                  shippingCompany: shippingCompany.trim() ? shippingCompany : transaction.shippingCompany,
                   inShippingDate: shippingAction === 'in_shipping' ? new Date() : transaction.inShippingDate,
                   shippedDate: shippingAction === 'shipped' ? new Date() : transaction.shippedDate
                 }
@@ -196,6 +202,7 @@ const Transaction = () => {
       setSelectedTransactionForShipping(null);
       setShippingAction(null);
       setTrackingId('');
+      setShippingCompany('');
     }
   };
 
@@ -204,6 +211,7 @@ const Transaction = () => {
     setSelectedTransactionForShipping(null);
     setShippingAction(null);
     setTrackingId('');
+    setShippingCompany('');
     setIsProcessingShipping(false);
   };
 
@@ -3488,7 +3496,42 @@ const Transaction = () => {
                     {/* Tracking ID Section - Displayed at the end */}
                     {selectedAddressDetails?.trackingId && (
                       <Grid container spacing={2} alignItems="stretch" sx={{ mt: 2 }}>
-                        <Grid item xs={12}>
+                        {selectedAddressDetails?.shippingCompany && (
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ 
+                              p: 2,
+                              backgroundColor: '#ffffff',
+                              borderRadius: 2,
+                              border: '1px solid #e5e7eb',
+                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                              height: '100%',
+                              display: 'flex',
+                              flexDirection: 'column'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600, 
+                                mb: 1.5,
+                                color: '#374151',
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                              }}>
+                                🚚 Shipping Company
+                              </Typography>
+                              <Typography sx={{ 
+                                color: '#111827',
+                                fontWeight: 600,
+                                fontSize: '1rem',
+                                flex: 1,
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}>
+                                {selectedAddressDetails.shippingCompany}
+                              </Typography>
+                            </Box>
+                          </Grid>
+                        )}
+                        <Grid item xs={12} sm={selectedAddressDetails?.shippingCompany ? 6 : 12}>
                           <Box sx={{ 
                             p: 2,
                             backgroundColor: '#ffffff',
@@ -3608,30 +3651,62 @@ const Transaction = () => {
                   </Typography>
                 </Box>
               )}
-              {shippingAction === 'shipped' && (
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#374151' }}>
-                    Enter Tracking ID
-                  </Typography>
-                  <input
-                    type="text"
-                    value={trackingId}
-                    onChange={(e) => setTrackingId(e.target.value)}
-                    placeholder="Enter tracking ID"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontFamily: 'inherit',
-                      outline: 'none',
-                      transition: 'border-color 0.2s'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                  />
-                </Box>
+              
+              {/* Show tracking ID and shipping company fields when action is 'in_shipping' */}
+              {shippingAction === 'in_shipping' && (
+                <>
+                  <Box sx={{ mt: 3 }}>
+                    <TextField
+                      fullWidth
+                      label="Enter Tracking ID"
+                      required
+                      helperText="Tracking ID is required to proceed"
+                      value={trackingId}
+                      onChange={(e) => setTrackingId(e.target.value)}
+                      placeholder="Enter tracking ID"
+                      variant="outlined"
+                      InputLabelProps={{
+                        shrink: true,
+                        style: { backgroundColor: '#fff', paddingLeft: 4, paddingRight: 4 }
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: '#667eea',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
+                  
+                  <Box sx={{ mt: 3 }}>
+                    <TextField
+                      fullWidth
+                      label="Shipping Company (Optional)"
+                      value={shippingCompany}
+                      onChange={(e) => setShippingCompany(e.target.value)}
+                      placeholder="e.g., Australia Post, DHL, FedEx"
+                      variant="outlined"
+                      InputLabelProps={{
+                        shrink: true,
+                        style: { backgroundColor: '#fff', paddingLeft: 4, paddingRight: 4 }
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: '#667eea',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                          },
+                        },
+                      }}
+                    />
+                  </Box>
+                </>
               )}
               
             </DialogContent>
