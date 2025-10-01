@@ -3374,54 +3374,6 @@ const Transaction = () => {
                       </Grid>
                     </Grid>
 
-                    {/* Tracking ID Section */}
-                    {selectedAddressDetails?.trackingId && (
-                      <Grid container spacing={2} alignItems="stretch" sx={{ mb: 2 }}>
-                        <Grid item xs={12}>
-                          <Box sx={{ 
-                            p: 2,
-                            backgroundColor: '#ffffff',
-                            borderRadius: 2,
-                            border: '1px solid #e5e7eb',
-                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column'
-                          }}>
-                            <Typography variant="subtitle2" sx={{ 
-                              fontWeight: 600, 
-                              mb: 1.5,
-                              color: '#374151',
-                              fontSize: '0.75rem',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.05em'
-                            }}>
-                              📦 Tracking ID
-                            </Typography>
-                            <Box sx={{
-                              backgroundColor: '#f0f4ff',
-                              padding: '12px 16px',
-                              borderRadius: 1,
-                              border: '1px solid #667eea',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}>
-                              <Typography sx={{ 
-                                fontFamily: 'monospace', 
-                                fontWeight: 600,
-                                color: '#667eea',
-                                fontSize: '1.125rem',
-                                letterSpacing: '1px'
-                              }}>
-                                {selectedAddressDetails.trackingId}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    )}
-
                     {/* Dates Row - Bottom - 2 dates per row */}
                     <Grid container spacing={2} alignItems="stretch">
                       {/* Processing Date - Always show */}
@@ -3532,6 +3484,54 @@ const Transaction = () => {
                         </Grid>
                       )}
                     </Grid>
+
+                    {/* Tracking ID Section - Displayed at the end */}
+                    {selectedAddressDetails?.trackingId && (
+                      <Grid container spacing={2} alignItems="stretch" sx={{ mt: 2 }}>
+                        <Grid item xs={12}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1.5,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              📦 Tracking ID
+                            </Typography>
+                            <Box sx={{
+                              backgroundColor: '#f0f4ff',
+                              padding: '12px 16px',
+                              borderRadius: 1,
+                              border: '1px solid #667eea',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <Typography sx={{ 
+                                fontFamily: 'monospace', 
+                                fontWeight: 600,
+                                color: '#667eea',
+                                fontSize: '1.125rem',
+                                letterSpacing: '1px'
+                              }}>
+                                {selectedAddressDetails.trackingId}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    )}
                   </Box>
                 </Box>
               )}
