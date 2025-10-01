@@ -84,6 +84,8 @@ const Transaction = () => {
   const [shippingConfirmationDialog, setShippingConfirmationDialog] = useState(false);
   const [selectedTransactionForShipping, setSelectedTransactionForShipping] = useState(null);
   const [shippingAction, setShippingAction] = useState(null);
+  const [trackingId, setTrackingId] = useState('');
+  const [isProcessingShipping, setIsProcessingShipping] = useState(false);
 
   const handleOpenCardDetails = (transaction) => {
     setSelectedCardDetails(transaction);
@@ -130,17 +132,40 @@ const Transaction = () => {
   const handleConfirmShipping = async () => {
     if (!selectedTransactionForShipping || !shippingAction) return;
 
+    // If shipping action is 'shipped', validate tracking ID
+    if (shippingAction === 'shipped' && !trackingId.trim()) {
+      toast.error('Please enter a tracking ID');
+      return;
+    }
+
+    setIsProcessingShipping(true);
     const token = window.localStorage.getItem('token');
     try {
-      const response = await axios.put(
-        `${BASE_URL}/api/transactions/update-shipping-status-new/${selectedTransactionForShipping._id}`,
-        { shippingStatus: shippingAction },
-        {
-          headers: {
-            'x-access-token': token
+      let response;
+      
+      // If shipped, use the add-tracking-id endpoint
+      if (shippingAction === 'shipped') {
+        response = await axios.put(
+          `${BASE_URL}/api/transactions/add-tracking-id/${selectedTransactionForShipping._id}`,
+          { trackingId: trackingId.trim() },
+          {
+            headers: {
+              'x-access-token': token
+            }
           }
-        }
-      );
+        );
+      } else {
+        // For other statuses, use the regular update endpoint
+        response = await axios.put(
+          `${BASE_URL}/api/transactions/update-shipping-status-new/${selectedTransactionForShipping._id}`,
+          { shippingStatus: shippingAction },
+          {
+            headers: {
+              'x-access-token': token
+            }
+          }
+        );
+      }
 
       if (response.data.success) {
         // Update the transaction in the local state
@@ -151,6 +176,7 @@ const Transaction = () => {
                   ...transaction, 
                   shippingStatus: shippingAction,
                   isShipped: shippingAction === 'shipped',
+                  trackingId: shippingAction === 'shipped' ? trackingId : transaction.trackingId,
                   inShippingDate: shippingAction === 'in_shipping' ? new Date() : transaction.inShippingDate,
                   shippedDate: shippingAction === 'shipped' ? new Date() : transaction.shippedDate
                 }
@@ -159,15 +185,17 @@ const Transaction = () => {
         );
         
         const actionText = shippingAction === 'in_shipping' ? 'In Shipping' : 'Shipped';
-        toast.success(`Order marked as ${actionText} successfully!`);
+        toast.success(`Order marked as ${actionText} successfully${shippingAction === 'shipped' ? ' and email sent!' : '!'}`);
       }
     } catch (error) {
       console.error('Error updating shipping status:', error);
       toast.error('Failed to update shipping status');
     } finally {
+      setIsProcessingShipping(false);
       setShippingConfirmationDialog(false);
       setSelectedTransactionForShipping(null);
       setShippingAction(null);
+      setTrackingId('');
     }
   };
 
@@ -175,6 +203,8 @@ const Transaction = () => {
     setShippingConfirmationDialog(false);
     setSelectedTransactionForShipping(null);
     setShippingAction(null);
+    setTrackingId('');
+    setIsProcessingShipping(false);
   };
 
   const getCard = async () => {
@@ -3344,6 +3374,54 @@ const Transaction = () => {
                       </Grid>
                     </Grid>
 
+                    {/* Tracking ID Section */}
+                    {selectedAddressDetails?.trackingId && (
+                      <Grid container spacing={2} alignItems="stretch" sx={{ mb: 2 }}>
+                        <Grid item xs={12}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#ffffff',
+                            borderRadius: 2,
+                            border: '1px solid #e5e7eb',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1.5,
+                              color: '#374151',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              📦 Tracking ID
+                            </Typography>
+                            <Box sx={{
+                              backgroundColor: '#f0f4ff',
+                              padding: '12px 16px',
+                              borderRadius: 1,
+                              border: '1px solid #667eea',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <Typography sx={{ 
+                                fontFamily: 'monospace', 
+                                fontWeight: 600,
+                                color: '#667eea',
+                                fontSize: '1.125rem',
+                                letterSpacing: '1px'
+                              }}>
+                                {selectedAddressDetails.trackingId}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    )}
+
                     {/* Dates Row - Bottom - 2 dates per row */}
                     <Grid container spacing={2} alignItems="stretch">
                       {/* Processing Date - Always show */}
@@ -3506,6 +3584,9 @@ const Transaction = () => {
               <Typography sx={{ mb: 2, color: '#374151', mt:3 }}>
                 Are you sure you want to mark this order as {shippingAction === 'in_shipping' ? 'In Shipping' : 'Shipped'}?
               </Typography>
+              
+              {/* Show tracking ID input only when shipping action is 'shipped' */}
+              
               {selectedTransactionForShipping && (
                 <Box sx={{ 
                   p: 2, 
@@ -3517,7 +3598,7 @@ const Transaction = () => {
                     Order Details:
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                    Transaction ID: {selectedTransactionForShipping._id}
+                    Payment Intent: {selectedTransactionForShipping.payment_intent || 'N/A'}
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#6b7280' }}>
                     Card Title: {selectedTransactionForShipping.title}
@@ -3527,11 +3608,38 @@ const Transaction = () => {
                   </Typography>
                 </Box>
               )}
+              {shippingAction === 'shipped' && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#374151' }}>
+                    Enter Tracking ID
+                  </Typography>
+                  <input
+                    type="text"
+                    value={trackingId}
+                    onChange={(e) => setTrackingId(e.target.value)}
+                    placeholder="Enter tracking ID"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontFamily: 'inherit',
+                      outline: 'none',
+                      transition: 'border-color 0.2s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                  />
+                </Box>
+              )}
+              
             </DialogContent>
             <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
               <Button
                 onClick={handleCancelShipping}
                 variant="outlined"
+                disabled={isProcessingShipping}
                 sx={{
                   borderColor: '#d1d5db',
                   color: '#6b7280',
@@ -3546,16 +3654,28 @@ const Transaction = () => {
               <Button
                 onClick={handleConfirmShipping}
                 variant="contained"
+                disabled={isProcessingShipping}
                 sx={{
                   backgroundColor: '#c165a0',
                   color:'white',
                   '&:hover': {
                     backgroundColor: '#c165a0',
                     color:'white'
+                  },
+                  '&:disabled': {
+                    backgroundColor: '#d1a8c6',
+                    color: 'white'
                   }
                 }}
               >
-                Confirm Shipped
+                {isProcessingShipping ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: 'white', mr: 1 }} />
+                    
+                  </>
+                ) : (
+                  'Confirm Shipped'
+                )}
               </Button>
             </DialogActions>
           </Dialog>
