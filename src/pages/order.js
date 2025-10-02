@@ -2647,7 +2647,8 @@ const Transaction = () => {
                           </Box>
                         </Box>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      {/* Commented out Estimated Shipping Days section - now using detailed shipping days object */}
+                      {/* <Grid item xs={12} sm={6}>
                         <Box sx={{ 
                           p: 2,
                           backgroundColor: '#ffffff',
@@ -2689,7 +2690,7 @@ const Transaction = () => {
                             </Typography>
                           </Box>
                         </Box>
-                      </Grid>
+                      </Grid> */}
                     </Grid>
                   </Box>
 
@@ -3574,6 +3575,122 @@ const Transaction = () => {
                           </Box>
                         </Grid>
                       </Grid>
+                    )}
+
+                    {/* Shipping Days Information - Displayed at the end */}
+                    {selectedAddressDetails?.shippingDays && (
+                        <Grid container spacing={2} alignItems="stretch" sx={{ mt: 2 }}>
+                          <Grid item xs={12}>
+                            <Box sx={{ 
+                              p: 2,
+                              backgroundColor: '#ffffff',
+                              borderRadius: 2,
+                              border: '1px solid #e5e7eb',
+                              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                              minHeight: '120px',
+                              height: '100%',
+                              display: 'flex',
+                              flexDirection: 'column'
+                            }}>
+                              <Typography variant="subtitle2" sx={{ 
+                                fontWeight: 600, 
+                                mb: 2,
+                                color: '#374151',
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em'
+                              }}>
+                                📅 Shipping Days
+                              </Typography>
+                              
+                              {/* Shipping Type Badge */}
+                              <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'flex-start',
+                                mb: 2
+                              }}>
+                                <Box sx={{
+                                  px: 2,
+                                  py: 0.5,
+                                  backgroundColor: selectedAddressDetails?.expressShipping ? '#f0f9ff' : '#f8fafc',
+                                  borderRadius: 1,
+                                  border: '1px solid',
+                                  borderColor: selectedAddressDetails?.expressShipping ? '#0ea5e9' : '#e2e8f0'
+                                }}>
+                                  <Typography sx={{ 
+                                    color: selectedAddressDetails?.expressShipping ? '#0ea5e9' : '#475569',
+                                    fontWeight: 600,
+                                    fontSize: '0.75rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                  }}>
+                                    {selectedAddressDetails?.expressShipping ? '🚀 Express Shipping' : '📦 Standard Shipping'}
+                                  </Typography>
+                                </Box>
+                              </Box>
+
+                              {/* Shipping Days Content */}
+                              <Box sx={{
+                                p: 2,
+                                backgroundColor: '#f8fafc',
+                                borderRadius: 1,
+                                border: '1px solid #e2e8f0'
+                              }}>
+                                {/* In Victoria Row */}
+                                <Box sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  py: 1.5,
+                                  borderBottom: '1px solid #e2e8f0',
+                                  mb: 1.5
+                                }}>
+                                  <Typography variant="subtitle2" sx={{ 
+                                    fontWeight: 600, 
+                                    color: '#475569',
+                                    fontSize: '0.875rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                  }}>
+                                    In Victoria
+                                  </Typography>
+                                  <Typography sx={{ 
+                                    color: '#1e293b',
+                                    fontWeight: 600,
+                                    fontSize: '1rem'
+                                  }}>
+                                    {selectedAddressDetails.shippingDays.inVictoria || 'N/A'}
+                                  </Typography>
+                                </Box>
+                                
+                                {/* Interstate Row */}
+                                <Box sx={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="subtitle2" sx={{ 
+                                    fontWeight: 600, 
+                                    color: '#475569',
+                                    fontSize: '0.875rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                  }}>
+                                    Interstate
+                                  </Typography>
+                                  <Typography sx={{ 
+                                    color: '#1e293b',
+                                    fontWeight: 600,
+                                    fontSize: '1rem'
+                                  }}>
+                                    {selectedAddressDetails.shippingDays.interstate || 'N/A'}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            </Box>
+                          </Grid>
+                        </Grid>
                     )}
                   </Box>
                 </Box>
