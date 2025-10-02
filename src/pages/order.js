@@ -119,6 +119,12 @@ const Transaction = () => {
   };
 
   const handleShippingStatusChange = (transaction, newStatus) => {
+    // Prevent direct transition from processing to shipped
+    if (newStatus === 'shipped' && transaction.shippingStatus === 'processing') {
+      toast.error('Please mark order as "In Shipping" first before marking as "Shipped"');
+      return;
+    }
+    
     if (newStatus === 'in_shipping' && transaction.shippingStatus !== 'in_shipping') {
       setSelectedTransactionForShipping(transaction);
       setShippingConfirmationDialog(true);
@@ -1582,14 +1588,31 @@ const Transaction = () => {
                                   In Shipping
                                 </Typography>
                               </MenuItem>
-                              <MenuItem value="shipped">
+                              <MenuItem 
+                                value="shipped"
+                                disabled={data?.shippingStatus === 'processing'}
+                                sx={{
+                                  opacity: data?.shippingStatus === 'processing' ? 0.5 : 1,
+                                  cursor: data?.shippingStatus === 'processing' ? 'not-allowed' : 'pointer'
+                                }}
+                              >
                                 <Typography sx={{ 
-                                  color: '#22c55e',
+                                  color: data?.shippingStatus === 'processing' ? '#9ca3af' : '#22c55e',
                                   fontWeight: 600,
                                   fontSize: '0.875rem',
                                   textTransform: 'capitalize'
                                 }}>
                                   Shipped
+                                  {/* {data?.shippingStatus === 'processing' && (
+                                    <Typography component="span" sx={{ 
+                                      fontSize: '0.75rem',
+                                      color: '#9ca3af',
+                                      ml: 1,
+                                      fontStyle: 'italic'
+                                    }}>
+                                      (Mark as "In Shipping" first)
+                                    </Typography>
+                                  )} */}
                                 </Typography>
                               </MenuItem>
                             </Select>
@@ -3787,14 +3810,14 @@ const Transaction = () => {
                         style: { backgroundColor: '#fff', paddingLeft: 4, paddingRight: 4 }
                       }}
                       sx={{
-                        '& .MuiOutlinedInput-root': {
-                          '&:hover fieldset': {
-                            borderColor: '#667eea',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#667eea',
-                          },
-                        },
+                        // '& .MuiOutlinedInput-root': {
+                        //   '&:hover fieldset': {
+                        //     borderColor: '#667eea',
+                        //   },
+                        //   '&.Mui-focused fieldset': {
+                        //     borderColor: '#667eea',
+                        //   },
+                        // },
                       }}
                     />
                   </Box>
@@ -3812,14 +3835,14 @@ const Transaction = () => {
                         style: { backgroundColor: '#fff', paddingLeft: 4, paddingRight: 4 }
                       }}
                       sx={{
-                        '& .MuiOutlinedInput-root': {
-                          '&:hover fieldset': {
-                            borderColor: '#667eea',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#667eea',
-                          },
-                        },
+                        // '& .MuiOutlinedInput-root': {
+                        //   '&:hover fieldset': {
+                        //     borderColor: '#667eea',
+                        //   },
+                        //   '&.Mui-focused fieldset': {
+                        //     borderColor: '#667eea',
+                        //   },
+                        // },
                       }}
                     />
                   </Box>
