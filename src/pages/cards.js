@@ -389,6 +389,7 @@ const UplaodCards = () => {
       title: card?.title || '',
       cardType: card?.cardType || [],
       price: card?.price || '',
+      promotionCode: card?.promotionCode || '',
       submit: null
     },
     validationSchema: Yup.object({
@@ -404,7 +405,11 @@ const UplaodCards = () => {
       price: Yup
         .number()
         .typeError('Price must be a number')
-        .required('Price is required')
+        .required('Price is required'),
+
+      promotionCode: Yup
+        .string()
+        .max(50, 'Promotion code must be less than 50 characters')
     }),
 
     onSubmit: async (values, helpers) => {
@@ -416,7 +421,8 @@ const UplaodCards = () => {
             id: card._id,
             title: values.title,
             cardType: values.cardType,
-            price: parseInt(values.price)
+            price: parseInt(values.price),
+            promotionCode: values.promotionCode
           }, {
             headers: {
               'Content-Type': 'application/json',
@@ -435,7 +441,8 @@ const UplaodCards = () => {
             {
               title: values.title,
               cardType: values.cardType,
-              price: parseInt(values.price)
+              price: parseInt(values.price),
+              promotionCode: values.promotionCode
             },
             {
               headers: {
@@ -544,7 +551,7 @@ const UplaodCards = () => {
             <Table aria-label="simple table" sx={{ width: '100%' }}> */}
               <TableHead>
                 <TableRow sx={{ width: '100%' }}>
-                  <TableCell colSpan={6} sx={{ width: '100%' }}>
+                  <TableCell colSpan={7} sx={{ width: '100%' }}>
                     <Box sx={{
                       display: 'flex',
                       alignItems: {md:'center', xs:'flex-start'},
@@ -744,6 +751,13 @@ const UplaodCards = () => {
                   </TableCell>
                   <TableCell sx={{ 
                     textAlign: 'left', 
+                    width: { xs: '15%', md: '15%' },
+                    minWidth: { xs: '80px', md: '100px' }
+                  }}>
+                    Promotion Code
+                  </TableCell>
+                  <TableCell sx={{ 
+                    textAlign: 'left', 
                     width: { xs: '25%', md: '20%' },
                     minWidth: { xs: '80px', md: '100px' }
                   }}>
@@ -754,7 +768,7 @@ const UplaodCards = () => {
               <TableBody>
                 {loadingComplete || filterLoading ?
                   <TableRow align="center">
-                    <TableCell colSpan={6} align="center">
+                    <TableCell colSpan={7} align="center">
                       <CircularProgress/>
                       {filterLoading && (
                         <Typography variant="body2" sx={{ mt: 1 }}>
@@ -812,7 +826,13 @@ const UplaodCards = () => {
                           width: { xs: '15%', md: '15%' },
                           minWidth: { xs: '60px', md: '80px' }
                         }}>
-                          {`${data.price} AUD `}
+                          {`${data.price} $ `}
+                        </TableCell>
+                        <TableCell component="th" scope="row" sx={{
+                          width: { xs: '15%', md: '15%' },
+                          minWidth: { xs: '80px', md: '100px' }
+                        }}>
+                          {data.promotionCode ? data.promotionCode : 'No Code'}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{ 
                           textAlign: 'left',
@@ -849,7 +869,7 @@ const UplaodCards = () => {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} align="center">
+                      <TableCell colSpan={7} align="center">
                         {filterType === 'popular' ? (
                           <Typography variant="body1" color="text.secondary">
                             No popular cards found. Cards need to have sales data to appear here.
@@ -921,7 +941,7 @@ borderColor: 'divider'            }}
                         error={formik.touched.price && Boolean(formik.errors.price)}
                         helperText={formik.touched.price && formik.errors.price}
                         InputProps={{
-                          endAdornment: <InputAdornment position="end">AUD</InputAdornment>
+                          endAdornment: <InputAdornment position="end">$</InputAdornment>
                         }}
                         sx={{
                           my: 1,
@@ -933,6 +953,29 @@ borderColor: 'divider'            }}
                         }}
                       />
                     </Grid>
+
+                    <Grid item md={12} xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Promotion Code"
+                        name="promotionCode"
+                        type="text"
+                        value={formik.values.promotionCode}
+                        onChange={formik.handleChange}
+                        error={formik.touched.promotionCode && Boolean(formik.errors.promotionCode)}
+                        helperText={formik.touched.promotionCode && formik.errors.promotionCode}
+                        placeholder="Enter promotion code"
+                        sx={{
+                          my: 1,
+                          '& input::placeholder': {
+                            color: 'gray',
+                            opacity: 1,
+                            fontSize: '10px'
+                          }
+                        }}
+                      />
+                    </Grid>
+
                     <Grid item md={12} xs={12}>
                       <FormControl fullWidth component="fieldset" sx={{ my: 1 }}>
                         <FormLabel component="legend" sx={{ color: 'black', fontWeight: 900 }}>

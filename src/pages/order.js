@@ -868,7 +868,7 @@ const Transaction = () => {
 
 // version 3
   const printTransaction = (transaction, winRef) => {
-    const docTitle = `Incardible-${transaction?.transaction_id}`;
+    const docTitle = `Incardible-${transaction?.title}`;
     const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
 
     // sirf front aur back lena hai
@@ -1503,7 +1503,9 @@ const Transaction = () => {
                               fontWeight: 500,
                               fontSize: '0.875rem'
                             }}>
-                              {data?.cardCustomizationId?.cardId?.title}
+                              {typeof data?.cardCustomizationId?.cardId?.title === 'object' 
+                                ? data?.cardCustomizationId?.cardId?.title?.text || 'N/A'
+                                : data?.cardCustomizationId?.cardId?.title || 'N/A'}
                             </Box>
                           </Box>
                         </TableCell>
@@ -1973,7 +1975,10 @@ const Transaction = () => {
                             fontWeight: 700,
                             color: '#111827'
                           }}>
-                            {selectedCardDetails?.cardCustomizationId?.cardId?.title || selectedCardDetails?.title}
+                            {(() => {
+                              const title = selectedCardDetails?.cardCustomizationId?.cardId?.title || selectedCardDetails?.title;
+                              return typeof title === 'object' ? title?.text || 'N/A' : title || 'N/A';
+                            })()}
                           </Typography>
                         </Box>
                       </Grid>
@@ -2057,6 +2062,33 @@ const Transaction = () => {
                             color: '#111827'
                           }}>
                             {selectedCardDetails?.quantity}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ 
+                          p: 2,
+                          backgroundColor: '#ffffff',
+                          borderRadius: 2,
+                          border: '1px solid #e5e7eb',
+                          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                          textAlign: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ 
+                            fontWeight: 600, 
+                            mb: 1,
+                            color: '#374151',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                          }}>
+                            Promotion Code
+                          </Typography>
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 700,
+                            color: '#111827'
+                          }}>
+                            {selectedCardDetails?.cardCustomizationId?.cardId?.promotionCode || 'No Code'}
                           </Typography>
                         </Box>
                       </Grid>
@@ -3600,8 +3632,9 @@ const Transaction = () => {
                       </Grid>
                     )}
 
-                    {/* Shipping Days Information - Displayed at the end */}
-                    {selectedAddressDetails?.shippingDays && (
+              
+                    
+                    {/* {selectedAddressDetails?.shippingDays && (
                         <Grid container spacing={2} alignItems="stretch" sx={{ mt: 2 }}>
                           <Grid item xs={12}>
                             <Box sx={{ 
@@ -3626,7 +3659,7 @@ const Transaction = () => {
                                 📅 Shipping Days
                               </Typography>
                               
-                              {/* Shipping Type Badge */}
+                        
                               <Box sx={{
                                 display: 'flex',
                                 justifyContent: 'flex-start',
@@ -3652,14 +3685,14 @@ const Transaction = () => {
                                 </Box>
                               </Box>
 
-                              {/* Shipping Days Content */}
+                      
                               <Box sx={{
                                 p: 2,
                                 backgroundColor: '#f8fafc',
                                 borderRadius: 1,
                                 border: '1px solid #e2e8f0'
                               }}>
-                                {/* In Victoria Row */}
+                         
                                 <Box sx={{
                                   display: 'flex',
                                   justifyContent: 'space-between',
@@ -3686,7 +3719,7 @@ const Transaction = () => {
                                   </Typography>
                                 </Box>
                                 
-                                {/* Interstate Row */}
+                             
                                 <Box sx={{
                                   display: 'flex',
                                   justifyContent: 'space-between',
@@ -3714,7 +3747,7 @@ const Transaction = () => {
                             </Box>
                           </Grid>
                         </Grid>
-                    )}
+                    )} */}
                   </Box>
                 </Box>
               )}
@@ -3784,7 +3817,9 @@ const Transaction = () => {
                     Payment Intent: {selectedTransactionForShipping.payment_intent || 'N/A'}
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#6b7280' }}>
-                    Card Title: {selectedTransactionForShipping.title}
+                    Card Title: {typeof selectedTransactionForShipping.title === 'object' 
+                      ? selectedTransactionForShipping.title?.text || 'N/A'
+                      : selectedTransactionForShipping.title || 'N/A'}
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#6b7280' }}>
                     Delivery Address: {selectedTransactionForShipping.delivery_address}
