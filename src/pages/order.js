@@ -2033,7 +2033,7 @@ const Transaction = () => {
                               fontWeight: 700,
                               color: '#111827'
                             }}>
-                              ${selectedCardDetails.cardCustomizationId.cardId.price} AUD
+                              ${selectedCardDetails.cardCustomizationId.cardId.price}
                             </Typography>
                           </Box>
                         </Grid>
@@ -2990,7 +2990,7 @@ const Transaction = () => {
                               fontWeight: 700,
                               color: '#e65100'
                             }}>
-                              -${Number(selectedTransactionDetails?.discount_price || 0).toFixed(2)}
+                              ${Number(selectedTransactionDetails?.discount_price || 0).toFixed(2)}
                             </Typography>
                           </Box>
                         </Grid>
