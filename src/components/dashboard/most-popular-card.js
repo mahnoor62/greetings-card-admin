@@ -177,7 +177,7 @@ const MostPopularCard = ({ data, loading }) => {
                     {/* <Receipt sx={{ fontSize: 20, mr: 1, color: 'error.main' }} /> */}
                     <CurrencyExchange sx={{ fontSize: 20, mr: 1, color: 'error.main' }} />
                     <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'error.main' }}>
-                      A${mostPopularCard.price || 0} Price
+                      ${mostPopularCard.price || 0} Price
                     </Typography>
                   </Box>
                 </Grid>

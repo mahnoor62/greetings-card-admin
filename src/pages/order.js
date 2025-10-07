@@ -1423,7 +1423,7 @@ const Transaction = () => {
                   <TableCell >No</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Account</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Order Details</TableCell>
-                  <TableCell sx={{ textAlign: 'left' }}>Card Title</TableCell>
+                  <TableCell sx={{ textAlign: 'left' }}>Card Details</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Address</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Status</TableCell>
                   <TableCell sx={{ textAlign: 'left' }}>Order Date</TableCell>
@@ -2555,7 +2555,7 @@ const Transaction = () => {
                           </Box>
                         </Box>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      {/* <Grid item xs={12} sm={6}>
                         <Box sx={{ 
                           p: 2,
                           backgroundColor: '#ffffff',
@@ -2598,7 +2598,7 @@ const Transaction = () => {
                             </Typography>
                           </Box>
                         </Box>
-                      </Grid>
+                      </Grid> */}
                       {/* <Grid item xs={12} sm={6}>
                         <Box sx={{ 
                           p: 2,
@@ -2789,7 +2789,7 @@ const Transaction = () => {
                             fontWeight: 700,
                             color: '#111827'
                           }}>
-                            ${selectedTransactionDetails?.price || 0} AUD
+                            ${selectedTransactionDetails?.price || 0} 
                           </Typography>
                         </Box>
                       </Grid>
@@ -2820,7 +2820,7 @@ const Transaction = () => {
                             fontWeight: 700,
                             color: '#111827'
                           }}>
-                            ${selectedTransactionDetails?.gst || 0} AUD
+                            ${selectedTransactionDetails?.gst || 0} 
                           </Typography>
                         </Box>
                       </Grid>
@@ -2851,7 +2851,7 @@ const Transaction = () => {
                             fontWeight: 700,
                             color: '#111827'
                           }}>
-                            ${selectedTransactionDetails?.shipping || 0} AUD
+                            ${selectedTransactionDetails?.shipping || 0} 
                           </Typography>
                         </Box>
                       </Grid>
@@ -2883,35 +2883,152 @@ const Transaction = () => {
                               fontWeight: 700,
                               color: '#111827'
                             }}>
-                              ${selectedTransactionDetails?.expressShippingRate || 0} AUD
+                              ${selectedTransactionDetails?.expressShippingRate || 0}
                             </Typography>
                           </Box>
                         </Grid>
                       )}
+                      
+                      {/* Subtotal Before Discount */}
+                      {selectedTransactionDetails?.discount_price > 0 && (
+                        <Grid item xs={12} sm={6} md={4}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#fffbf0',
+                            borderRadius: 2,
+                            border: '1px solid #ffd966',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            textAlign: 'center',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#b8860b',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Subtotal Before Discount
+                            </Typography>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700,
+                              color: '#b8860b'
+                            }}>
+                              ${selectedTransactionDetails?.total_before_discount ? Number(selectedTransactionDetails.total_before_discount).toFixed(2) : '0.00'} 
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      
+                      {/* Coupon Code */}
+                      {selectedTransactionDetails?.coupon_code && (
+                        <Grid item xs={12} sm={6} md={4}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#e8f5e9',
+                            borderRadius: 2,
+                            border: '1px solid #4caf50',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            textAlign: 'center',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#2e7d32',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Coupon Code Applied
+                            </Typography>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700,
+                              color: '#2e7d32',
+                              fontFamily: 'monospace',
+                              letterSpacing: '1px'
+                            }}>
+                              {selectedTransactionDetails?.coupon_code}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      
+                      {/* Discount Amount */}
+                      {selectedTransactionDetails?.discount_price > 0 && (
+                        <Grid item xs={12} sm={6} md={4}>
+                          <Box sx={{ 
+                            p: 2,
+                            backgroundColor: '#fff3e0',
+                            borderRadius: 2,
+                            border: '1px solid #ff9800',
+                            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                            textAlign: 'center',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center'
+                          }}>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 600, 
+                              mb: 1,
+                              color: '#e65100',
+                              fontSize: '0.75rem',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              Discount Amount
+                            </Typography>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700,
+                              color: '#e65100'
+                            }}>
+                              -${Number(selectedTransactionDetails?.discount_price || 0).toFixed(2)}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      )}
+                      
                       <Grid item xs={12}>
                         <Box sx={{ 
                           p: 3,
-                          backgroundColor: '#ffffff',
+                          backgroundColor: selectedTransactionDetails?.discount_price > 0 ? '#e8f5e9' : '#ffffff',
                           borderRadius: 2,
-                          border: '2px solid #111827',
+                          border: selectedTransactionDetails?.discount_price > 0 ? '2px solid #4caf50' : '2px solid #111827',
                           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                           textAlign: 'center'
                         }}>
                           <Typography variant="subtitle1" sx={{ 
                             fontWeight: 600, 
                             mb: 1,
-                            color: '#374151',
+                            color: selectedTransactionDetails?.discount_price > 0 ? '#2e7d32' : '#374151',
                             textTransform: 'uppercase',
                             letterSpacing: '0.05em'
                           }}>
-                            Total Amount
+                            {selectedTransactionDetails?.discount_price > 0 ? 'Final Amount Paid' : 'Total Amount'}
                           </Typography>
                           <Typography variant="h4" sx={{ 
                             fontWeight: 800,
-                            color: '#111827'
+                            color: selectedTransactionDetails?.discount_price > 0 ? '#2e7d32' : '#111827'
                           }}>
-                            ${selectedTransactionDetails?.total || 0} AUD
+                            ${Number(selectedTransactionDetails?.total || 0).toFixed(2)} 
                           </Typography>
+                          {selectedTransactionDetails?.discount_price > 0 && (
+                            <Typography variant="body2" sx={{ 
+                              mt: 1,
+                              color: '#4caf50',
+                              fontWeight: 600
+                            }}>
+                              💰 You saved ${Number(selectedTransactionDetails?.discount_price || 0).toFixed(2)}!
+                            </Typography>
+                          )}
                         </Box>
                       </Grid>
                     </Grid>

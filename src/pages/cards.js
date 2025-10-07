@@ -343,7 +343,8 @@ const UplaodCards = () => {
     formik.setValues({
       title: selectedCard?.title || '',
       cardType: selectedCard?.cardType || [],
-      price: selectedCard?.price || ''
+      price: selectedCard?.price || '',
+      promotionCode: selectedCard?.promotionCode || ''
     });
   };
 
