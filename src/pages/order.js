@@ -890,14 +890,145 @@ const Transaction = () => {
     const CONTENT_H = 148 - PAGE_MARGIN_MM * 2;
     const COL_W = (CONTENT_W - GAP_MM) / 2;
 
+    // Extract unique font names from the data
+    const extractFontNames = () => {
+      const fonts = new Set();
+      if (arTemplateData?.mainHeading?.fontName) {
+        fonts.add(arTemplateData.mainHeading.fontName);
+      }
+      if (arTemplateData?.paragraph1?.fontName) {
+        fonts.add(arTemplateData.paragraph1.fontName);
+      }
+      if (arTemplateData?.paragraph2?.fontName) {
+        fonts.add(arTemplateData.paragraph2.fontName);
+      }
+      return Array.from(fonts);
+    };
+
+    const fontNames = extractFontNames();
+    console.log('Fonts to load:', fontNames);
+
+    // Map Unity font names to local font file names (exact match)
+    const mapFontNameToFile = (fontName) => {
+      if (!fontName) return '';
+      
+      console.log(`Mapping font: "${fontName}"`);
+      
+      // Create exact mapping from Unity font names to actual file names
+      const fontFileMap = {
+        'AlanSans-VariableFont_wght SDF': 'AlanSans-VariableFont_wght SDF.ttf',
+        'ALBA SDF': 'ALBA SDF.TTF',
+        'AlexBrush-Regular SDF': 'AlexBrush-Regular SDF.ttf',
+        'AmaticSC-Regular SDF': 'AmaticSC-Regular SDF.ttf',
+        'Anak Paud SDF': 'Anak Paud SDF.otf',
+        'Antaresia SDF': 'Antaresia SDF.otf',
+        'Anton-Regular SDF': 'Anton-Regular SDF.ttf',
+        'Apple Chancery SDF': 'Apple Chancery SDF.ttf',
+        'Aquatype SDF': 'Aquatype SDF.ttf',
+        'ARCADECLASSIC SDF': 'ARCADECLASSIC SDF.TTF',
+        'Arimo-VariableFont_wght SDF': 'Arimo-VariableFont_wght SDF.ttf',
+        'Autumn in November SDF': 'Autumn in November SDF.ttf',
+        'BareMarker-Light SDF': 'BareMarker-Light SDF.ttf',
+        'blackjack SDF': 'blackjack SDF.TTF',
+        'Canterbury SDF': 'Canterbury SDF.ttf',
+        'Carnevalee Freakshow SDF': 'Carnevalee Freakshow SDF.ttf',
+        'CHLORINR SDF': 'chlorine.TTF',
+        'DancingScript-VariableFont_wght SDF': 'DancingScript-VariableFont_wght SDF.ttf',
+        'Darhouty Frederics SDF': 'Darhouty Frederics SDF.otf',
+        'Emigrate SDF': 'Emigrate SDF.otf',
+        'Facon SDF': 'Facon SDF.ttf',
+        'Fakeblood SDF': 'Fakeblood SDF.otf',
+        'FFF_Tusj SDF': 'FFF-Tusj SDF.ttf',
+        'GrandHotel-Regular SDF': 'GrandHotel-Regular SDF.ttf',
+        'GreatVibes-Regular SDF': 'GreatVibes-Regular SDF.ttf',
+        'Hanged Letters SDF': 'Hanged Letters SDF.ttf',
+        'Happy Birthday SDF': 'happy birthday.ttf',
+        'Howdy Koala SDF': 'Howdy Koala SDF.ttf',
+        'Inter-Regular SDF': 'Inter-VariableFont_opsz,wght SDF.ttf',
+        'Inter-VariableFont_opsz,wght SDF': 'Inter-VariableFont_opsz,wght SDF.ttf',
+        'KaushanScript-Regular SDF': 'KaushanScript-Regular SDF.ttf',
+        'KingRimba SDF': 'KingRimba SDF.ttf',
+        'Lato-Regular SDF': 'Lato-Regular SDF.ttf',
+        'Lobster_1 SDF': 'Lobster_1.ttf',
+        'MAXIGO SDF': 'MAXIGO SDF.otf',
+        'Mitchell Demo SDF': 'Mitchell Demo.otf',
+        'Montserrat-VariableFont_wght SDF': 'Montserrat-Italic-VariableFont_wght SDF.ttf',
+        'Morally Serif SDF': 'Morally Serif.otf',
+        'NotoSans-VariableFont_wdth,wght SDF': 'NotoSans-VariableFont_wdth,wght.ttf',
+        'OpenSans-VariableFont_wdth,wght SDF': 'OpenSans-VariableFont_wdth,wght SDF.ttf',
+        'Pacifico SDF': 'Pacifico SDF.ttf',
+        'ParryHotter SDF': 'ParryHotter SDF.ttf',
+        'Poppins-Regular SDF': 'Poppins-Regular SDF.ttf',
+        'Pricedown Bl SDF': 'Pricedown Bl SDF.otf',
+        'Raleway-VariableFont_wght SDF': 'Raleway-VariableFont_wght SDF.ttf',
+        'Roboto-VariableFont_wdth,wght SDF': 'Roboto-VariableFont_wdth,wght SDF.ttf',
+        'Sawone SDF': 'Sawone SDF.ttf',
+        'Sofia-Regular SDF': 'Sofia-Regular SDF.ttf',
+        'Super Adorable SDF': 'Super Adorable SDF.ttf',
+        'waltograph42 SDF': 'waltograph42 SDF.otf',
+        'Way Come SDF': 'Way Come SDF.ttf',
+        'YoungMorin-Regular SDF': 'YoungMorin-Regular SDF.ttf',
+        'Zombie_Holocaust SDF': 'Zombie_Holocaust SDF.ttf'
+      };
+      
+      const result = fontFileMap[fontName] || null;
+      console.log(`Font file result for "${fontName}": "${result}"`);
+      return result;
+    };
+
+    // Generate @font-face declarations for local fonts
+    const generateLocalFontFaces = () => {
+      const fontFaces = [];
+      const uniqueFonts = [...new Set(fontNames)];
+      
+      uniqueFonts.forEach(fontName => {
+        const fontFile = mapFontNameToFile(fontName);
+        console.log(`Font mapping: "${fontName}" -> "${fontFile}"`);
+        if (fontFile) {
+          const cleanFontName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+          console.log(`Clean font name: "${fontName}" -> "${cleanFontName}"`);
+          
+          // Determine font format based on file extension
+          const format = fontFile.endsWith('.otf') ? 'opentype' : 'truetype';
+          
+          // Try multiple paths to ensure font loads
+          const fontPaths = [
+            `/font/${fontFile}`,
+            `./font/${fontFile}`,
+            `${window.location.origin}/font/${fontFile}`
+          ];
+          
+          fontFaces.push(`
+            @font-face {
+              font-family: '${cleanFontName}';
+              src: url('${fontPaths[0]}') format('${format}');
+              font-weight: normal;
+              font-style: normal;
+              font-display: block;
+            }
+          `);
+        } else {
+          console.log(`No font file found for: "${fontName}"`);
+        }
+      });
+      
+      return fontFaces.join('\n');
+    };
+
+    const localFontFaces = generateLocalFontFaces();
+    console.log('Local font faces generated:', localFontFaces);
+
     const styles = `
 <style>
   @page {
     size: A5 landscape;
     margin: ${PAGE_MARGIN_MM}mm;
   }
+  
+  ${localFontFaces}
+  
   * { box-sizing: border-box; }
-  html, body { margin:0; padding:0; font-family: Calibri, sans-serif; }
+  html, body { margin:0; padding:0; font-family: Calibri, Arial, sans-serif; }
   .page {
     width: ${CONTENT_W}mm;
     height: ${CONTENT_H}mm;
@@ -916,8 +1047,7 @@ const Transaction = () => {
     height: calc(100% - 2mm);
     aspect-ratio: 1 / 1.4142;
     width: auto;
-    /*border: 2px solid #bbb;   !* sirf border *!*/
-    background: #fff;         /* sirf white bg */
+    background: #fff;
     overflow: hidden;
     break-inside: avoid;
   }
@@ -928,22 +1058,19 @@ const Transaction = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
     z-index: 2;
     pointer-events: none;
     max-width: 84%;
     max-height: 84%;
   }
   .overlay-inner{
+    width: 100%;
     max-width: 100%;
     max-height: 100%;
     overflow: hidden;
     line-height: 1.25;
-    color: black;
   }
-  .overlay-inner h2{ font-weight:700; font-size:18pt; margin:0 0 4mm; }
-  .overlay-inner p{ font-size:12pt; margin:0 0 3mm; }
-  .overlay-inner .stroke{ -webkit-text-stroke:0.6pt #000; }
+  .overlay-inner h2, .overlay-inner p { margin:0 0 3mm; word-wrap: break-word; }
 
   .qr {
     position: absolute;
@@ -968,33 +1095,61 @@ const Transaction = () => {
       return `rgb(${r}, ${g}, ${b})`;
     };
 
+    // Map Unity font names to local font names
+    const mapUnityFontToWebFont = (fontName) => {
+      if (!fontName) return 'Calibri, Arial, sans-serif';
+      
+      console.log(`mapUnityFontToWebFont input: "${fontName}"`);
+      
+      // Use the exact font name as it appears in the @font-face declaration
+      // The @font-face uses the cleaned name (without SDF suffix)
+      let cleaned = fontName.replace(/ SDF$/i, '').trim();
+      console.log(`Final font family name: "${cleaned}"`);
+      
+      // Use ONLY the custom font from your public/font folder
+      // No fallback fonts - only your custom fonts
+      const result = `"${cleaned}"`;
+      console.log(`Final font family: "${result}"`);
+      return result;
+    };
+
     // Helper function to apply text styling
     const applyTextStyle = (textObj, elementType = 'p') => {
       if (!textObj || !textObj.text) return '';
       
+      // Use EXACT styling from data - use font size exactly as provided
       const color = rgbToCss(textObj.color);
-      const fontSize = textObj.fontSize ? `${textObj.fontSize}pt` : '12pt';
+      const fontSize = textObj.fontSize ? `${textObj.fontSize}px` : `${elementType === 'h2' ? 18 : 12}px`;
       const fontWeight = textObj.isBold ? 'bold' : 'normal';
       const fontStyle = textObj.isItalic ? 'italic' : 'normal';
       const textDecoration = textObj.isUnderline ? 'underline' : 'none';
       
-      // Use only the exact font name from the data
-      const fontFamily = textObj.fontName ? `"${textObj.fontName}"` : '';
+      // Use EXACT font name from data (without quotes to match @font-face)
+      const cleanFontName = textObj.fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+      const fontFamily = cleanFontName; // No quotes to match @font-face declaration
       
-      // Determine text alignment
-      let textAlign = 'left';
-      if (textObj.isCenterAligned) textAlign = 'center';
+      // Use EXACT alignment from data
+      let textAlign = textObj.alignment || 'center';
+      if (textObj.isLeftAligned) textAlign = 'left';
       else if (textObj.isRightAligned) textAlign = 'right';
+      else if (textObj.isCenterAligned) textAlign = 'center';
       
-      const style = `
-        color: ${color};
-        font-size: ${fontSize};
-        font-weight: ${fontWeight};
-        font-style: ${fontStyle};
-        text-decoration: ${textDecoration};
-        text-align: ${textAlign};
-        font-family: ${fontFamily};
-      `;
+      console.log('Applying EXACT text style from data:', {
+        originalFont: textObj.fontName,
+        finalFontFamily: fontFamily,
+        fontSize,
+        fontWeight,
+        fontStyle,
+        color,
+        textAlign,
+        isBold: textObj.isBold,
+        isItalic: textObj.isItalic,
+        isUnderline: textObj.isUnderline
+      });
+      
+      const style = `color: ${color}; font-size: ${fontSize}; font-weight: ${fontWeight}; font-style: ${fontStyle}; text-decoration: ${textDecoration}; text-align: ${textAlign}; font-family: ${fontFamily}; margin: 0 0 3mm; padding: 0; line-height: 1.3;`;
+      
+      console.log(`Final CSS style: ${style}`);
       
       return `<${elementType} style="${style}">${textObj.text}</${elementType}>`;
     };
@@ -1030,14 +1185,153 @@ const Transaction = () => {
       `<html><head><title>${docTitle}</title>${styles}</head><body>${pages.join('')}</body></html>`
     );
     winRef.document.close();
+    
+    // Load fonts using FontFace API as backup
+    const loadFontsWithFontFaceAPI = async () => {
+      if (!winRef.document.fonts) return;
+      
+      console.log('Loading fonts with FontFace API...');
+      const fontPromises = [];
+      
+      fontNames.forEach(fontName => {
+        const fontFile = mapFontNameToFile(fontName);
+        if (fontFile) {
+          const cleanFontName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+          console.log(`Loading font: ${cleanFontName} from ${fontFile}`);
+          
+          // Try multiple font paths
+          const fontPaths = [
+            `/font/${fontFile}`,
+            `./font/${fontFile}`,
+            `${winRef.location.origin}/font/${fontFile}`
+          ];
+          
+          const fontFace = new winRef.FontFace(
+            cleanFontName,
+            `url('${fontPaths[0]}')`
+          );
+          
+          fontPromises.push(
+            fontFace.load().then(() => {
+              winRef.document.fonts.add(fontFace);
+              console.log(`Font ${cleanFontName} loaded successfully with FontFace API`);
+              
+              // Verify font is actually available
+              const isAvailable = winRef.document.fonts.check(`16px "${cleanFontName}"`);
+              console.log(`Font ${cleanFontName} availability check:`, isAvailable);
+              
+              // Additional verification - test with different sizes
+              const testSizes = ['12px', '16px', '24px', '37px'];
+              testSizes.forEach(size => {
+                const check = winRef.document.fonts.check(`${size} "${cleanFontName}"`);
+                console.log(`Font ${cleanFontName} at ${size}:`, check);
+              });
+            }).catch(async (err) => {
+              console.error(`Failed to load font ${cleanFontName} with FontFace API:`, err);
+              
+              // Try loading as data URL as fallback
+              try {
+                console.log(`Trying to load ${cleanFontName} as data URL...`);
+                const response = await fetch(fontPaths[0]);
+                const fontBuffer = await response.arrayBuffer();
+                const fontBase64 = btoa(String.fromCharCode(...new Uint8Array(fontBuffer)));
+                const dataUrl = `data:font/truetype;charset=utf-8;base64,${fontBase64}`;
+                
+                const dataFontFace = new winRef.FontFace(cleanFontName, dataUrl);
+                await dataFontFace.load();
+                winRef.document.fonts.add(dataFontFace);
+                console.log(`Font ${cleanFontName} loaded successfully as data URL`);
+              } catch (dataErr) {
+                console.error(`Failed to load font ${cleanFontName} as data URL:`, dataErr);
+              }
+            })
+          );
+        }
+      });
+      
+      try {
+        await Promise.all(fontPromises);
+        console.log('All fonts loaded with FontFace API');
+      } catch (error) {
+        console.error('Error loading fonts:', error);
+      }
+    };
+    
+    // Test font file accessibility
+    const testFontAccessibility = async () => {
+      for (const fontName of fontNames) {
+        const fontFile = mapFontNameToFile(fontName);
+        if (fontFile) {
+          const testUrl = `/font/${fontFile}`;
+          console.log(`Testing font accessibility: ${testUrl}`);
+          
+          try {
+            const response = await fetch(testUrl, { method: 'HEAD' });
+            console.log(`Font file ${fontFile} accessible:`, response.ok);
+            if (!response.ok) {
+              console.error(`Font file ${fontFile} not accessible:`, response.status, response.statusText);
+            }
+          } catch (error) {
+            console.error(`Error testing font accessibility for ${fontFile}:`, error);
+          }
+        }
+      }
+    };
+    
+    testFontAccessibility();
+    
+    // Test direct font loading
+    const testDirectFontLoading = async () => {
+      for (const fontName of fontNames) {
+        const fontFile = mapFontNameToFile(fontName);
+        if (fontFile) {
+          const cleanFontName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+          const fontUrl = `/font/${fontFile}`;
+          
+          console.log(`Testing direct font loading: ${cleanFontName} from ${fontUrl}`);
+          
+          try {
+            // Create a test element with the font
+            const testElement = winRef.document.createElement('div');
+            testElement.style.fontFamily = `"${cleanFontName}", Arial, sans-serif`;
+            testElement.style.fontSize = '16px';
+            testElement.style.position = 'absolute';
+            testElement.style.left = '-9999px';
+            testElement.textContent = 'Test Font';
+            winRef.document.body.appendChild(testElement);
+            
+            // Force font loading
+            await winRef.document.fonts.load(`16px "${cleanFontName}"`);
+            
+            // Check if font is actually loaded
+            const isLoaded = winRef.document.fonts.check(`16px "${cleanFontName}"`);
+            console.log(`Font "${cleanFontName}" loaded:`, isLoaded);
+            
+            // Clean up test element
+            winRef.document.body.removeChild(testElement);
+            
+          } catch (error) {
+            console.error(`Error testing direct font loading for ${cleanFontName}:`, error);
+          }
+        }
+      }
+    };
+    
+    // Start loading fonts immediately
+    loadFontsWithFontFaceAPI();
+    
+    // Test direct loading after a delay
+    setTimeout(testDirectFontLoading, 1000);
 
-    // QR load
+    // QR load and font loading
     const script = winRef.document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
     script.onload = () => {
       const qrValue = `${AR_EXPERIENCE_LINK}/?templateId=${transaction?.cardCustomizationId?._id}`;
       console.log("qrValue", qrValue)
       const slot = winRef.document.getElementById('qr-slot');
+      
+      // Generate QR code
       if (slot && winRef.QRCode) {
         const qr = new winRef.QRCode(slot, {
           text: qrValue,
@@ -1045,12 +1339,84 @@ const Transaction = () => {
           height: 100,
           correctLevel: winRef.QRCode.CorrectLevel.M
         });
-        setTimeout(() => { winRef.focus(); winRef.print(); }, 500);
+      }
+      
+      // Wait for fonts to load before printing
+      const waitForFontsAndPrint = () => {
+        // Check if fonts are loaded
+        const checkFontsLoaded = () => {
+          const fontsToCheck = fontNames.map(name => {
+            const cleanName = name.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+            return cleanName;
+          });
+          
+          console.log('Checking if fonts are loaded:', fontsToCheck);
+          
+          let allLoaded = true;
+          fontsToCheck.forEach(fontName => {
+            const isLoaded = winRef.document.fonts.check(`16px "${fontName}"`);
+            console.log(`Font "${fontName}" loaded:`, isLoaded);
+            if (!isLoaded) allLoaded = false;
+          });
+          
+          return allLoaded;
+        };
+        
+        const tryPrint = () => {
+          console.log('Attempting to print...');
+          
+          // Final font check before printing
+          fontNames.forEach(fontName => {
+            const cleanName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+            const isLoaded = winRef.document.fonts.check(`16px "${cleanName}"`);
+            console.log(`Final check - Font "${cleanName}" loaded:`, isLoaded);
+          });
+          
+          winRef.focus();
+          winRef.print();
+        };
+        
+        // Try immediate check
+        if (checkFontsLoaded()) {
+          console.log('All fonts already loaded');
+          setTimeout(tryPrint, 500);
+          return;
+        }
+        
+        // Wait for fonts to load
+        if (winRef.document.fonts && winRef.document.fonts.ready) {
+          winRef.document.fonts.ready.then(() => {
+            console.log('Fonts ready event fired');
+            if (checkFontsLoaded()) {
+              console.log('All fonts loaded successfully');
+              setTimeout(tryPrint, 500);
+            } else {
+              console.log('Some fonts still not loaded, printing anyway...');
+              setTimeout(tryPrint, 500);
+            }
+          }).catch(() => {
+            console.log('Font loading failed, printing anyway...');
+            setTimeout(tryPrint, 500);
+          });
+        } else {
+          // Fallback if document.fonts API not available
+          console.log('Font loading API not available, waiting and printing...');
+          setTimeout(tryPrint, 1500);
+        }
+      };
+      
+      waitForFontsAndPrint();
+    };
+    script.onerror = () => { 
+      // If QR script fails, still try to print
+      if (winRef.document.fonts && winRef.document.fonts.ready) {
+        winRef.document.fonts.ready.then(() => {
+          setTimeout(() => { winRef.focus(); winRef.print(); }, 800);
+        });
       } else {
-        winRef.focus(); winRef.print();
+        setTimeout(() => { winRef.focus(); winRef.print(); }, 1200);
       }
     };
-    script.onerror = () => { winRef.focus(); winRef.print(); };
     winRef.document.head.appendChild(script);
 
     winRef.onafterprint = () => { try { winRef.close(); } catch {} };
