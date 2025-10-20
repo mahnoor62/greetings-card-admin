@@ -543,47 +543,47 @@ const Page = () => {
     reader.readAsDataURL(file);
   };
 
-  const formikForEnvelope = useFormik({
-    initialValues: {
-      envelope: ''
-    },
+  // const formikForEnvelope = useFormik({
+  //   initialValues: {
+  //     envelope: ''
+  //   },
 
-    validationSchema: yup.object({
-      // image: yup.string().required('Image of gallery is required'),
-    }),
-    onSubmit: async (values, { resetForm }) => {
-      setEnvelopeLoading(true);
-      try {
-        const formData = new FormData();
-        formData.append('id', id);
-        formData.append('envelope', envelopeImage);
+  //   validationSchema: yup.object({
+  //     // image: yup.string().required('Image of gallery is required'),
+  //   }),
+  //   onSubmit: async (values, { resetForm }) => {
+  //     setEnvelopeLoading(true);
+  //     try {
+  //       const formData = new FormData();
+  //       formData.append('id', id);
+  //       formData.append('envelope', envelopeImage);
 
-        const response = await axios.post(`${BASE_URL}/api/cards/upload-envelope`,
-          formData,
-          {
-            headers: {
-              'x-access-token': token,
-              'Content-Type': 'multipart/form-data'
-            }
-          });
+  //       const response = await axios.post(`${BASE_URL}/api/cards/upload-envelope`,
+  //         formData,
+  //         {
+  //           headers: {
+  //             'x-access-token': token,
+  //             'Content-Type': 'multipart/form-data'
+  //           }
+  //         });
 
-        toast.success('Envelope uploaded successfully.');
-        formikForEnvelope.resetForm();
-        setEnvelopeLoading(false);
-        document.getElementById('envelope').value = '';
-      } catch (error) {
-        console.log('error in uploaded envelope', error);
-        toast.error(error.response.data.msg);
-        setEnvelopeLoading(false);
-      }
-    }
-  });
+  //       toast.success('Envelope uploaded successfully.');
+  //       formikForEnvelope.resetForm();
+  //       setEnvelopeLoading(false);
+  //       document.getElementById('envelope').value = '';
+  //     } catch (error) {
+  //       console.log('error in uploaded envelope', error);
+  //       toast.error(error.response.data.msg);
+  //       setEnvelopeLoading(false);
+  //     }
+  //   }
+  // });
 
-  useEffect(() => {
-    if (envelopeImage) {
-      formikForEnvelope.handleSubmit();
-    }
-  }, [envelopeImage]);
+  // useEffect(() => {
+  //   if (envelopeImage) {
+  //     formikForEnvelope.handleSubmit();
+  //   }
+  // }, [envelopeImage]);
 
   const handleNextClick = () => {
     // if (!image || !backImage || !insideLeftImage || !insideRightImage) {
@@ -641,6 +641,7 @@ const Page = () => {
       /\\/g,
       '/')}`
     : null;
+
   const existingEnvelopeUrl = card?.envelope
     ? `${BASE_URL}/${card.envelope.replace(/\\/g, '/')}`
     : null;
@@ -1055,7 +1056,8 @@ const Page = () => {
                 </Box>
               </Box>
             </Grid>
-            <Grid item xs={6} md={3}>
+
+            {/* <Grid item xs={6} md={3}>
               <Card sx={{
                 bgcolor: '#f0f3f8',
                 height: 400,
@@ -1066,8 +1068,8 @@ const Page = () => {
                   {/* <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
                     <ErrorOutlineIcon/>
                   </Tooltip> */}
-                </Box>
-                <Box
+                {/* </Box> */}
+                {/* <Box
                   sx={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -1077,7 +1079,7 @@ const Page = () => {
                     py: 3
                   }}
                 >
-                  {/* Image at Top */}
+           
                   <Box
                     onDrop={handleDropForEnvelope}
                     onDragOver={(e) => e.preventDefault()}
@@ -1095,14 +1097,14 @@ const Page = () => {
                     }}
                   />
 
-                  {/* Text in Center */}
+                
                   <CardContent sx={{ textAlign: 'center' }}>
                     <Typography variant="body1" sx={{ color: 'black', fontWeight: 900 }}>
                       Drag & drop <span style={{ color: '#c09b9b' }}>image</span>
                     </Typography>
                   </CardContent>
 
-                  {/* Button at Bottom */}
+                
                   <CardActions>
                     <Button
                       variant="contained"
@@ -1139,7 +1141,8 @@ const Page = () => {
                   Envelope
                 </Typography>
               </Box>
-            </Grid>
+            </Grid>  */}
+            
           </Grid>
 
         </Container>
