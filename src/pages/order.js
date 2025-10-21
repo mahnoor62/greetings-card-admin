@@ -2814,7 +2814,6 @@ function buildPrintHTML_SameStyle(transaction) {
     iframeDoc.head.appendChild(script);
   };
 
-
   const handlePrintClick = (transaction) => {
     try {
       setPrinting(true);
