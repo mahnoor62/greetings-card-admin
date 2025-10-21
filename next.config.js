@@ -5,6 +5,7 @@
 // next.config.js
 module.exports = {
   reactStrictMode: true,
+    output: 'export',
   async headers() {
     return [
       {
