@@ -2538,11 +2538,27 @@ function buildPrintHTML_SameStyle(transaction) {
     size: A5 landscape;
     margin: ${PAGE_MARGIN_MM}mm;
   }
+  @media print {
+    @page {
+      size: A5 landscape;
+      margin: ${PAGE_MARGIN_MM}mm;
+    }
+  }
   
   ${localFontFaces}
   
   * { box-sizing: border-box; }
-  html, body { margin:0; padding:0; font-family: Calibri, Arial, sans-serif; }
+  html, body { 
+    margin: 0; 
+    padding: 0; 
+    font-family: Calibri, Arial, sans-serif;
+  }
+  @media print {
+    html, body {
+      width: 210mm;
+      height: 148mm;
+    }
+  }
   .page {
     width: ${CONTENT_W}mm;
     height: ${CONTENT_H}mm;
@@ -2568,23 +2584,51 @@ function buildPrintHTML_SameStyle(transaction) {
 
   .overlay-text{
     position: absolute;
-    inset: 8%;
+    top: 15mm; /* Margin from top */
+    left: 50%;
+    transform: translateX(-50%); /* Keep horizontal centering */
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
     z-index: 2;
     pointer-events: none;
-    max-width: 84%;
-    max-height: 84%;
   }
   .overlay-inner{
-    width: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    overflow: hidden;
-    line-height: 1.25;
+    display: flex;
+    flex-direction: column;
+    width: 264px;
+    height: 354px; /* 81px (heading) + 273px (paragraph) */
+    gap: 5mm; /* Added gap between heading and paragraph */
   }
-  .overlay-inner h2, .overlay-inner p { margin:0 0 3mm; word-wrap: break-word; }
+  .overlay-inner h2 { 
+    margin: 0; 
+    word-wrap: break-word; 
+    width: 264px;
+    height: 81px;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Will be overridden by data alignment */
+    overflow: hidden;
+    padding: 5px;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    white-space: normal;
+  }
+  .overlay-inner p { 
+    margin: 0; 
+    word-wrap: break-word; 
+    word-break: break-all;
+    width: 264px;
+    height: 273px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center; /* Will be overridden by data alignment */
+    overflow: hidden;
+    padding: 5px;
+    box-sizing: border-box;
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+  }
 
   .qr {
     position: absolute;
@@ -2626,9 +2670,17 @@ function buildPrintHTML_SameStyle(transaction) {
       
       // Use EXACT alignment from data
       let textAlign = textObj.alignment || 'center';
-      if (textObj.isLeftAligned) textAlign = 'left';
-      else if (textObj.isRightAligned) textAlign = 'right';
-      else if (textObj.isCenterAligned) textAlign = 'center';
+      let justifyContent = 'center';
+      if (textObj.isLeftAligned) {
+        textAlign = 'left';
+        justifyContent = 'flex-start';
+      } else if (textObj.isRightAligned) {
+        textAlign = 'right';
+        justifyContent = 'flex-end';
+      } else if (textObj.isCenterAligned) {
+        textAlign = 'center';
+        justifyContent = 'center';
+      }
       
       console.log('Applying EXACT text style from data:', {
         originalFont: textObj.fontName,
@@ -2638,12 +2690,13 @@ function buildPrintHTML_SameStyle(transaction) {
         fontStyle,
         color,
         textAlign,
+        justifyContent,
         isBold: textObj.isBold,
         isItalic: textObj.isItalic,
         isUnderline: textObj.isUnderline
       });
       
-      const style = `color: ${color}; font-size: ${fontSize}; font-weight: ${fontWeight}; font-style: ${fontStyle}; text-decoration: ${textDecoration}; text-align: ${textAlign}; font-family: ${fontFamily}; margin: 0 0 3mm; padding: 0; line-height: 1.3;`;
+      const style = `color: ${color}; font-size: ${fontSize}; font-weight: ${fontWeight}; font-style: ${fontStyle}; text-decoration: ${textDecoration}; text-align: ${textAlign}; font-family: ${fontFamily}; margin: 0; padding: 0; line-height: 1.2; justify-content: ${justifyContent}; word-wrap: break-word; word-break: break-all; white-space: normal;`;
       
       console.log(`Final CSS style: ${style}`);
       
@@ -2730,7 +2783,12 @@ function buildPrintHTML_SameStyle(transaction) {
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
     script.onload = () => {
       const qrValue = `${AR_EXPERIENCE_LINK}/?templateId=${transaction?.cardCustomizationId?._id}`;
-      console.log("qrValue", qrValue)
+      console.log('==========================================');
+      console.log('🔗 QR CODE LINK FOR PDF:');
+      console.log('Template ID:', transaction?.cardCustomizationId?._id);
+      console.log('AR Experience Link:', AR_EXPERIENCE_LINK);
+      console.log('Complete QR URL:', qrValue);
+      console.log('==========================================');
       const slot = iframeDoc.getElementById('qr-slot');
       
       // Generate QR code
@@ -2765,6 +2823,7 @@ function buildPrintHTML_SameStyle(transaction) {
         
         const tryPrint = () => {
           console.log('Attempting to print from iframe...');
+          console.log('📄 PDF will be generated at A5 landscape size (210mm × 148mm)');
           
           // Final font check before printing
           fontNames.forEach(fontName => {
