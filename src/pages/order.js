@@ -2692,7 +2692,7 @@ function buildPrintHTML_SameStyle(transaction) {
     padding: 5px;
     box-sizing: border-box;
     text-overflow: ellipsis;
-    white-space: normal;
+    white-space: pre-wrap;
   }
   .overlay-inner p { 
     margin: 0; 
@@ -2706,7 +2706,7 @@ function buildPrintHTML_SameStyle(transaction) {
     overflow: hidden;
     padding: 5px;
     box-sizing: border-box;
-    white-space: normal;
+    white-space: pre-wrap;
     line-height: 1.2;
     text-align: center;
   }
@@ -2777,7 +2777,7 @@ function buildPrintHTML_SameStyle(transaction) {
         isUnderline: textObj.isUnderline
       });
       
-      const style = `color: ${color}; font-size: ${fontSize}; font-weight: ${fontWeight}; font-style: ${fontStyle}; text-decoration: ${textDecoration}; text-align: ${textAlign}; font-family: ${fontFamily}; margin: 0; padding: 0; line-height: 1.2; justify-content: ${justifyContent}; word-wrap: break-word; word-break: break-all; white-space: normal;`;
+      const style = `color: ${color}; font-size: ${fontSize}; font-weight: ${fontWeight}; font-style: ${fontStyle}; text-decoration: ${textDecoration}; text-align: ${textAlign}; font-family: ${fontFamily}; margin: 0; padding: 0; line-height: 1.2; justify-content: ${justifyContent}; word-wrap: break-word; word-break: break-all; white-space: pre-wrap;`;
       
       console.log(`Final CSS style: ${style}`);
       
