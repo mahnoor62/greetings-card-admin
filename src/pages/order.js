@@ -192,8 +192,10 @@ const printRef = React.useRef(null);
     doc.setFont(undefined, 'normal');
     doc.text(selectedAddressDetails.phone_number || 'N/A', 20, yPosition);
     
-    // Generate filename with timestamp
-    const filename = `Address_Details_${Date.now()}.pdf`;
+    // Generate filename with order number or timestamp
+    const filename = selectedAddressDetails.orderId 
+      ? `Address_Details_Order_${selectedAddressDetails.orderId}.pdf`
+      : `Address_Details_${Date.now()}.pdf`;
     
     // Download the PDF
     doc.save(filename);
