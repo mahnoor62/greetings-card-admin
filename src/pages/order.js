@@ -51,6 +51,7 @@ import PrintIcon from '@mui/icons-material/Print';
 import { useAuth } from '../hooks/use-auth';
 import { useRouter } from 'next/router';
 import QRCodeGenerator from '../components/qrCode';
+import jsPDF from 'jspdf';
 
 // import applyFilter from '../utils/filter';
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -119,6 +120,84 @@ const printRef = React.useRef(null);
   const handleCloseAddressDetails = () => {
     setAddressDetailsModal(false);
     setSelectedAddressDetails(null);
+  };
+
+  const handlePrintAddressDetails = () => {
+    if (!selectedAddressDetails) return;
+
+    const doc = new jsPDF();
+    
+    // Set font size and styles
+    const titleFontSize = 18;
+    const headingFontSize = 14;
+    const textFontSize = 11;
+    
+    let yPosition = 20;
+    
+    // Title
+    doc.setFontSize(titleFontSize);
+    doc.setFont(undefined, 'bold');
+    doc.text('Address Details', 105, yPosition, { align: 'center' });
+    yPosition += 15;
+    
+    // Horizontal line
+    doc.setLineWidth(0.5);
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 10;
+    
+    // Complete Address Section
+    doc.setFontSize(headingFontSize);
+    doc.setFont(undefined, 'bold');
+    doc.text('Address:', 20, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(textFontSize);
+    doc.setFont(undefined, 'normal');
+    const addressLines = [
+      selectedAddressDetails.delivery_address || 'N/A',
+      selectedAddressDetails.suburb || '',
+      `${selectedAddressDetails.state || ''} ${selectedAddressDetails.postal_code || ''}`
+    ];
+    
+    addressLines.forEach(line => {
+      if (line.trim()) {
+        doc.text(line, 20, yPosition);
+        yPosition += 6;
+      }
+    });
+    
+    yPosition += 5;
+    
+    // Customer Name Section
+    doc.setFontSize(headingFontSize);
+    doc.setFont(undefined, 'bold');
+    doc.text('Name:', 20, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(textFontSize);
+    doc.setFont(undefined, 'normal');
+    const customerName = selectedAddressDetails?.cardCustomizationId?.userId 
+      ? `${selectedAddressDetails.cardCustomizationId.userId.firstName || ''} ${selectedAddressDetails.cardCustomizationId.userId.lastName || ''}`
+      : 'N/A';
+    doc.text(customerName, 20, yPosition);
+    yPosition += 10;
+    
+    // Phone Number Section
+    doc.setFontSize(headingFontSize);
+    doc.setFont(undefined, 'bold');
+    doc.text('Phone Number:', 20, yPosition);
+    yPosition += 8;
+    
+    doc.setFontSize(textFontSize);
+    doc.setFont(undefined, 'normal');
+    doc.text(selectedAddressDetails.phone_number || 'N/A', 20, yPosition);
+    
+    // Generate filename with timestamp
+    const filename = `Address_Details_${Date.now()}.pdf`;
+    
+    // Download the PDF
+    doc.save(filename);
+    toast.success('Address details downloaded successfully!');
   };
 
   const handleShippingStatusChange = (transaction, newStatus) => {
@@ -2795,8 +2874,8 @@ function buildPrintHTML_SameStyle(transaction) {
       if (slot && iframeDoc.defaultView.QRCode) {
         const qr = new iframeDoc.defaultView.QRCode(slot, {
           text: qrValue,
-          width: 100,
-          height: 100,
+          width: 140,
+          height: 140,
           correctLevel: iframeDoc.defaultView.QRCode.CorrectLevel.M
         });
       }
@@ -2959,13 +3038,14 @@ function buildPrintHTML_SameStyle(transaction) {
         }}
       >
         <Container 
-          maxWidth="lg"
+          maxWidth="xl"
           sx={{ 
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             width: '100%',
-            py: 4
+            py: 4,
+            px: { xs: 2, sm: 3, md: 4, lg: 6, xl: 8 }
           }}
         >
           <Typography variant="h2" sx={{
@@ -3020,7 +3100,7 @@ function buildPrintHTML_SameStyle(transaction) {
     maxWidth: '100%',
     mx: 'auto',
     display: 'block',
-    overflowX: {xs: 'auto', md:'auto' },                // ← horizontal scroll
+    overflowX: { xs: 'auto', sm: 'auto', md: 'auto', lg: 'hidden', xl: 'hidden' },
     WebkitOverflowScrolling: 'touch',
     scrollbarWidth: 'thin',
     '&::-webkit-scrollbar': { height: 6 },
@@ -3032,7 +3112,7 @@ function buildPrintHTML_SameStyle(transaction) {
     aria-label="transactions table"
     sx={{
       width: '100%',
-      minWidth: { xs: 960, sm: 960, md: 'auto' },
+      minWidth: { xs: 960, sm: 960, md: '100%' },
       tableLayout: { xs: 'auto', md: 'auto' }
     }}
   >
@@ -5625,7 +5705,31 @@ function buildPrintHTML_SameStyle(transaction) {
                 </Box>
               )}
             </DialogContent>
-            <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb' }}>
+            <DialogActions sx={{ p: 3, backgroundColor: '#ffffff', borderTop: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between' }}>
+              <Button 
+                onClick={handlePrintAddressDetails} 
+                variant="contained"
+                startIcon={<PrintIcon />}
+                sx={{
+                  backgroundColor: '#10b981',
+                  color: '#ffffff',
+                  borderRadius: 2,
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  '&:hover': {
+                    backgroundColor: '#059669',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 6px rgba(16, 185, 129, 0.3)',
+                    transition: 'all 0.2s ease-in-out'
+                  },
+                  transition: 'all 0.2s ease-in-out'
+                }}
+              >
+                Print
+              </Button>
               <Button 
                 onClick={handleCloseAddressDetails} 
                 variant="outlined"
