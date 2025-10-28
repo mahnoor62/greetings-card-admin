@@ -2674,6 +2674,8 @@ function buildPrintHTML_SameStyle(transaction) {
     background: #fff;
     overflow: hidden;
     break-inside: avoid;
+    /* TESTING: Border to verify card dimensions */
+    border: 3px solid green;
   }
 
   .overlay-text{
@@ -2709,6 +2711,8 @@ function buildPrintHTML_SameStyle(transaction) {
     box-sizing: border-box;
     text-overflow: ellipsis;
     white-space: pre-wrap;
+    /* TESTING: Border to verify width and height */
+    border: 2px solid red;
   }
   .overlay-inner p { 
     margin: 0; 
@@ -2726,6 +2730,8 @@ function buildPrintHTML_SameStyle(transaction) {
     white-space: pre-wrap;
     line-height: 1.2;
     text-align: center;
+    /* TESTING: Border to verify width and height */
+    border: 2px solid blue;
   }
 
   .qr {
