@@ -2468,6 +2468,19 @@ function buildPrintHTML_SameStyle(transaction) {
 
     // sirf front aur back lena hai
     const arTemplateData = transaction?.cardCustomizationId?.arTemplateData;
+    
+    // Log fontWeight, width, and height for mainHeading and paragraph1
+    console.log('=== PDF Generation Data Check ===');
+    console.log('mainHeading data:', arTemplateData?.mainHeading);
+    console.log('mainHeading fontWeight:', arTemplateData?.mainHeading?.fontWeight);
+    console.log('mainHeading width:', arTemplateData?.mainHeading?.width);
+    console.log('mainHeading height:', arTemplateData?.mainHeading?.height);
+    console.log('paragraph1 data:', arTemplateData?.paragraph1);
+    console.log('paragraph1 fontWeight:', arTemplateData?.paragraph1?.fontWeight);
+    console.log('paragraph1 width:', arTemplateData?.paragraph1?.width);
+    console.log('paragraph1 height:', arTemplateData?.paragraph1?.height);
+    console.log('================================');
+    
     const front = {
       src: makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
       heading: arTemplateData?.mainHeading,
@@ -2683,8 +2696,11 @@ function buildPrintHTML_SameStyle(transaction) {
   .overlay-inner h2 { 
     margin: 0; 
     word-wrap: break-word; 
-    width: 264px;
-    height: 81px;
+    /* Width and height now set dynamically via inline styles from data */
+    width: 264px; /* Fallback if not provided in data */
+    height: 81px; /* Fallback if not provided in data */
+    /* Font-weight will be set via inline styles from data - remove default bold */
+    font-weight: normal; /* Default, will be overridden by inline style */
     display: flex;
     align-items: center;
     justify-content: center; /* Will be overridden by data alignment */
@@ -2698,8 +2714,9 @@ function buildPrintHTML_SameStyle(transaction) {
     margin: 0; 
     word-wrap: break-word; 
     word-break: break-all;
-    width: 264px;
-    height: 273px;
+    /* Width and height now set dynamically via inline styles from data */
+    width: 264px; /* Fallback if not provided in data */
+    height: 273px; /* Fallback if not provided in data */
     display: flex;
     align-items: flex-start;
     justify-content: center; /* Will be overridden by data alignment */
@@ -2725,25 +2742,66 @@ function buildPrintHTML_SameStyle(transaction) {
   }
 </style>`;
 
-    // Helper function to convert RGB values to CSS color
+    // Helper function to convert color to CSS color
+    // Uses EXACT hex value from data: {hex: "#7BCA69"} -> "#7BCA69"
     const rgbToCss = (colorObj) => {
-      if (!colorObj || typeof colorObj.r === 'undefined') return 'black';
-      const r = Math.round(colorObj.r * 255);
-      const g = Math.round(colorObj.g * 255);
-      const b = Math.round(colorObj.b * 255);
-      return `rgb(${r}, ${g}, ${b})`;
+      if (!colorObj) {
+        console.log('Color conversion: No color object provided, using black');
+        return 'black';
+      }
+      
+      // Use hex value exactly as provided in data
+      if (colorObj.hex) {
+        const hexValue = colorObj.hex;
+        console.log('Color conversion (using exact hex from data):', {
+          colorObject: colorObj,
+          hexFromData: hexValue,
+          hexType: typeof hexValue,
+          finalColorApplied: hexValue
+        });
+        return hexValue; // Use hex value directly, exactly as received
+      }
+      
+      // Fallback if hex is not present
+      console.log('Color conversion: Hex value not found in color object:', colorObj);
+      return 'black';
     };
 
     // Helper function to apply text styling
     const applyTextStyle = (textObj, elementType = 'p') => {
       if (!textObj || !textObj.text) return '';
       
-      // Use EXACT styling from data - use font size exactly as provided
+      // Log complete data object to see all properties
+      console.log('Complete textObj data:', JSON.stringify(textObj, null, 2));
+      console.log('Element type:', elementType);
+      
+      // Use EXACT styling from data - only use actual values from data, no defaults
       const color = rgbToCss(textObj.color);
-      const fontSize = textObj.fontSize ? `${textObj.fontSize}px` : `${elementType === 'h2' ? 18 : 12}px`;
-      const fontWeight = textObj.isBold ? 'bold' : 'normal';
+      const fontSize = textObj.fontSize != null ? `${textObj.fontSize}px` : null;
+      // Use fontWeight directly from data (for both mainHeading and paragraph1) - use exact value as provided
+      const fontWeight = textObj.fontWeight != null ? String(textObj.fontWeight) : null;
+      
+      console.log(`${elementType === 'h2' ? 'mainHeading' : 'paragraph'} fontWeight processing:`, {
+        fontWeightFromData: textObj.fontWeight,
+        fontWeightType: typeof textObj.fontWeight,
+        fontWeightValue: fontWeight,
+        fontWeightTypeAfter: typeof fontWeight
+      });
       const fontStyle = textObj.isItalic ? 'italic' : 'normal';
       const textDecoration = textObj.isUnderline ? 'underline' : 'none';
+      
+      // Use dynamic width and height from data - only actual values, no defaults
+      const width = textObj.width != null ? `${textObj.width}px` : null;
+      const height = textObj.height != null ? `${textObj.height}px` : null;
+      
+      console.log(`${elementType === 'h2' ? 'mainHeading' : 'paragraph'} dimensions:`, {
+        width: width,
+        widthFromData: textObj.width,
+        height: height,
+        heightFromData: textObj.height,
+        fontWeight: fontWeight,
+        fontWeightFromData: textObj.fontWeight
+      });
       
       // Use EXACT font name from data (without quotes to match @font-face)
       const cleanFontName = textObj.fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
@@ -2768,20 +2826,64 @@ function buildPrintHTML_SameStyle(transaction) {
         finalFontFamily: fontFamily,
         fontSize,
         fontWeight,
+        fontWeightFromData: textObj.fontWeight,
+        colorFromData: textObj.color,
+        colorApplied: color,
+        width,
+        widthFromData: textObj.width,
+        height,
+        heightFromData: textObj.height,
         fontStyle,
-        color,
         textAlign,
         justifyContent,
-        isBold: textObj.isBold,
         isItalic: textObj.isItalic,
-        isUnderline: textObj.isUnderline
+        isUnderline: textObj.isUnderline,
+        alignment: textObj.alignment,
+        isLeftAligned: textObj.isLeftAligned,
+        isRightAligned: textObj.isRightAligned,
+        isCenterAligned: textObj.isCenterAligned,
+        allProperties: Object.keys(textObj)
       });
       
-      const style = `color: ${color}; font-size: ${fontSize}; font-weight: ${fontWeight}; font-style: ${fontStyle}; text-decoration: ${textDecoration}; text-align: ${textAlign}; font-family: ${fontFamily}; margin: 0; padding: 0; line-height: 1.2; justify-content: ${justifyContent}; word-wrap: break-word; word-break: break-all; white-space: pre-wrap;`;
+      // Build style string only with actual values from data
+      const styleParts = [
+        `color: ${color}`,
+        fontSize != null ? `font-size: ${fontSize}` : null,
+        fontWeight != null ? `font-weight: ${fontWeight}` : null,
+        `font-style: ${fontStyle}`,
+        `text-decoration: ${textDecoration}`,
+        `text-align: ${textAlign}`,
+        `font-family: ${fontFamily}`,
+        width != null ? `width: ${width}` : null,
+        height != null ? `height: ${height}` : null,
+        `margin: 0`,
+        `padding: 5px`,
+        `box-sizing: border-box`,
+        `line-height: 1.2`,
+        `justify-content: ${justifyContent}`,
+        `word-wrap: break-word`,
+        `word-break: break-all`,
+        `white-space: pre-wrap`,
+        `display: flex`,
+        `align-items: ${elementType === 'h2' ? 'center' : 'flex-start'}`,
+        `overflow: hidden`
+      ].filter(part => part !== null); // Remove null values
       
+      const style = styleParts.join('; ');
+      
+      // Explicit logging for fontWeight to debug h2 issue
+      const htmlElement = `<${elementType} style="${style}">${textObj.text}</${elementType}>`;
+      console.log(`${elementType === 'h2' ? 'mainHeading' : 'paragraph'} style check:`, {
+        fontWeightValue: fontWeight,
+        fontWeightType: typeof fontWeight,
+        fontWeightInStyle: style.includes('font-weight'),
+        fullStyle: style,
+        htmlElement: htmlElement,
+        hasFontWeightInHTML: htmlElement.includes('font-weight')
+      });
       console.log(`Final CSS style: ${style}`);
       
-      return `<${elementType} style="${style}">${textObj.text}</${elementType}>`;
+      return htmlElement;
     };
 
     const makeCardHTML = (c) => `
