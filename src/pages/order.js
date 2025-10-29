@@ -1319,15 +1319,32 @@ function buildPrintHTML_SameStyle(transaction) {
   };
 
   const applyTextStyle = (textObj, tag='p') => {
-    if (!textObj || !textObj.text) return '';
-    const color = rgbToCss(textObj.color);
+    // For h2 and p tags, render box even if no text (with default dimensions)
+    const hasText = textObj && textObj.text;
+    const shouldRenderEmptyBox = (tag === 'h2' || tag === 'p');
+    
+    // Handle completely missing textObj
+    if (!textObj) {
+      if (shouldRenderEmptyBox) {
+        const defaultWidth = tag === 'h2' ? '264px' : '264px';
+        const defaultHeight = tag === 'h2' ? '81px' : '273px';
+        return `<${tag} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0 0 3mm; padding: 5px;"></${tag}>`;
+      }
+      return '';
+    }
+    
+    if (!hasText && !shouldRenderEmptyBox) {
+      return '';
+    }
+    
+    const color = textObj.color ? rgbToCss(textObj.color) : 'black';
     const fontSize = textObj.fontSize ? `${textObj.fontSize}px` : (tag==='h2' ? '18px' : '12px');
     const fontWeight = textObj.isBold ? 'bold' : 'normal';
     const fontStyle  = textObj.isItalic ? 'italic' : 'normal';
     const textDecoration = textObj.isUnderline ? 'underline' : 'none';
 
     // EXACT same clean name + NO quotes (matches your @font-face family)
-    const cleanFontName = (textObj.fontName||'')
+    const cleanFontName = (textObj.fontName||'Arial')
       .replace(/ SDF$/i,'')
       .replace(/-VariableFont_.+$/i,'')
       .replace(/-Regular$/i,'');
@@ -1336,21 +1353,35 @@ function buildPrintHTML_SameStyle(transaction) {
     if (textObj.isLeftAligned) textAlign = 'left';
     else if (textObj.isRightAligned) textAlign = 'right';
     else if (textObj.isCenterAligned) textAlign = 'center';
+    
+    // Add default dimensions if missing
+    let width, height;
+    if (tag === 'h2') {
+      width = textObj.width != null ? `${textObj.width}px` : '264px';
+      height = textObj.height != null ? `${textObj.height}px` : '81px';
+    } else if (tag === 'p') {
+      width = textObj.width != null ? `${textObj.width}px` : '264px';
+      height = textObj.height != null ? `${textObj.height}px` : '273px';
+    }
+    
+    const dimensionStyles = (width && height) ? `width: ${width}; height: ${height};` : '';
+    const borderStyle = !hasText ? 'border: 1px dashed #ccc;' : '';
+    const textContent = textObj.text || '';
 
-    const style = `color:${color}; font-size:${fontSize}; font-weight:${fontWeight}; font-style:${fontStyle}; text-decoration:${textDecoration}; text-align:${textAlign}; font-family:${cleanFontName}; margin:0 0 3mm; padding:0; line-height:1.3;`;
-    return `<${tag} style="${style}">${textObj.text}</${tag}>`;
+    const style = `${dimensionStyles} ${borderStyle} color:${color}; font-size:${fontSize}; font-weight:${fontWeight}; font-style:${fontStyle}; text-decoration:${textDecoration}; text-align:${textAlign}; font-family:${cleanFontName}; margin:0 0 3mm; padding:5px; box-sizing: border-box; line-height:1.3; display: flex; align-items: ${tag === 'h2' ? 'center' : 'flex-start'}; justify-content: center; word-wrap: break-word; overflow: hidden;`;
+    return `<${tag} style="${style}">${textContent}</${tag}>`;
   };
 
   const makeCardHTML = (c) => `
     <div class="card" ${c.src ? `style="background-image:url('${c.src}');"` : ''}>
-      ${(c.heading || c.para1 || c.para2) ? `
-        <div class="overlay-text">
-          <div class="overlay-inner">
-            ${c.heading ? applyTextStyle(c.heading,'h2') : ''}
-            ${c.para1   ? applyTextStyle(c.para1,'p')   : ''}
-            ${c.para2   ? applyTextStyle(c.para2,'p')   : ''}
-          </div>
-        </div>` : ''}
+      ${!c.qr ? `
+      <div class="overlay-text">
+        <div class="overlay-inner">
+          ${applyTextStyle(c.heading,'h2')}
+          ${applyTextStyle(c.para1,'p')}
+          ${c.para2 ? applyTextStyle(c.para2,'p') : ''}
+        </div>
+      </div>` : ''}
       ${c.qr ? `<div class="qr"><div id="qr-slot"></div></div>` : ''}
     </div>
   `;
@@ -2775,14 +2806,31 @@ function buildPrintHTML_SameStyle(transaction) {
 
     // Helper function to apply text styling
     const applyTextStyle = (textObj, elementType = 'p') => {
-      if (!textObj || !textObj.text) return '';
+      // For mainHeading (h2) and paragraph1 (p), render box even if no text
+      // For other elements, return empty if no text
+      const hasText = textObj && textObj.text;
+      const shouldRenderEmptyBox = (elementType === 'h2' || elementType === 'p');
+      
+      if (!textObj) {
+        // If textObj doesn't exist at all, only render empty box for h2/p
+        if (shouldRenderEmptyBox) {
+          const defaultWidth = elementType === 'h2' ? '264px' : '264px';
+          const defaultHeight = elementType === 'h2' ? '81px' : '273px';
+          return `<${elementType} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0; padding: 5px;"></${elementType}>`;
+        }
+        return '';
+      }
+      
+      if (!hasText && !shouldRenderEmptyBox) {
+        return '';
+      }
       
       // Log complete data object to see all properties
       console.log('Complete textObj data:', JSON.stringify(textObj, null, 2));
       console.log('Element type:', elementType);
       
       // Use EXACT styling from data - only use actual values from data, no defaults
-      const color = rgbToCss(textObj.color);
+      const color = textObj.color ? rgbToCss(textObj.color) : 'black';
       const fontSize = textObj.fontSize != null ? `${textObj.fontSize}px` : null;
       // Use fontWeight directly from data (for both mainHeading and paragraph1) - use exact value as provided
       const fontWeight = textObj.fontWeight != null ? String(textObj.fontWeight) : null;
@@ -2796,9 +2844,22 @@ function buildPrintHTML_SameStyle(transaction) {
       const fontStyle = textObj.isItalic ? 'italic' : 'normal';
       const textDecoration = textObj.isUnderline ? 'underline' : 'none';
       
-      // Use dynamic width and height from data - only actual values, no defaults
-      const width = textObj.width != null ? `${textObj.width}px` : null;
-      const height = textObj.height != null ? `${textObj.height}px` : null;
+      // Use dynamic width and height from data, or default values if not provided
+      let width, height;
+      
+      if (elementType === 'h2') {
+        // mainHeading defaults: 264px x 81px
+        width = textObj.width != null ? `${textObj.width}px` : '264px';
+        height = textObj.height != null ? `${textObj.height}px` : '81px';
+      } else if (elementType === 'p') {
+        // paragraph1 defaults: 264px x 273px
+        width = textObj.width != null ? `${textObj.width}px` : '264px';
+        height = textObj.height != null ? `${textObj.height}px` : '273px';
+      } else {
+        // For other types, use data values or null
+        width = textObj.width != null ? `${textObj.width}px` : null;
+        height = textObj.height != null ? `${textObj.height}px` : null;
+      }
       
       console.log(`${elementType === 'h2' ? 'mainHeading' : 'paragraph'} dimensions:`, {
         width: width,
@@ -2810,7 +2871,7 @@ function buildPrintHTML_SameStyle(transaction) {
       });
       
       // Use EXACT font name from data (without quotes to match @font-face)
-      const cleanFontName = textObj.fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+      const cleanFontName = textObj.fontName ? textObj.fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '') : 'Arial';
       const fontFamily = cleanFontName; // No quotes to match @font-face declaration
       
       // Use EXACT alignment from data
@@ -2860,8 +2921,8 @@ function buildPrintHTML_SameStyle(transaction) {
         `text-decoration: ${textDecoration}`,
         `text-align: ${textAlign}`,
         `font-family: ${fontFamily}`,
-        width != null ? `width: ${width}` : null,
-        height != null ? `height: ${height}` : null,
+        width ? `width: ${width}` : null,
+        height ? `height: ${height}` : null,
         `margin: 0`,
         `padding: 5px`,
         `box-sizing: border-box`,
@@ -2872,20 +2933,26 @@ function buildPrintHTML_SameStyle(transaction) {
         `white-space: pre-wrap`,
         `display: flex`,
         `align-items: ${elementType === 'h2' ? 'center' : 'flex-start'}`,
-        `overflow: hidden`
+        `overflow: hidden`,
+        !hasText ? `border: 1px dashed #ccc` : null // Add border for empty boxes
       ].filter(part => part !== null); // Remove null values
       
       const style = styleParts.join('; ');
       
+      // Use empty string if no text, but still render the box
+      const textContent = textObj.text || '';
+      
       // Explicit logging for fontWeight to debug h2 issue
-      const htmlElement = `<${elementType} style="${style}">${textObj.text}</${elementType}>`;
+      const htmlElement = `<${elementType} style="${style}">${textContent}</${elementType}>`;
       console.log(`${elementType === 'h2' ? 'mainHeading' : 'paragraph'} style check:`, {
         fontWeightValue: fontWeight,
         fontWeightType: typeof fontWeight,
         fontWeightInStyle: style.includes('font-weight'),
         fullStyle: style,
         htmlElement: htmlElement,
-        hasFontWeightInHTML: htmlElement.includes('font-weight')
+        hasFontWeightInHTML: htmlElement.includes('font-weight'),
+        hasText: hasText,
+        textContent: textContent
       });
       console.log(`Final CSS style: ${style}`);
       
@@ -2894,14 +2961,14 @@ function buildPrintHTML_SameStyle(transaction) {
 
     const makeCardHTML = (c) => `
     <div class="card">
-      ${(c.heading || c.para1 || c.para2) ? `
-        <div class="overlay-text">
-          <div class="overlay-inner">
-            ${c.heading ? applyTextStyle(c.heading, 'h2') : ''}
-            ${c.para1 ? applyTextStyle(c.para1, 'p') : ''}
-            ${c.para2 ? applyTextStyle(c.para2, 'p') : ''}
-          </div>
-        </div>` : ''}
+      ${!c.qr ? `
+      <div class="overlay-text">
+        <div class="overlay-inner">
+          ${applyTextStyle(c.heading, 'h2')}
+          ${applyTextStyle(c.para1, 'p')}
+          ${c.para2 ? applyTextStyle(c.para2, 'p') : ''}
+        </div>
+      </div>` : ''}
       ${c.qr ? `<div class="qr"><div id="qr-slot"></div></div>` : ''}
     </div>
   `;
