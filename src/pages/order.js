@@ -1368,7 +1368,7 @@ function buildPrintHTML_SameStyle(transaction) {
     const borderStyle = !hasText ? 'border: 1px dashed #ccc;' : '';
     const textContent = textObj.text || '';
 
-    const style = `${dimensionStyles} ${borderStyle} color:${color}; font-size:${fontSize}; font-weight:${fontWeight}; font-style:${fontStyle}; text-decoration:${textDecoration}; text-align:${textAlign}; font-family:${cleanFontName}; margin:0 0 3mm; padding:5px; box-sizing: border-box; line-height:1.3; display: flex; align-items: ${tag === 'h2' ? 'center' : 'flex-start'}; justify-content: center; overflow-wrap: break-word; word-break: normal; hyphens: none; overflow: hidden;`;
+    const style = `${dimensionStyles} ${borderStyle} color:${color}; font-size:${fontSize}; font-weight:${fontWeight}; font-style:${fontStyle}; text-decoration:${textDecoration}; text-align:${textAlign}; font-family:${cleanFontName}; margin:0 0 3mm; padding:5px; box-sizing: border-box; line-height:1.3; overflow-wrap: break-word; word-break: normal; white-space: normal; hyphens: none; display: block; overflow: hidden; text-overflow: ellipsis;`;
     return `<${tag} style="${style}">${textContent}</${tag}>`;
   };
 
@@ -2931,14 +2931,13 @@ function buildPrintHTML_SameStyle(transaction) {
         `padding: 5px`,
         `box-sizing: border-box`,
         `line-height: 1.2`,
-        `justify-content: ${justifyContent}`,
         `overflow-wrap: break-word`,
         `word-break: normal`,
-        `white-space: pre-wrap`,
+        `white-space: normal`,
         `hyphens: none`,
-        `display: flex`,
-        `align-items: ${elementType === 'h2' ? 'center' : 'flex-start'}`,
+        `display: block`,
         `overflow: hidden`,
+        `text-overflow: ellipsis`,
         !hasText ? `border: 1px dashed #ccc` : null // Add border for empty boxes
       ].filter(part => part !== null); // Remove null values
       
