@@ -1326,8 +1326,14 @@ function buildPrintHTML_SameStyle(transaction) {
     // Handle completely missing textObj
     if (!textObj) {
       if (shouldRenderEmptyBox) {
-        const defaultWidth = tag === 'h2' ? '264px' : '264px';
+        const defaultWidth = tag === 'h2' ? '264px' : '254px'; // 264 - 10 for paragraph1
         const defaultHeight = tag === 'h2' ? '81px' : '273px';
+        if (tag === 'p') {
+          console.log('=== Paragraph1 Width Adjustment (No Data) ===');
+          console.log('Default width would be: 264px');
+          console.log('Adjusted width (after -10px): 254px');
+          console.log('=============================================');
+        }
         return `<${tag} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0 0 3mm; padding: 5px;"></${tag}>`;
       }
       return '';
@@ -1360,7 +1366,21 @@ function buildPrintHTML_SameStyle(transaction) {
       width = textObj.width != null ? `${textObj.width}px` : '264px';
       height = textObj.height != null ? `${textObj.height}px` : '81px';
     } else if (tag === 'p') {
-      width = textObj.width != null ? `${textObj.width}px` : '264px';
+      // For paragraph1, subtract 10px from the width
+      if (textObj.width != null) {
+        const originalWidth = textObj.width;
+        const adjustedWidth = originalWidth - 10;
+        console.log('=== Paragraph1 Width Adjustment ===');
+        console.log('Original width from data:', originalWidth, 'px');
+        console.log('Adjusted width (after -10px):', adjustedWidth, 'px');
+        console.log('===================================');
+        width = `${adjustedWidth}px`;
+      } else {
+        console.log('=== Paragraph1 Width (Using Default) ===');
+        console.log('No width in data, using default: 254px (264 - 10)');
+        console.log('========================================');
+        width = '254px'; // default (264 - 10)
+      }
       height = textObj.height != null ? `${textObj.height}px` : '273px';
     }
     
@@ -2814,8 +2834,14 @@ function buildPrintHTML_SameStyle(transaction) {
       if (!textObj) {
         // If textObj doesn't exist at all, only render empty box for h2/p
         if (shouldRenderEmptyBox) {
-          const defaultWidth = elementType === 'h2' ? '264px' : '264px';
+          const defaultWidth = elementType === 'h2' ? '264px' : '254px'; // 264 - 10 for paragraph1
           const defaultHeight = elementType === 'h2' ? '81px' : '273px';
+          if (elementType === 'p') {
+            console.log('=== Paragraph1 Width Adjustment (No Data) ===');
+            console.log('Default width would be: 264px');
+            console.log('Adjusted width (after -10px): 254px');
+            console.log('=============================================');
+          }
           return `<${elementType} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0; padding: 5px;"></${elementType}>`;
         }
         return '';
@@ -2846,6 +2872,8 @@ function buildPrintHTML_SameStyle(transaction) {
       
       // Use dynamic width and height from data, or default values if not provided
       let width, height;
+      let originalWidthValue = null;
+      let adjustedWidthValue = null;
       
       if (elementType === 'h2') {
         // mainHeading defaults: 264px x 81px
@@ -2853,7 +2881,23 @@ function buildPrintHTML_SameStyle(transaction) {
         height = textObj.height != null ? `${textObj.height}px` : '81px';
       } else if (elementType === 'p') {
         // paragraph1 defaults: 264px x 273px
-        width = textObj.width != null ? `${textObj.width}px` : '264px';
+        // For paragraph1, subtract 10px from the width
+        if (textObj.width != null) {
+          originalWidthValue = textObj.width;
+          adjustedWidthValue = originalWidthValue - 10;
+          console.log('=== Paragraph1 Width Adjustment ===');
+          console.log('Original width from data:', originalWidthValue, 'px');
+          console.log('adjustedWidthValue:', adjustedWidthValue, 'px');
+          console.log('===================================');
+          width = `${adjustedWidthValue}px`;
+        } else {
+          originalWidthValue = 264;
+          adjustedWidthValue = 254;
+          console.log('=== Paragraph1 Width (Using Default) ===');
+          console.log('No width in data, using default: 254px (264 - 10)');
+          console.log('========================================');
+          width = '254px'; // default (264 - 10)
+        }
         height = textObj.height != null ? `${textObj.height}px` : '273px';
       } else {
         // For other types, use data values or null
@@ -2889,6 +2933,7 @@ function buildPrintHTML_SameStyle(transaction) {
       }
       
       console.log('Applying EXACT text style from data:', {
+        elementType: elementType,
         originalFont: textObj.fontName,
         finalFontFamily: fontFamily,
         fontSize,
@@ -2898,6 +2943,11 @@ function buildPrintHTML_SameStyle(transaction) {
         colorApplied: color,
         width,
         widthFromData: textObj.width,
+        ...(elementType === 'p' && originalWidthValue !== null ? {
+          'PARAGRAPH1_ORIGINAL_WIDTH': originalWidthValue + 'px',
+          'PARAGRAPH1_ADJUSTED_WIDTH': adjustedWidthValue + 'px',
+          'PARAGRAPH1_DIFFERENCE': '-10px'
+        } : {}),
         height,
         heightFromData: textObj.height,
         fontStyle,
