@@ -1326,9 +1326,10 @@ function buildPrintHTML_SameStyle(transaction) {
     // Handle completely missing textObj
     if (!textObj) {
       if (shouldRenderEmptyBox) {
-        const defaultWidth = tag === 'h2' ? '264px' : '254px'; // 264 - 10 for paragraph1
+        const defaultWidth = tag === 'h2' ? '264px' : '234px'; // 264 - 30 for paragraph1
         const defaultHeight = tag === 'h2' ? '81px' : '273px';
-        return `<${tag} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0 0 3mm; padding: 5px;"></${tag}>`;
+        const marginStyle = tag === 'p' ? '0 auto 3mm' : '0 0 3mm'; // Center paragraph horizontally
+        return `<${tag} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: ${marginStyle}; padding: 5px;"></${tag}>`;
       }
       return '';
     }
@@ -1360,13 +1361,13 @@ function buildPrintHTML_SameStyle(transaction) {
       width = textObj.width != null ? `${textObj.width}px` : '264px';
       height = textObj.height != null ? `${textObj.height}px` : '81px';
     } else if (tag === 'p') {
-      // Subtract 10px from width for paragraph1
+      // Subtract 30px from width for paragraph1
       if (textObj.width != null) {
         const originalWidth = textObj.width;
-        const adjustedWidth = originalWidth - 10;
+        const adjustedWidth = originalWidth - 30;
         width = `${adjustedWidth}px`;
       } else {
-        width = '254px'; // 264 - 10
+        width = '234px'; // 264 - 30
       }
       height = textObj.height != null ? `${textObj.height}px` : '273px';
     }
@@ -1374,8 +1375,9 @@ function buildPrintHTML_SameStyle(transaction) {
     const dimensionStyles = (width && height) ? `width: ${width}; height: ${height};` : '';
     const borderStyle = !hasText ? 'border: 1px dashed #ccc;' : '';
     const textContent = textObj.text || '';
+    const marginStyle = tag === 'p' ? '0 auto 3mm' : '0 0 3mm'; // Center paragraph horizontally
 
-    const style = `${dimensionStyles} ${borderStyle} color:${color}; font-size:${fontSize}; font-weight:${fontWeight}; font-style:${fontStyle}; text-decoration:${textDecoration}; text-align:${textAlign}; font-family:${cleanFontName}; margin:0 0 3mm; padding:5px; box-sizing: border-box; line-height:1.3; overflow-wrap: break-word; word-break: normal; white-space: normal; hyphens: none; display: block; overflow: hidden; text-overflow: ellipsis;`;
+    const style = `${dimensionStyles} ${borderStyle} color:${color}; font-size:${fontSize}; font-weight:${fontWeight}; font-style:${fontStyle}; text-decoration:${textDecoration}; text-align:${textAlign}; font-family:${cleanFontName}; margin:${marginStyle}; padding:5px; box-sizing: border-box; line-height:1.3; overflow-wrap: break-word; word-break: normal; white-space: normal; hyphens: none; display: block; overflow: hidden; text-overflow: ellipsis;`;
     return `<${tag} style="${style}">${textContent}</${tag}>`;
   };
 
@@ -2824,9 +2826,9 @@ function buildPrintHTML_SameStyle(transaction) {
       if (!textObj) {
         // If textObj doesn't exist at all, only render empty box for h2/p
         if (shouldRenderEmptyBox) {
-          const defaultWidth = elementType === 'h2' ? '264px' : '254px'; // 264 - 10 for paragraph1
+          const defaultWidth = elementType === 'h2' ? '264px' : '234px'; // 264 - 30 for paragraph1
           const defaultHeight = elementType === 'h2' ? '81px' : '273px';
-          return `<${elementType} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0; padding: 5px;"></${elementType}>`;
+          return `<${elementType} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0 auto; padding: 5px;"></${elementType}>`;
         }
         return '';
       }
@@ -2863,13 +2865,13 @@ function buildPrintHTML_SameStyle(transaction) {
         height = textObj.height != null ? `${textObj.height}px` : '81px';
       } else if (elementType === 'p') {
         // paragraph1 defaults: 264px x 273px
-        // Subtract 10px from width for paragraph1
+        // Subtract 30px from width for paragraph1
         if (textObj.width != null) {
           const originalWidth = textObj.width;
-          const adjustedWidth = originalWidth - 10;
+          const adjustedWidth = originalWidth - 30;
           width = `${adjustedWidth}px`;
         } else {
-          width = '254px'; // 264 - 10
+          width = '234px'; // 264 - 30
         }
         height = textObj.height != null ? `${textObj.height}px` : '273px';
       } else {
@@ -2941,7 +2943,7 @@ function buildPrintHTML_SameStyle(transaction) {
         `font-family: ${fontFamily}`,
         width ? `width: ${width}` : null,
         height ? `height: ${height}` : null,
-        `margin: 0`,
+        elementType === 'p' ? `margin: 0 auto` : `margin: 0`, // Center paragraph horizontally
         `padding: 5px`,
         `box-sizing: border-box`,
         `line-height: 1.2`,
