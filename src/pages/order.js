@@ -1326,7 +1326,7 @@ function buildPrintHTML_SameStyle(transaction) {
     // Handle completely missing textObj
     if (!textObj) {
       if (shouldRenderEmptyBox) {
-        const defaultWidth = tag === 'h2' ? '264px' : '264px';
+        const defaultWidth = tag === 'h2' ? '264px' : '254px'; // 264 - 10 for paragraph1
         const defaultHeight = tag === 'h2' ? '81px' : '273px';
         return `<${tag} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0 0 3mm; padding: 5px;"></${tag}>`;
       }
@@ -1360,7 +1360,14 @@ function buildPrintHTML_SameStyle(transaction) {
       width = textObj.width != null ? `${textObj.width}px` : '264px';
       height = textObj.height != null ? `${textObj.height}px` : '81px';
     } else if (tag === 'p') {
-      width = textObj.width != null ? `${textObj.width}px` : '264px';
+      // Subtract 10px from width for paragraph1
+      if (textObj.width != null) {
+        const originalWidth = textObj.width;
+        const adjustedWidth = originalWidth - 10;
+        width = `${adjustedWidth}px`;
+      } else {
+        width = '254px'; // 264 - 10
+      }
       height = textObj.height != null ? `${textObj.height}px` : '273px';
     }
     
@@ -2817,7 +2824,7 @@ function buildPrintHTML_SameStyle(transaction) {
       if (!textObj) {
         // If textObj doesn't exist at all, only render empty box for h2/p
         if (shouldRenderEmptyBox) {
-          const defaultWidth = elementType === 'h2' ? '264px' : '264px';
+          const defaultWidth = elementType === 'h2' ? '264px' : '254px'; // 264 - 10 for paragraph1
           const defaultHeight = elementType === 'h2' ? '81px' : '273px';
           return `<${elementType} style="width: ${defaultWidth}; height: ${defaultHeight}; border: 1px dashed #ccc; box-sizing: border-box; margin: 0; padding: 5px;"></${elementType}>`;
         }
@@ -2856,7 +2863,14 @@ function buildPrintHTML_SameStyle(transaction) {
         height = textObj.height != null ? `${textObj.height}px` : '81px';
       } else if (elementType === 'p') {
         // paragraph1 defaults: 264px x 273px
-        width = textObj.width != null ? `${textObj.width}px` : '264px';
+        // Subtract 10px from width for paragraph1
+        if (textObj.width != null) {
+          const originalWidth = textObj.width;
+          const adjustedWidth = originalWidth - 10;
+          width = `${adjustedWidth}px`;
+        } else {
+          width = '254px'; // 264 - 10
+        }
         height = textObj.height != null ? `${textObj.height}px` : '273px';
       } else {
         // For other types, use data values or null
