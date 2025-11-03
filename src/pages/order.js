@@ -2960,7 +2960,7 @@ function buildPrintHTML_SameStyle(transaction) {
       const style = styleParts.join('; ');
       
       // Use empty string if no text, but still render the box
-      const textContent = textObj.text || '';
+      const textContent = (textObj.text || '').replace(/\n/g, '<br>');
       
       // Explicit logging for fontWeight to debug h2 issue
       const htmlElement = `<${elementType} style="${style}">${textContent}</${elementType}>`;
