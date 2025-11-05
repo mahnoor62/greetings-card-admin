@@ -3384,20 +3384,44 @@ function buildPrintHTML_SameStyle(transaction) {
             
             const fontFace = new FontFace(cleanFontName, `url('${fontPath}')`);
             
-            fontPromises.push(
-              fontFace.load().then(() => {
-                document.fonts.add(fontFace);
-                console.log(`Font ${cleanFontName} loaded successfully in main document`);
-              }).catch((err) => {
-                console.error(`Failed to load font ${cleanFontName} in main document:`, err);
-              })
-            );
+            // Add timeout and retry logic
+            const loadFontWithRetry = async (retries = 3) => {
+              for (let i = 0; i < retries; i++) {
+                try {
+                  await fontFace.load();
+                  document.fonts.add(fontFace);
+                  console.log(`Font ${cleanFontName} loaded successfully in main document (attempt ${i + 1})`);
+                  return;
+                } catch (err) {
+                  console.error(`Failed to load font ${cleanFontName} in main document (attempt ${i + 1}):`, err);
+                  if (i < retries - 1) {
+                    // Wait before retry
+                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+                  } else {
+                    // Last attempt failed, try with different path
+                    console.log(`Trying alternative path for ${cleanFontName}...`);
+                    try {
+                      const altFontFace = new FontFace(cleanFontName, `url('${fontPath}')`);
+                      await altFontFace.load();
+                      document.fonts.add(altFontFace);
+                      console.log(`Font ${cleanFontName} loaded with alternative method`);
+                      return;
+                    } catch (altErr) {
+                      console.error(`All attempts failed for font ${cleanFontName}:`, altErr);
+                      throw altErr;
+                    }
+                  }
+                }
+              }
+            };
+            
+            fontPromises.push(loadFontWithRetry());
           }
         });
         
         try {
-          await Promise.all(fontPromises);
-          console.log('All fonts loaded in main document');
+          await Promise.allSettled(fontPromises);
+          console.log('Font loading attempts completed in main document');
         } catch (error) {
           console.error('Error loading fonts in main document:', error);
         }
@@ -3405,6 +3429,9 @@ function buildPrintHTML_SameStyle(transaction) {
 
       // Load fonts in main document first
       await loadFontsInMainDocument();
+      
+      // Wait a bit for fonts to settle
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Also inject @font-face CSS directly into main document's head for html2canvas
       const injectFontFacesInMainDocument = () => {
@@ -3443,6 +3470,19 @@ function buildPrintHTML_SameStyle(transaction) {
       };
 
       injectFontFacesInMainDocument();
+      
+      // Wait for @font-face CSS to load fonts
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Check if fonts loaded via @font-face CSS
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+          console.log('Fonts ready after @font-face injection');
+        } catch (e) {
+          console.log('Error waiting for fonts after @font-face:', e);
+        }
+      }
 
       // Wait for fonts to load properly - check if fonts are actually loaded in both documents
       const waitForFonts = async () => {
@@ -3486,25 +3526,104 @@ function buildPrintHTML_SameStyle(transaction) {
 
         // Additional wait and check for both documents
         let attempts = 0;
-        const maxAttempts = 15;
+        const maxAttempts = 20; // Increased attempts
         while (attempts < maxAttempts) {
           const iframeLoaded = checkFontsLoaded(iframeDoc);
           const mainLoaded = checkFontsLoaded(document);
+          
+          // Log which fonts are loaded/not loaded for debugging
+          if (attempts % 5 === 0) {
+            console.log(`Font check attempt ${attempts + 1}/${maxAttempts}:`);
+            console.log('  Iframe fonts loaded:', iframeLoaded);
+            console.log('  Main document fonts loaded:', mainLoaded);
+            uniqueFontNames.forEach(fontName => {
+              const iframeCheck = iframeDoc.fonts ? (iframeDoc.fonts.check(`16px "${fontName}"`) || iframeDoc.fonts.check(`16px ${fontName}`)) : false;
+              const mainCheck = document.fonts.check(`16px "${fontName}"`) || document.fonts.check(`16px ${fontName}`);
+              console.log(`  Font "${fontName}": iframe=${iframeCheck}, main=${mainCheck}`);
+            });
+          }
           
           if (iframeLoaded && mainLoaded) {
             console.log('All fonts verified as loaded in both documents');
             break;
           }
           
+          // If main document fonts are not loaded, try reloading them
+          if (!mainLoaded && attempts === 5) {
+            console.log('Main document fonts not loaded, attempting to reload...');
+            
+            // Try to copy fonts from iframe to main document
+            try {
+              if (iframeDoc.fonts && iframeDoc.fonts.size > 0) {
+                console.log('Attempting to copy fonts from iframe to main document...');
+                const iframeFonts = Array.from(iframeDoc.fonts);
+                for (const fontFace of iframeFonts) {
+                  try {
+                    // Check if font is already in main document
+                    const exists = Array.from(document.fonts).some(f => f.family === fontFace.family);
+                    if (!exists) {
+                      // Clone the font face
+                      const clonedFont = new FontFace(fontFace.family, fontFace.source);
+                      await clonedFont.load();
+                      document.fonts.add(clonedFont);
+                      console.log(`Copied font "${fontFace.family}" from iframe to main document`);
+                    }
+                  } catch (copyErr) {
+                    console.error(`Failed to copy font "${fontFace.family}":`, copyErr);
+                  }
+                }
+              }
+            } catch (err) {
+              console.error('Error copying fonts from iframe:', err);
+            }
+            
+            // Also try to reload fonts using @font-face CSS approach
+            const fontFaceStyle = document.getElementById('html2canvas-font-faces');
+            if (fontFaceStyle) {
+              // Force re-evaluation by removing and re-adding
+              const cssContent = fontFaceStyle.textContent;
+              fontFaceStyle.remove();
+              await new Promise(resolve => setTimeout(resolve, 100));
+              const newStyle = document.createElement('style');
+              newStyle.id = 'html2canvas-font-faces';
+              newStyle.textContent = cssContent;
+              document.head.appendChild(newStyle);
+              console.log('Font-face CSS re-injected');
+              
+              // Wait for fonts to load after re-injection
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              if (document.fonts && document.fonts.ready) {
+                try {
+                  await document.fonts.ready;
+                  console.log('Fonts ready after re-injection');
+                } catch (e) {
+                  console.log('Error waiting for fonts after re-injection:', e);
+                }
+              }
+            }
+          }
+          
           if (attempts === maxAttempts - 1) {
             console.warn('Some fonts may not be fully loaded, proceeding anyway...');
             console.log('Iframe fonts loaded:', checkFontsLoaded(iframeDoc));
             console.log('Main document fonts loaded:', checkFontsLoaded(document));
+            
+            // Log detailed status for each font
+            uniqueFontNames.forEach(fontName => {
+              const iframeCheck = iframeDoc.fonts ? (iframeDoc.fonts.check(`16px "${fontName}"`) || iframeDoc.fonts.check(`16px ${fontName}`)) : false;
+              const mainCheck = document.fonts.check(`16px "${fontName}"`) || document.fonts.check(`16px ${fontName}`);
+              if (!mainCheck) {
+                console.warn(`  WARNING: Font "${fontName}" not loaded in main document (iframe: ${iframeCheck})`);
+              }
+            });
           }
           
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay
           attempts++;
         }
+        
+        // Final wait to ensure fonts are rendered
+        await new Promise(resolve => setTimeout(resolve, 1000));
       };
 
       await waitForFonts();
