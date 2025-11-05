@@ -52,6 +52,7 @@ import { useAuth } from '../hooks/use-auth';
 import { useRouter } from 'next/router';
 import QRCodeGenerator from '../components/qrCode';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // import applyFilter from '../utils/filter';
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -63,6 +64,7 @@ const printRef = React.useRef(null);
 
   const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [printing, setPrinting] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState(0);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [printingWindow, setPrintingWindow] = useState(null);
@@ -2502,7 +2504,7 @@ function buildPrintHTML_SameStyle(transaction) {
 
 
 // version 3 previous
-  const buildPrintHTML = (transaction, iframeDoc) => {
+  const buildPrintHTML = (transaction, iframeDoc, skipPrint = false) => {
     const docTitle = `Incardible-${transaction?.title}`;
     const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
 
@@ -2963,18 +2965,19 @@ function buildPrintHTML_SameStyle(transaction) {
       const textContent = (textObj.text || '').replace(/\n/g, '<br>');
       
       // Explicit logging for fontWeight to debug h2 issue
-      const htmlElement = `<${elementType} style="${style}">${textContent}</${elementType}>`;
-      console.log(`${elementType === 'h2' ? 'mainHeading' : 'paragraph'} style check:`, {
-        fontWeightValue: fontWeight,
-        fontWeightType: typeof fontWeight,
-        fontWeightInStyle: style.includes('font-weight'),
-        fullStyle: style,
-        htmlElement: htmlElement,
-        hasFontWeightInHTML: htmlElement.includes('font-weight'),
-        hasText: hasText,
-        textContent: textContent
-      });
+      const htmlElement = `<${elementType} style="${style}">${textObj.text}</${elementType}>`;
+      // console.log(`${elementType === 'h2' ? 'mainHeading' : 'paragraph'} style check:`, {
+      //   fontWeightValue: fontWeight,
+      //   fontWeightType: typeof fontWeight,
+      //   fontWeightInStyle: style.includes('font-weight'),
+      //   fullStyle: style,
+      //   htmlElement: htmlElement,
+      //   hasFontWeightInHTML: htmlElement.includes('font-weight'),
+      //   hasText: hasText,
+      //   textContent: textObj.text
+      // });
       console.log(`Final CSS style: ${style}`);
+      console.log(`HTML element: ${htmlElement}`);
       
       return htmlElement;
     };
@@ -3098,6 +3101,10 @@ function buildPrintHTML_SameStyle(transaction) {
         };
         
         const tryPrint = () => {
+          if (skipPrint) {
+            console.log('Print skipped (download mode)');
+            return;
+          }
           console.log('Attempting to print from iframe...');
           console.log('📄 PDF will be generated at A5 landscape size (210mm × 148mm)');
           
@@ -3108,8 +3115,10 @@ function buildPrintHTML_SameStyle(transaction) {
             console.log(`Final check - Font "${cleanName}" loaded:`, isLoaded);
           });
           
-          iframeDoc.defaultView.focus();
-          iframeDoc.defaultView.print();
+          if (iframeDoc.defaultView) {
+            iframeDoc.defaultView.focus();
+            iframeDoc.defaultView.print();
+          }
         };
         
         // Try immediate check
@@ -3137,13 +3146,20 @@ function buildPrintHTML_SameStyle(transaction) {
       waitForFontsAndPrint();
     };
     script.onerror = () => { 
+      if (skipPrint) {
+        return;
+      }
       // If QR script fails, still try to print
       if (iframeDoc.fonts && iframeDoc.fonts.ready) {
         iframeDoc.fonts.ready.then(() => {
-          setTimeout(() => { iframeDoc.defaultView.focus(); iframeDoc.defaultView.print(); }, 800);
+          if (iframeDoc.defaultView) {
+            setTimeout(() => { iframeDoc.defaultView.focus(); iframeDoc.defaultView.print(); }, 800);
+          }
         });
       } else {
-        setTimeout(() => { iframeDoc.defaultView.focus(); iframeDoc.defaultView.print(); }, 1200);
+        if (iframeDoc.defaultView) {
+          setTimeout(() => { iframeDoc.defaultView.focus(); iframeDoc.defaultView.print(); }, 1200);
+        }
       }
     };
     iframeDoc.head.appendChild(script);
@@ -3152,6 +3168,7 @@ function buildPrintHTML_SameStyle(transaction) {
   const handlePrintClick = (transaction) => {
     try {
       setPrinting(true);
+      setSelectedTransaction(transaction);
 
       const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
       const urls = [
@@ -3199,6 +3216,7 @@ function buildPrintHTML_SameStyle(transaction) {
         }
 
         setPrinting(false);
+        setSelectedTransaction(null);
       };
 
       if (urls.length === 0) { proceed(); return; }
@@ -3215,7 +3233,467 @@ function buildPrintHTML_SameStyle(transaction) {
     } catch (e) {
       console.error(e);
       setPrinting(false);
+      setSelectedTransaction(null);
       toast.error('Failed to print. Please try again.');
+    }
+  };
+
+  const handleDownloadPNG = async (transaction) => {
+    try {
+      setDownloading(true);
+      setSelectedTransaction(transaction);
+
+      const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
+      const urls = [
+        makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
+        makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign)
+      ].filter(Boolean);
+
+      // Preload images
+      if (urls.length > 0) {
+        await Promise.all(urls.map(url => {
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = img.onerror = resolve;
+            img.src = url;
+          });
+        }));
+      }
+
+      // Create iframe with same content as print
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.width = '210mm';
+      iframe.style.height = '296mm'; // Height for 2 pages (148mm each)
+      iframe.style.border = 'none';
+      iframe.style.visibility = 'hidden';
+      iframe.style.left = '-9999px';
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+      // Build the print content in the iframe (same as print, but skip printing)
+      buildPrintHTML(transaction, iframeDoc, true); // Skip print for PNG download
+
+      // Wait for content to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Wait for QR code to generate if needed
+      if (iframeDoc.getElementById('qr-slot')) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      // Font mapping function (same as in buildPrintHTML)
+      const mapFontNameToFile = (fontName) => {
+        if (!fontName) return '';
+        const fontFileMap = {
+          'AlanSans-VariableFont_wght SDF': 'AlanSans-VariableFont_wght SDF.ttf',
+          'ALBA SDF': 'ALBA SDF.TTF',
+          'AlexBrush-Regular SDF': 'AlexBrush-Regular SDF.ttf',
+          'AmaticSC-Regular SDF': 'AmaticSC-Regular SDF.ttf',
+          'Anak Paud SDF': 'Anak Paud SDF.otf',
+          'Antaresia SDF': 'Antaresia SDF.otf',
+          'Anton-Regular SDF': 'Anton-Regular SDF.ttf',
+          'Apple Chancery SDF': 'Apple Chancery SDF.ttf',
+          'Aquatype SDF': 'Aquatype SDF.ttf',
+          'ARCADECLASSIC SDF': 'ARCADECLASSIC SDF.TTF',
+          'Arimo-VariableFont_wght SDF': 'Arimo-VariableFont_wght SDF.ttf',
+          'Autumn in November SDF': 'Autumn in November SDF.ttf',
+          'BareMarker-Light SDF': 'BareMarker-Light SDF.ttf',
+          'blackjack SDF': 'blackjack SDF.TTF',
+          'Canterbury SDF': 'Canterbury SDF.ttf',
+          'Carnevalee Freakshow SDF': 'Carnevalee Freakshow SDF.ttf',
+          'CHLORINR SDF': 'chlorine.TTF',
+          'DancingScript-VariableFont_wght SDF': 'DancingScript-VariableFont_wght SDF.ttf',
+          'Darhouty Frederics SDF': 'Darhouty Frederics SDF.otf',
+          'Emigrate SDF': 'Emigrate SDF.otf',
+          'Facon SDF': 'Facon SDF.ttf',
+          'Fakeblood SDF': 'Fakeblood SDF.otf',
+          'FFF_Tusj SDF': 'FFF-Tusj SDF.ttf',
+          'GrandHotel-Regular SDF': 'GrandHotel-Regular SDF.ttf',
+          'GreatVibes-Regular SDF': 'GreatVibes-Regular SDF.ttf',
+          'Hanged Letters SDF': 'Hanged Letters SDF.ttf',
+          'Happy Birthday SDF': 'happy birthday.ttf',
+          'Howdy Koala SDF': 'Howdy Koala SDF.ttf',
+          'Inter-Regular SDF': 'Inter-VariableFont_opsz,wght SDF.ttf',
+          'Inter-VariableFont_opsz,wght SDF': 'Inter-VariableFont_opsz,wght SDF.ttf',
+          'KaushanScript-Regular SDF': 'KaushanScript-Regular SDF.ttf',
+          'KingRimba SDF': 'KingRimba SDF.ttf',
+          'Lato-Regular SDF': 'Lato-Regular SDF.ttf',
+          'Lobster_1 SDF': 'Lobster_1.ttf',
+          'MAXIGO SDF': 'MAXIGO SDF.otf',
+          'Mitchell Demo SDF': 'Mitchell Demo.otf',
+          'Montserrat-VariableFont_wght SDF': 'Montserrat-Italic-VariableFont_wght SDF.ttf',
+          'Morally Serif SDF': 'Morally Serif.otf',
+          'NotoSans-VariableFont_wdth,wght SDF': 'NotoSans-VariableFont_wdth,wght.ttf',
+          'OpenSans-VariableFont_wdth,wght SDF': 'OpenSans-VariableFont_wdth,wght SDF.ttf',
+          'Pacifico SDF': 'Pacifico SDF.ttf',
+          'ParryHotter SDF': 'ParryHotter SDF.ttf',
+          'Poppins-Regular SDF': 'Poppins-Regular SDF.ttf',
+          'Pricedown Bl SDF': 'Pricedown Bl SDF.otf',
+          'Raleway-VariableFont_wght SDF': 'Raleway-VariableFont_wght SDF.ttf',
+          'Roboto-VariableFont_wdth,wght SDF': 'Roboto-VariableFont_wdth,wght SDF.ttf',
+          'Sawone SDF': 'Sawone SDF.ttf',
+          'Sofia-Regular SDF': 'Sofia-Regular SDF.ttf',
+          'Super Adorable SDF': 'Super Adorable SDF.ttf',
+          'waltograph42 SDF': 'waltograph42 SDF.otf',
+          'Way Come SDF': 'Way Come SDF.ttf',
+          'YoungMorin-Regular SDF': 'YoungMorin-Regular SDF.ttf',
+          'Zombie_Holocaust SDF': 'Zombie_Holocaust SDF.ttf'
+        };
+        return fontFileMap[fontName] || null;
+      };
+
+      // Get font names from the transaction data
+      const arTemplateData = transaction?.cardCustomizationId?.arTemplateData;
+      const originalFontNames = [];
+      if (arTemplateData?.mainHeading?.fontName) {
+        originalFontNames.push(arTemplateData.mainHeading.fontName);
+      }
+      if (arTemplateData?.paragraph1?.fontName) {
+        originalFontNames.push(arTemplateData.paragraph1.fontName);
+      }
+      if (arTemplateData?.paragraph2?.fontName) {
+        originalFontNames.push(arTemplateData.paragraph2.fontName);
+      }
+
+      // Load fonts in the MAIN document (not just iframe) so html2canvas can access them
+      const loadFontsInMainDocument = async () => {
+        if (!document.fonts) {
+          console.log('Font API not available in main document');
+          return;
+        }
+
+        console.log('Loading fonts in main document for html2canvas...');
+        const fontPromises = [];
+        
+        originalFontNames.forEach(fontName => {
+          const fontFile = mapFontNameToFile(fontName);
+          if (fontFile) {
+            const cleanFontName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+            console.log(`Loading font in main document: ${cleanFontName} from ${fontFile}`);
+            
+            const fontPath = `${window.location.origin}/font/${fontFile}`;
+            
+            // Check if font is already loaded
+            const isAlreadyLoaded = document.fonts.check(`16px "${cleanFontName}"`) || document.fonts.check(`16px ${cleanFontName}`);
+            if (isAlreadyLoaded) {
+              console.log(`Font ${cleanFontName} already loaded in main document`);
+              return;
+            }
+            
+            const fontFace = new FontFace(cleanFontName, `url('${fontPath}')`);
+            
+            fontPromises.push(
+              fontFace.load().then(() => {
+                document.fonts.add(fontFace);
+                console.log(`Font ${cleanFontName} loaded successfully in main document`);
+              }).catch((err) => {
+                console.error(`Failed to load font ${cleanFontName} in main document:`, err);
+              })
+            );
+          }
+        });
+        
+        try {
+          await Promise.all(fontPromises);
+          console.log('All fonts loaded in main document');
+        } catch (error) {
+          console.error('Error loading fonts in main document:', error);
+        }
+      };
+
+      // Load fonts in main document first
+      await loadFontsInMainDocument();
+
+      // Also inject @font-face CSS directly into main document's head for html2canvas
+      const injectFontFacesInMainDocument = () => {
+        const fontFaceStyle = document.createElement('style');
+        fontFaceStyle.id = 'html2canvas-font-faces';
+        
+        // Remove existing font-face style if any
+        const existing = document.getElementById('html2canvas-font-faces');
+        if (existing) {
+          existing.remove();
+        }
+
+        let fontFaceCSS = '';
+        originalFontNames.forEach(fontName => {
+          const fontFile = mapFontNameToFile(fontName);
+          if (fontFile) {
+            const cleanFontName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
+            const fontPath = `${window.location.origin}/font/${fontFile}`;
+            const format = fontFile.endsWith('.otf') ? 'opentype' : 'truetype';
+            
+            fontFaceCSS += `
+              @font-face {
+                font-family: '${cleanFontName}';
+                src: url('${fontPath}') format('${format}');
+                font-weight: normal;
+                font-style: normal;
+                font-display: block;
+              }
+            `;
+          }
+        });
+
+        fontFaceStyle.textContent = fontFaceCSS;
+        document.head.appendChild(fontFaceStyle);
+        console.log('Font-face CSS injected into main document');
+      };
+
+      injectFontFacesInMainDocument();
+
+      // Wait for fonts to load properly - check if fonts are actually loaded in both documents
+      const waitForFonts = async () => {
+        const cleanFontNames = originalFontNames.map(name => 
+          name.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '')
+        );
+        const uniqueFontNames = [...new Set(cleanFontNames)];
+
+        // Check if fonts are loaded in both iframe and main document
+        const checkFontsLoaded = (doc) => {
+          if (uniqueFontNames.length === 0) return true;
+          if (!doc.fonts) return false;
+          
+          let allLoaded = true;
+          uniqueFontNames.forEach(fontName => {
+            const isLoaded = doc.fonts.check(`16px "${fontName}"`) || doc.fonts.check(`16px ${fontName}`);
+            if (!isLoaded) allLoaded = false;
+          });
+          return allLoaded;
+        };
+
+        // Wait for fonts to be ready in iframe
+        if (iframeDoc.fonts && iframeDoc.fonts.ready) {
+          try {
+            await iframeDoc.fonts.ready;
+            console.log('Fonts ready in iframe');
+          } catch (e) {
+            console.log('Font ready event error in iframe:', e);
+          }
+        }
+
+        // Wait for fonts to be ready in main document
+        if (document.fonts && document.fonts.ready) {
+          try {
+            await document.fonts.ready;
+            console.log('Fonts ready in main document');
+          } catch (e) {
+            console.log('Font ready event error in main document:', e);
+          }
+        }
+
+        // Additional wait and check for both documents
+        let attempts = 0;
+        const maxAttempts = 15;
+        while (attempts < maxAttempts) {
+          const iframeLoaded = checkFontsLoaded(iframeDoc);
+          const mainLoaded = checkFontsLoaded(document);
+          
+          if (iframeLoaded && mainLoaded) {
+            console.log('All fonts verified as loaded in both documents');
+            break;
+          }
+          
+          if (attempts === maxAttempts - 1) {
+            console.warn('Some fonts may not be fully loaded, proceeding anyway...');
+            console.log('Iframe fonts loaded:', checkFontsLoaded(iframeDoc));
+            console.log('Main document fonts loaded:', checkFontsLoaded(document));
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 300));
+          attempts++;
+        }
+      };
+
+      await waitForFonts();
+
+      // Wait a bit more to ensure fonts are fully rendered
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Force a repaint to ensure fonts are rendered
+      const forceRepaint = () => {
+        // Force layout recalculation
+        if (iframeDoc.body) {
+          iframeDoc.body.style.display = 'none';
+          iframeDoc.body.offsetHeight; // Trigger reflow
+          iframeDoc.body.style.display = '';
+        }
+      };
+      forceRepaint();
+
+      // Additional wait after repaint
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Find both page sections
+      const pageSections = iframeDoc.querySelectorAll('section.page');
+      
+      if (pageSections.length < 2) {
+        throw new Error('Could not find both pages');
+      }
+
+      // Capture each page as PNG
+      const page1 = pageSections[0];
+      const page2 = pageSections[1];
+
+      console.log('Capturing page 1...');
+      
+      // Wait a bit more to ensure fonts are rendered in the DOM
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const canvas1 = await html2canvas(page1, {
+        scale: 2,
+        useCORS: true,
+        logging: true, // Enable logging to debug font issues
+        allowTaint: true,
+        backgroundColor: '#fff',
+        width: page1.scrollWidth,
+        height: page1.scrollHeight,
+        windowWidth: page1.scrollWidth,
+        windowHeight: page1.scrollHeight,
+        letterRendering: true, // Better font rendering
+        onclone: (clonedDoc, element) => {
+          // Copy all style sheets to ensure fonts are available
+          const originalStyles = iframeDoc.querySelectorAll('style');
+          originalStyles.forEach(originalStyle => {
+            const clonedStyle = clonedDoc.createElement('style');
+            clonedStyle.textContent = originalStyle.textContent;
+            clonedDoc.head.appendChild(clonedStyle);
+          });
+          
+          // Also inject font-face CSS from main document into cloned document
+          const mainFontFaceStyle = document.getElementById('html2canvas-font-faces');
+          if (mainFontFaceStyle) {
+            const clonedFontFaceStyle = clonedDoc.createElement('style');
+            clonedFontFaceStyle.textContent = mainFontFaceStyle.textContent;
+            clonedDoc.head.appendChild(clonedFontFaceStyle);
+          }
+          
+          // Force fonts to load in cloned document by accessing computed styles
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach(el => {
+            if (el.style && el.style.fontFamily) {
+              // Access computed style to force font loading
+              try {
+                const computedStyle = clonedDoc.defaultView.getComputedStyle(el);
+                const fontFamily = computedStyle.fontFamily;
+                console.log('Element font family:', fontFamily);
+              } catch (e) {
+                // Ignore errors
+              }
+            }
+          });
+          
+          console.log('Stylesheets and fonts copied to cloned document for page 1');
+        }
+      });
+
+      console.log('Capturing page 2...');
+      
+      // Wait a bit more to ensure fonts are rendered in the DOM
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const canvas2 = await html2canvas(page2, {
+        scale: 2,
+        useCORS: true,
+        logging: true, // Enable logging to debug font issues
+        allowTaint: true,
+        backgroundColor: '#fff',
+        width: page2.scrollWidth,
+        height: page2.scrollHeight,
+        windowWidth: page2.scrollWidth,
+        windowHeight: page2.scrollHeight,
+        letterRendering: true, // Better font rendering
+        onclone: (clonedDoc, element) => {
+          // Copy all style sheets to ensure fonts are available
+          const originalStyles = iframeDoc.querySelectorAll('style');
+          originalStyles.forEach(originalStyle => {
+            const clonedStyle = clonedDoc.createElement('style');
+            clonedStyle.textContent = originalStyle.textContent;
+            clonedDoc.head.appendChild(clonedStyle);
+          });
+          
+          // Also inject font-face CSS from main document into cloned document
+          const mainFontFaceStyle = document.getElementById('html2canvas-font-faces');
+          if (mainFontFaceStyle) {
+            const clonedFontFaceStyle = clonedDoc.createElement('style');
+            clonedFontFaceStyle.textContent = mainFontFaceStyle.textContent;
+            clonedDoc.head.appendChild(clonedFontFaceStyle);
+          }
+          
+          // Force fonts to load in cloned document by accessing computed styles
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach(el => {
+            if (el.style && el.style.fontFamily) {
+              // Access computed style to force font loading
+              try {
+                const computedStyle = clonedDoc.defaultView.getComputedStyle(el);
+                const fontFamily = computedStyle.fontFamily;
+                console.log('Element font family:', fontFamily);
+              } catch (e) {
+                // Ignore errors
+              }
+            }
+          });
+          
+          console.log('Stylesheets and fonts copied to cloned document for page 2');
+        }
+      });
+
+      // Convert canvases to PNG and download
+      const fileName1 = `Incardible-${transaction?.title || 'Card'}-Page1-${Date.now()}.png`;
+      const fileName2 = `Incardible-${transaction?.title || 'Card'}-Page2-${Date.now()}.png`;
+
+      canvas1.toBlob((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName1;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      });
+
+      // Download second page after a short delay
+      setTimeout(() => {
+        canvas2.toBlob((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName2;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        });
+      }, 500);
+
+      // Clean up
+      document.body.removeChild(iframe);
+      
+      // Remove injected font-face CSS
+      const fontFaceStyle = document.getElementById('html2canvas-font-faces');
+      if (fontFaceStyle) {
+        fontFaceStyle.remove();
+      }
+
+      toast.success('Images downloaded successfully!');
+      setDownloading(false);
+      setSelectedTransaction(null);
+    } catch (e) {
+      console.error(e);
+      
+      // Clean up on error
+      const fontFaceStyle = document.getElementById('html2canvas-font-faces');
+      if (fontFaceStyle) {
+        fontFaceStyle.remove();
+      }
+      
+      setDownloading(false);
+      setSelectedTransaction(null);
+      toast.error('Failed to download images. Please try again.');
     }
   };
 
@@ -3657,25 +4135,26 @@ function buildPrintHTML_SameStyle(transaction) {
                           {formatDateTime(data?.paid_at)}
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{ textAlign: 'left' }}>
-                          <Tooltip title="Download Card">
-                            <IconButton>
-                              {printing && selectedTransaction?._id === data._id ? (
-                                <CircularProgress size={24}/>
-                              ) : (
-                                <DownloadIcon onClick={() => handlePrintClick(data)}/>
-                              )}
-                            </IconButton>
-
-                            {/*<IconButton>*/}
-
-                            {/*  {*/}
-                            {/*    loading && (*/}
-                            {/*      <CircularProgress/>*/}
-                            {/*    )*/}
-                            {/*  }*/}
-                            {/*  <DownloadIcon onClick={() => printReceipt(data)}/>*/}
-                            {/*</IconButton>*/}
-                          </Tooltip>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Tooltip title="Print Card">
+                              <IconButton>
+                                {printing && selectedTransaction?._id === data._id ? (
+                                  <CircularProgress size={24}/>
+                                ) : (
+                                  <PrintIcon onClick={() => handlePrintClick(data)}/>
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Download as PNG">
+                              <IconButton>
+                                {downloading && selectedTransaction?._id === data._id ? (
+                                  <CircularProgress size={24}/>
+                                ) : (
+                                  <DownloadIcon onClick={() => handleDownloadPNG(data)}/>
+                                )}
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     );
