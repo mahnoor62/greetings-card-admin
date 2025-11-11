@@ -378,7 +378,7 @@ const printRef = React.useRef(null);
     // console.log(searchQuery);
   };
 
-  console.log("transactions", transactions)
+  // console.log("transactions", transactions)
 
 //filter function
   let filtered = applyFilter(transactions, searchQuery, [
@@ -3167,69 +3167,213 @@ function buildPrintHTML_SameStyle(transaction) {
 
   const handlePrintClick = (transaction) => {
     try {
+
+
+      // console.log(`${BASE_URL}/${transaction?.cardCustomizationId?.templateTextSS}`)
+
+      const imagePath = transaction?.cardCustomizationId?.templateTextSS;
+      const imageUrl = imagePath ? `${BASE_URL}/${imagePath.replace(/\\/g, '/')}` : null;
+
+      if (!imageUrl) {
+        toast.error('Printable image not found.');
+        return;
+      }
+
       setPrinting(true);
       setSelectedTransaction(transaction);
 
-      const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
-      const urls = [
-        makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
-        makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign)
-      ].filter(Boolean);
-
-      const proceed = () => {
-        // Create a hidden iframe for printing
+      const image = new Image();
+      image.onload = () => {
         const iframe = document.createElement('iframe');
-        iframe.style.position = 'absolute';
+        iframe.style.position = 'fixed';
         iframe.style.width = '0';
         iframe.style.height = '0';
-        iframe.style.border = 'none';
+        iframe.style.border = '0';
         iframe.style.visibility = 'hidden';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
         document.body.appendChild(iframe);
 
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-        // Build the print content in the iframe
-        buildPrintHTML(transaction, iframeDoc);
-
-        // Clean up iframe after printing
-        const cleanupIframe = () => {
-          setTimeout(() => {
-            try {
-              document.body.removeChild(iframe);
-              console.log('Iframe removed');
-            } catch (e) {
-              console.error('Error removing iframe:', e);
-            }
-          }, 1000);
-        };
-
-        // Listen for afterprint event to clean up
-        if (iframe.contentWindow) {
-          iframe.contentWindow.onafterprint = cleanupIframe;
-          
-          // Also add a fallback cleanup in case onafterprint doesn't fire
-          setTimeout(() => {
-            if (document.body.contains(iframe)) {
-              cleanupIframe();
-            }
-          }, 10000);
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (!iframeDoc) {
+          console.error('Unable to access iframe document for printing');
+          document.body.removeChild(iframe);
+          setPrinting(false);
+          setSelectedTransaction(null);
+          toast.error('Failed to prepare print preview.');
+          return;
         }
 
+        const cleanup = () => {
+          try {
+            document.body.removeChild(iframe);
+          } catch (err) {
+            console.error('Failed to remove print iframe', err);
+          }
+          setPrinting(false);
+          setSelectedTransaction(null);
+        };
+
+        const html = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <title>Print Preview</title>
+              <style>
+                @page { size: A4 landscape; margin: 0; }
+                body {
+                  margin: 0;
+                  width: 297mm;
+                  height: 210mm;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background: #fff;
+                }
+                img {
+                  max-width: 100%;
+                  max-height: 100%;
+                  object-fit: contain;
+                  print-color-adjust: exact;
+                  -webkit-print-color-adjust: exact;
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${imageUrl}" alt="Card preview" />
+              <script>
+                function triggerPrint() {
+                  window.focus();
+                  window.print();
+                }
+                const printImage = document.querySelector('img');
+                if (printImage.complete) {
+                  setTimeout(triggerPrint, 100);
+                } else {
+                  printImage.onload = () => setTimeout(triggerPrint, 100);
+                  printImage.onerror = () => {
+                    try { parent.postMessage({ type: 'print-image-error' }, '*'); } catch (_) {}
+                  };
+                }
+              </script>
+            </body>
+          </html>
+        `;
+
+        iframeDoc.open();
+        iframeDoc.write(html);
+        iframeDoc.close();
+
+        const triggerPrint = () => {
+          try {
+            if (iframe.contentWindow) {
+              iframe.contentWindow.focus();
+              iframe.contentWindow.print();
+              setTimeout(cleanup, 1000);
+            } else {
+              cleanup();
+            }
+          } catch (err) {
+            console.error('Error initiating print', err);
+            toast.error('Failed to start printing.');
+            cleanup();
+          }
+        };
+
+        window.addEventListener('message', function handleMessage(event) {
+          if (event?.data?.type === 'print-image-error') {
+            window.removeEventListener('message', handleMessage);
+            toast.error('Failed to load printable image.');
+            cleanup();
+          }
+        }, { once: true });
+
+        if (iframe.contentWindow) {
+          iframe.contentWindow.onafterprint = cleanup;
+        }
+
+        setTimeout(triggerPrint, 300);
+      };
+
+      image.onerror = () => {
+        toast.error('Failed to load printable image.');
         setPrinting(false);
         setSelectedTransaction(null);
       };
 
-      if (urls.length === 0) { proceed(); return; }
+      image.src = imageUrl;
 
-      let loaded = 0;
-      urls.forEach(src => {
-        const img = new Image();
-        img.onload = img.onerror = () => {
-          loaded += 1;
-          if (loaded === urls.length) proceed();
-        };
-        img.src = src;
-      });
+
+
+
+      // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      // console.log(`${BASE_URL}/${transaction?.cardCustomizationId?.templateTextSS}`)
+
+      // setPrinting(true);
+      // setSelectedTransaction(transaction);
+
+      // const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
+      // const urls = [
+      //   makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
+      //   makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign)
+      // ].filter(Boolean);
+
+      // const proceed = () => {
+      //   // Create a hidden iframe for printing
+      //   const iframe = document.createElement('iframe');
+      //   iframe.style.position = 'absolute';
+      //   iframe.style.width = '0';
+      //   iframe.style.height = '0';
+      //   iframe.style.border = 'none';
+      //   iframe.style.visibility = 'hidden';
+      //   document.body.appendChild(iframe);
+
+      //   const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+      //   // Build the print content in the iframe
+      //   buildPrintHTML(transaction, iframeDoc);
+
+      //   // Clean up iframe after printing
+      //   const cleanupIframe = () => {
+      //     setTimeout(() => {
+      //       try {
+      //         document.body.removeChild(iframe);
+      //         console.log('Iframe removed');
+      //       } catch (e) {
+      //         console.error('Error removing iframe:', e);
+      //       }
+      //     }, 1000);
+      //   };
+
+      //   // Listen for afterprint event to clean up
+      //   if (iframe.contentWindow) {
+      //     iframe.contentWindow.onafterprint = cleanupIframe;
+          
+      //     // Also add a fallback cleanup in case onafterprint doesn't fire
+      //     setTimeout(() => {
+      //       if (document.body.contains(iframe)) {
+      //         cleanupIframe();
+      //       }
+      //     }, 10000);
+      //   }
+
+      //   setPrinting(false);
+      //   setSelectedTransaction(null);
+      // };
+
+      // if (urls.length === 0) { proceed(); return; }
+
+      // let loaded = 0;
+      // urls.forEach(src => {
+      //   const img = new Image();
+      //   img.onload = img.onerror = () => {
+      //     loaded += 1;
+      //     if (loaded === urls.length) proceed();
+      //   };
+      //   img.src = src;
+      // });
+      
     } catch (e) {
       console.error(e);
       setPrinting(false);
@@ -3242,541 +3386,43 @@ function buildPrintHTML_SameStyle(transaction) {
     try {
       setDownloading(true);
       setSelectedTransaction(transaction);
-
-      const makeUrl = (p) => (p ? `${BASE_URL}/${p.replace(/\\/g, '/')}` : null);
-      const urls = [
-        makeUrl(transaction?.cardCustomizationId?.cardId?.frontDesign),
-        makeUrl(transaction?.cardCustomizationId?.cardId?.backDesign)
-      ].filter(Boolean);
-
-      // Preload images
-      if (urls.length > 0) {
-        await Promise.all(urls.map(url => {
-          return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = img.onerror = resolve;
-            img.src = url;
-          });
-        }));
+  
+      const imagePath = transaction?.cardCustomizationId?.templateTextSS;
+      const imageUrl = imagePath ? `${BASE_URL}/${imagePath.replace(/\\/g, '/')}` : null;
+      if (!imageUrl) {
+        toast.error('Image not found for download.');
+        return;
       }
-
-      // Create iframe with same content as print
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'absolute';
-      iframe.style.width = '210mm';
-      iframe.style.height = '296mm'; // Height for 2 pages (148mm each)
-      iframe.style.border = 'none';
-      iframe.style.visibility = 'hidden';
-      iframe.style.left = '-9999px';
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-      // Build the print content in the iframe (same as print, but skip printing)
-      buildPrintHTML(transaction, iframeDoc, true); // Skip print for PNG download
-
-      // Wait for content to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Wait for QR code to generate if needed
-      if (iframeDoc.getElementById('qr-slot')) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-
-      // Font mapping function (same as in buildPrintHTML)
-      const mapFontNameToFile = (fontName) => {
-        if (!fontName) return '';
-        const fontFileMap = {
-          'AlanSans-VariableFont_wght SDF': 'AlanSans-VariableFont_wght SDF.ttf',
-          'ALBA SDF': 'ALBA SDF.TTF',
-          'AlexBrush-Regular SDF': 'AlexBrush-Regular SDF.ttf',
-          'AmaticSC-Regular SDF': 'AmaticSC-Regular SDF.ttf',
-          'Anak Paud SDF': 'Anak Paud SDF.otf',
-          'Antaresia SDF': 'Antaresia SDF.otf',
-          'Anton-Regular SDF': 'Anton-Regular SDF.ttf',
-          'Apple Chancery SDF': 'Apple Chancery SDF.ttf',
-          'Aquatype SDF': 'Aquatype SDF.ttf',
-          'ARCADECLASSIC SDF': 'ARCADECLASSIC SDF.TTF',
-          'Arimo-VariableFont_wght SDF': 'Arimo-VariableFont_wght SDF.ttf',
-          'Autumn in November SDF': 'Autumn in November SDF.ttf',
-          'BareMarker-Light SDF': 'BareMarker-Light SDF.ttf',
-          'blackjack SDF': 'blackjack SDF.TTF',
-          'Canterbury SDF': 'Canterbury SDF.ttf',
-          'Carnevalee Freakshow SDF': 'Carnevalee Freakshow SDF.ttf',
-          'CHLORINR SDF': 'chlorine.TTF',
-          'DancingScript-VariableFont_wght SDF': 'DancingScript-VariableFont_wght SDF.ttf',
-          'Darhouty Frederics SDF': 'Darhouty Frederics SDF.otf',
-          'Emigrate SDF': 'Emigrate SDF.otf',
-          'Facon SDF': 'Facon SDF.ttf',
-          'Fakeblood SDF': 'Fakeblood SDF.otf',
-          'FFF_Tusj SDF': 'FFF-Tusj SDF.ttf',
-          'GrandHotel-Regular SDF': 'GrandHotel-Regular SDF.ttf',
-          'GreatVibes-Regular SDF': 'GreatVibes-Regular SDF.ttf',
-          'Hanged Letters SDF': 'Hanged Letters SDF.ttf',
-          'Happy Birthday SDF': 'happy birthday.ttf',
-          'Howdy Koala SDF': 'Howdy Koala SDF.ttf',
-          'Inter-Regular SDF': 'Inter-VariableFont_opsz,wght SDF.ttf',
-          'Inter-VariableFont_opsz,wght SDF': 'Inter-VariableFont_opsz,wght SDF.ttf',
-          'KaushanScript-Regular SDF': 'KaushanScript-Regular SDF.ttf',
-          'KingRimba SDF': 'KingRimba SDF.ttf',
-          'Lato-Regular SDF': 'Lato-Regular SDF.ttf',
-          'Lobster_1 SDF': 'Lobster_1.ttf',
-          'MAXIGO SDF': 'MAXIGO SDF.otf',
-          'Mitchell Demo SDF': 'Mitchell Demo.otf',
-          'Montserrat-VariableFont_wght SDF': 'Montserrat-Italic-VariableFont_wght SDF.ttf',
-          'Morally Serif SDF': 'Morally Serif.otf',
-          'NotoSans-VariableFont_wdth,wght SDF': 'NotoSans-VariableFont_wdth,wght.ttf',
-          'OpenSans-VariableFont_wdth,wght SDF': 'OpenSans-VariableFont_wdth,wght SDF.ttf',
-          'Pacifico SDF': 'Pacifico SDF.ttf',
-          'ParryHotter SDF': 'ParryHotter SDF.ttf',
-          'Poppins-Regular SDF': 'Poppins-Regular SDF.ttf',
-          'Pricedown Bl SDF': 'Pricedown Bl SDF.otf',
-          'Raleway-VariableFont_wght SDF': 'Raleway-VariableFont_wght SDF.ttf',
-          'Roboto-VariableFont_wdth,wght SDF': 'Roboto-VariableFont_wdth,wght SDF.ttf',
-          'Sawone SDF': 'Sawone SDF.ttf',
-          'Sofia-Regular SDF': 'Sofia-Regular SDF.ttf',
-          'Super Adorable SDF': 'Super Adorable SDF.ttf',
-          'waltograph42 SDF': 'waltograph42 SDF.otf',
-          'Way Come SDF': 'Way Come SDF.ttf',
-          'YoungMorin-Regular SDF': 'YoungMorin-Regular SDF.ttf',
-          'Zombie_Holocaust SDF': 'Zombie_Holocaust SDF.ttf'
-        };
-        return fontFileMap[fontName] || null;
-      };
-
-      // Get font names from the transaction data
-      const arTemplateData = transaction?.cardCustomizationId?.arTemplateData;
-      const originalFontNames = [];
-      if (arTemplateData?.mainHeading?.fontName) {
-        originalFontNames.push(arTemplateData.mainHeading.fontName);
-      }
-      if (arTemplateData?.paragraph1?.fontName) {
-        originalFontNames.push(arTemplateData.paragraph1.fontName);
-      }
-      if (arTemplateData?.paragraph2?.fontName) {
-        originalFontNames.push(arTemplateData.paragraph2.fontName);
-      }
-
-      // Load fonts in the MAIN document (not just iframe) so html2canvas can access them
-      const loadFontsInMainDocument = async () => {
-        if (!document.fonts) {
-          console.log('Font API not available in main document');
-          return;
-        }
-
-        console.log('Loading fonts in main document for html2canvas...');
-        const fontPromises = [];
-        
-        originalFontNames.forEach(fontName => {
-          const fontFile = mapFontNameToFile(fontName);
-          if (fontFile) {
-            const cleanFontName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
-            console.log(`Loading font in main document: ${cleanFontName} from ${fontFile}`);
-            
-            const fontPath = `${window.location.origin}/font/${fontFile}`;
-            
-            // Check if font is already loaded
-            const isAlreadyLoaded = document.fonts.check(`16px "${cleanFontName}"`) || document.fonts.check(`16px ${cleanFontName}`);
-            if (isAlreadyLoaded) {
-              console.log(`Font ${cleanFontName} already loaded in main document`);
-              return;
-            }
-            
-            const fontFace = new FontFace(cleanFontName, `url('${fontPath}')`);
-            
-            // Add timeout and retry logic
-            const loadFontWithRetry = async (retries = 3) => {
-              for (let i = 0; i < retries; i++) {
-                try {
-                  await fontFace.load();
-                  document.fonts.add(fontFace);
-                  console.log(`Font ${cleanFontName} loaded successfully in main document (attempt ${i + 1})`);
-                  return;
-                } catch (err) {
-                  console.error(`Failed to load font ${cleanFontName} in main document (attempt ${i + 1}):`, err);
-                  if (i < retries - 1) {
-                    // Wait before retry
-                    await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-                  } else {
-                    // Last attempt failed, try with different path
-                    console.log(`Trying alternative path for ${cleanFontName}...`);
-                    try {
-                      const altFontFace = new FontFace(cleanFontName, `url('${fontPath}')`);
-                      await altFontFace.load();
-                      document.fonts.add(altFontFace);
-                      console.log(`Font ${cleanFontName} loaded with alternative method`);
-                      return;
-                    } catch (altErr) {
-                      console.error(`All attempts failed for font ${cleanFontName}:`, altErr);
-                      throw altErr;
-                    }
-                  }
-                }
-              }
-            };
-            
-            fontPromises.push(loadFontWithRetry());
-          }
-        });
-        
-        try {
-          await Promise.allSettled(fontPromises);
-          console.log('Font loading attempts completed in main document');
-        } catch (error) {
-          console.error('Error loading fonts in main document:', error);
-        }
-      };
-
-      // Preload fonts by creating hidden elements with the fonts to ensure they're loaded
-      const preloadFonts = async () => {
-        const preloadPromises = [];
-        originalFontNames.forEach(fontName => {
-          const fontFile = mapFontNameToFile(fontName);
-          if (fontFile) {
-            const fontPath = `${window.location.origin}/font/${fontFile}`;
-            // Preload font file
-            const link = document.createElement('link');
-            link.rel = 'preload';
-            link.as = 'font';
-            link.href = fontPath;
-            link.crossOrigin = 'anonymous';
-            document.head.appendChild(link);
-            preloadPromises.push(
-              new Promise((resolve) => {
-                link.onload = () => {
-                  console.log(`Font preloaded: ${fontFile}`);
-                  resolve();
-                };
-                link.onerror = () => {
-                  console.warn(`Font preload failed: ${fontFile}`);
-                  resolve(); // Continue anyway
-                };
-                // Timeout after 5 seconds
-                setTimeout(resolve, 5000);
-              })
-            );
-          }
-        });
-        await Promise.allSettled(preloadPromises);
-      };
-
-      // Preload fonts first
-      await preloadFonts();
-
-      // Inject @font-face CSS directly into main document's head for html2canvas
-      const injectFontFacesInMainDocument = () => {
-        const fontFaceStyle = document.createElement('style');
-        fontFaceStyle.id = 'html2canvas-font-faces';
-        
-        // Remove existing font-face style if any
-        const existing = document.getElementById('html2canvas-font-faces');
-        if (existing) {
-          existing.remove();
-        }
-
-        let fontFaceCSS = '';
-        originalFontNames.forEach(fontName => {
-          const fontFile = mapFontNameToFile(fontName);
-          if (fontFile) {
-            const cleanFontName = fontName.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '');
-            const fontPath = `${window.location.origin}/font/${fontFile}`;
-            const format = fontFile.endsWith('.otf') ? 'opentype' : 'truetype';
-            
-            // Use multiple src formats for better compatibility
-            fontFaceCSS += `
-              @font-face {
-                font-family: '${cleanFontName}';
-                src: url('${fontPath}') format('${format}');
-                font-weight: normal;
-                font-style: normal;
-                font-display: block;
-                unicode-range: U+0000-10FFFF;
-              }
-            `;
-            console.log(`Font-face CSS for ${cleanFontName}: ${fontPath}`);
-          }
-        });
-
-        fontFaceStyle.textContent = fontFaceCSS;
-        document.head.appendChild(fontFaceStyle);
-        console.log('Font-face CSS injected into main document');
-        
-        // Verify font URLs are accessible
-        originalFontNames.forEach(fontName => {
-          const fontFile = mapFontNameToFile(fontName);
-          if (fontFile) {
-            const fontPath = `${window.location.origin}/font/${fontFile}`;
-            // Test if font URL is accessible
-            fetch(fontPath, { method: 'HEAD', mode: 'no-cors' })
-              .then(() => {
-                console.log(`✓ Font URL accessible: ${fontPath}`);
-              })
-              .catch(() => {
-                console.warn(`✗ Font URL may not be accessible: ${fontPath}`);
-                // Try alternative path
-                const altPath = `/font/${fontFile}`;
-                console.log(`  Trying alternative path: ${altPath}`);
-              });
-          }
-        });
-      };
-
-      injectFontFacesInMainDocument();
-      
-      // Wait for @font-face CSS to load fonts - longer wait on live server
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Create a test element to force font loading
-      const testFontLoading = () => {
-        const cleanFontNames = originalFontNames.map(name => 
-          name.replace(/ SDF$/i, '').replace(/-VariableFont_.+$/i, '').replace(/-Regular$/i, '')
-        );
-        const uniqueFontNames = [...new Set(cleanFontNames)];
-        
-        // Create hidden test elements with each font to force loading
-        uniqueFontNames.forEach(fontName => {
-          const testEl = document.createElement('div');
-          testEl.style.position = 'absolute';
-          testEl.style.visibility = 'hidden';
-          testEl.style.fontFamily = `'${fontName}'`;
-          testEl.style.fontSize = '16px';
-          testEl.textContent = 'Test';
-          document.body.appendChild(testEl);
-          
-          // Force font loading by accessing computed style
-          try {
-            const computed = window.getComputedStyle(testEl);
-            const actualFont = computed.fontFamily;
-            console.log(`Test element font for ${fontName}: ${actualFont}`);
-          } catch (e) {
-            console.log(`Error checking font ${fontName}:`, e);
-          }
-          
-          // Remove after a short delay
-          setTimeout(() => {
-            if (testEl.parentNode) {
-              testEl.parentNode.removeChild(testEl);
-            }
-          }, 100);
-        });
-      };
-      
-      testFontLoading();
-      
-      // Additional wait for fonts to be available
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Simplified: Since html2canvas uses @font-face CSS, we just need to ensure:
-      // 1. @font-face CSS is injected (done above)
-      // 2. Fonts are preloaded (done above)
-      // 3. Wait enough time for fonts to be available
-      // We don't need to check document.fonts.check() since it's unreliable and html2canvas uses CSS @font-face
-      
-      console.log('Waiting for fonts to be available via @font-face CSS...');
-      
-      // Wait for fonts to be ready in iframe (for print preview)
-      if (iframeDoc.fonts && iframeDoc.fonts.ready) {
-        try {
-          await iframeDoc.fonts.ready;
-          console.log('Fonts ready in iframe');
-        } catch (e) {
-          console.log('Font ready event error in iframe:', e);
-        }
-      }
-      
-      // Additional wait to ensure @font-face fonts are loaded and available to html2canvas
-      // This is important because html2canvas reads fonts from @font-face CSS, not FontFace API
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log('Proceeding with image capture - fonts should be available via @font-face CSS');
-
-      // Wait a bit more to ensure fonts are fully rendered
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Force a repaint to ensure fonts are rendered
-      const forceRepaint = () => {
-        // Force layout recalculation
-        if (iframeDoc.body) {
-          iframeDoc.body.style.display = 'none';
-          iframeDoc.body.offsetHeight; // Trigger reflow
-          iframeDoc.body.style.display = '';
-        }
-      };
-      forceRepaint();
-
-      // Additional wait after repaint
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Find both page sections
-      const pageSections = iframeDoc.querySelectorAll('section.page');
-      
-      if (pageSections.length < 2) {
-        throw new Error('Could not find both pages');
-      }
-
-      // Capture each page as PNG
-      const page1 = pageSections[0];
-      const page2 = pageSections[1];
-
-      console.log('Capturing page 1...');
-      
-      // Wait a bit more to ensure fonts are rendered in the DOM
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const canvas1 = await html2canvas(page1, {
-        scale: 2,
-        useCORS: true,
-        logging: true, // Enable logging to debug font issues
-        allowTaint: true,
-        backgroundColor: '#fff',
-        width: page1.scrollWidth,
-        height: page1.scrollHeight,
-        windowWidth: page1.scrollWidth,
-        windowHeight: page1.scrollHeight,
-        letterRendering: true, // Better font rendering
-        onclone: (clonedDoc, element) => {
-          // Copy all style sheets to ensure fonts are available
-          const originalStyles = iframeDoc.querySelectorAll('style');
-          originalStyles.forEach(originalStyle => {
-            const clonedStyle = clonedDoc.createElement('style');
-            clonedStyle.textContent = originalStyle.textContent;
-            clonedDoc.head.appendChild(clonedStyle);
-          });
-          
-          // Also inject font-face CSS from main document into cloned document
-          const mainFontFaceStyle = document.getElementById('html2canvas-font-faces');
-          if (mainFontFaceStyle) {
-            const clonedFontFaceStyle = clonedDoc.createElement('style');
-            clonedFontFaceStyle.textContent = mainFontFaceStyle.textContent;
-            clonedDoc.head.appendChild(clonedFontFaceStyle);
-          }
-          
-          // Force fonts to load in cloned document by accessing computed styles
-          const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach(el => {
-            if (el.style && el.style.fontFamily) {
-              // Access computed style to force font loading
-              try {
-                const computedStyle = clonedDoc.defaultView.getComputedStyle(el);
-                const fontFamily = computedStyle.fontFamily;
-                console.log('Element font family:', fontFamily);
-              } catch (e) {
-                // Ignore errors
-              }
-            }
-          });
-          
-          console.log('Stylesheets and fonts copied to cloned document for page 1');
-        }
-      });
-
-      console.log('Capturing page 2...');
-      
-      // Wait a bit more to ensure fonts are rendered in the DOM
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const canvas2 = await html2canvas(page2, {
-        scale: 2,
-        useCORS: true,
-        logging: true, // Enable logging to debug font issues
-        allowTaint: true,
-        backgroundColor: '#fff',
-        width: page2.scrollWidth,
-        height: page2.scrollHeight,
-        windowWidth: page2.scrollWidth,
-        windowHeight: page2.scrollHeight,
-        letterRendering: true, // Better font rendering
-        onclone: (clonedDoc, element) => {
-          // Copy all style sheets to ensure fonts are available
-          const originalStyles = iframeDoc.querySelectorAll('style');
-          originalStyles.forEach(originalStyle => {
-            const clonedStyle = clonedDoc.createElement('style');
-            clonedStyle.textContent = originalStyle.textContent;
-            clonedDoc.head.appendChild(clonedStyle);
-          });
-          
-          // Also inject font-face CSS from main document into cloned document
-          const mainFontFaceStyle = document.getElementById('html2canvas-font-faces');
-          if (mainFontFaceStyle) {
-            const clonedFontFaceStyle = clonedDoc.createElement('style');
-            clonedFontFaceStyle.textContent = mainFontFaceStyle.textContent;
-            clonedDoc.head.appendChild(clonedFontFaceStyle);
-          }
-          
-          // Force fonts to load in cloned document by accessing computed styles
-          const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach(el => {
-            if (el.style && el.style.fontFamily) {
-              // Access computed style to force font loading
-              try {
-                const computedStyle = clonedDoc.defaultView.getComputedStyle(el);
-                const fontFamily = computedStyle.fontFamily;
-                console.log('Element font family:', fontFamily);
-              } catch (e) {
-                // Ignore errors
-              }
-            }
-          });
-          
-          console.log('Stylesheets and fonts copied to cloned document for page 2');
-        }
-      });
-
-      // Convert canvases to PNG and download
-      const fileName1 = `Incardible-${transaction?.title || 'Card'}-Page1-${Date.now()}.png`;
-      const fileName2 = `Incardible-${transaction?.title || 'Card'}-Page2-${Date.now()}.png`;
-
-      canvas1.toBlob((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName1;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      });
-
-      // Download second page after a short delay
-      setTimeout(() => {
-        canvas2.toBlob((blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = fileName2;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-        });
-      }, 500);
-
-      // Clean up
-      document.body.removeChild(iframe);
-      
-      // Remove injected font-face CSS
-      const fontFaceStyle = document.getElementById('html2canvas-font-faces');
-      if (fontFaceStyle) {
-        fontFaceStyle.remove();
-      }
-
-      toast.success('Images downloaded successfully!');
-      setDownloading(false);
-      setSelectedTransaction(null);
+  
+      // Fetch the image as a blob
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error('Failed to fetch image');
+  
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+  
+      // Create a temporary link to trigger download
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const filename = imageUrl.split('/').pop() || 'card-image.png';
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      // Revoke the blob URL after a short delay to free memory
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+  
+      toast.success('Image downloaded successfully!');
     } catch (e) {
       console.error(e);
-      
-      // Clean up on error
-      const fontFaceStyle = document.getElementById('html2canvas-font-faces');
-      if (fontFaceStyle) {
-        fontFaceStyle.remove();
-      }
-      
+      toast.error('Failed to download image. Please try again.');
+    } finally {
       setDownloading(false);
       setSelectedTransaction(null);
-      toast.error('Failed to download images. Please try again.');
     }
   };
+  
 
   return (
     <>
