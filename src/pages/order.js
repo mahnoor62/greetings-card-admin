@@ -3182,8 +3182,27 @@ function buildPrintHTML_SameStyle(transaction) {
       setPrinting(true);
       setSelectedTransaction(transaction);
 
+      const templateId = transaction?.cardCustomizationId?._id;
+      const qrValue = (() => {
+        if (!templateId || !AR_EXPERIENCE_LINK) return null;
+        try {
+          const link = new URL(AR_EXPERIENCE_LINK);
+          link.searchParams.set('templateId', templateId);
+          return link.toString();
+        } catch (err) {
+          console.warn('Unable to construct QR URL via URL API, using fallback.', err);
+          const base = AR_EXPERIENCE_LINK.endsWith('/') ? AR_EXPERIENCE_LINK.slice(0, -1) : AR_EXPERIENCE_LINK;
+          return `${base}/?templateId=${templateId}`;
+        }
+      })();
+
+      const qrDownloadUrl = qrValue
+        ? `https://api.qrserver.com/v1/create-qr-code/?format=png&size=600x600&data=${encodeURIComponent(qrValue)}`
+        : null;
+
       const image = new Image();
-      image.onload = () => {
+      image.crossOrigin = 'anonymous';
+      image.onload = async () => {
         const iframe = document.createElement('iframe');
         iframe.style.position = 'fixed';
         iframe.style.width = '0';
@@ -3214,6 +3233,28 @@ function buildPrintHTML_SameStyle(transaction) {
           setSelectedTransaction(null);
         };
 
+        const readBlobAsDataURL = (blob) => new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+
+        let qrDataUrl = null;
+        if (qrDownloadUrl) {
+          try {
+            const qrResponse = await fetch(qrDownloadUrl);
+            if (qrResponse.ok) {
+              const qrBlob = await qrResponse.blob();
+              qrDataUrl = await readBlobAsDataURL(qrBlob);
+            } else {
+              console.warn('Failed to fetch QR for print preview.');
+            }
+          } catch (err) {
+            console.warn('Error fetching QR for print preview:', err);
+          }
+        }
+
         const html = `
           <!DOCTYPE html>
           <html>
@@ -3225,37 +3266,76 @@ function buildPrintHTML_SameStyle(transaction) {
                 body {
                   margin: 0;
                   width: 297mm;
+                  height: 420mm;
+                  display: flex;
+                  flex-direction: column;
+                }
+                .page {
+                  width: 100%;
                   height: 210mm;
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  background: #fff;
+                  position: relative;
+                  page-break-after: always;
                 }
-                img {
-                  max-width: 100%;
-                  max-height: 100%;
+                .page:last-of-type {
+                  page-break-after: auto;
+                }
+                .card-image {
+                  max-width: 90%;
+                  max-height: 90%;
                   object-fit: contain;
                   print-color-adjust: exact;
                   -webkit-print-color-adjust: exact;
                 }
+                .qr-container {
+                  position: absolute;
+                  bottom: 25mm;
+                  right: 25mm;
+                  width: 150px;
+                  height: 150px;
+                  display: ${qrDataUrl ? 'flex' : 'none'};
+                  align-items: center;
+                  justify-content: center;
+                  padding: 0;
+                }
+                .qr-container img {
+                  width: 100%;
+                  height: 100%;
+                  object-fit: contain;
+                }
               </style>
             </head>
             <body>
-              <img src="${imageUrl}" alt="Card preview" />
+              <div class="page">
+                <img src="${imageUrl}" alt="Card preview" class="card-image base-image" />
+              </div>
+              <div class="page">
+                <div class="qr-container">
+                  ${qrDataUrl ? `<img src="${qrDataUrl}" alt="QR code" class="qr-image" />` : ''}
+                </div>
+              </div>
               <script>
                 function triggerPrint() {
                   window.focus();
                   window.print();
                 }
-                const printImage = document.querySelector('img');
-                if (printImage.complete) {
-                  setTimeout(triggerPrint, 100);
-                } else {
-                  printImage.onload = () => setTimeout(triggerPrint, 100);
-                  printImage.onerror = () => {
-                    try { parent.postMessage({ type: 'print-image-error' }, '*'); } catch (_) {}
-                  };
-                }
+                const baseImage = document.querySelector('.base-image');
+                const qrImage = document.querySelector('.qr-image');
+
+                const waitForImage = (img) => new Promise((resolve, reject) => {
+                  if (!img) { resolve(); return; }
+                  if (img.complete) { resolve(); return; }
+                  img.onload = () => resolve();
+                  img.onerror = () => reject();
+                });
+
+                Promise.all([waitForImage(baseImage), waitForImage(qrImage)]).then(() => {
+                  setTimeout(triggerPrint, 150);
+                }).catch(() => {
+                  try { parent.postMessage({ type: 'print-image-error' }, '*'); } catch (_) {}
+                });
               </script>
             </body>
           </html>
@@ -3383,40 +3463,110 @@ function buildPrintHTML_SameStyle(transaction) {
   };
 
   const handleDownloadPNG = async (transaction) => {
+    const downloadBlob = (blob, filename) => {
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    };
+
+    const fetchBlob = async (url) => {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch resource: ${url}`);
+      }
+      return response.blob();
+    };
+
+    const loadImageFromBlob = (blob) => new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = (err) => {
+        URL.revokeObjectURL(url);
+        reject(err);
+      };
+      img.src = url;
+    });
+
+    const buildQrUrl = (templateId) => {
+      if (!templateId || !AR_EXPERIENCE_LINK) return null;
+      try {
+        const link = new URL(AR_EXPERIENCE_LINK);
+        link.searchParams.set('templateId', templateId);
+        return link.toString();
+      } catch (err) {
+        console.warn('Unable to construct QR URL via URL API, using fallback.', err);
+        const base = AR_EXPERIENCE_LINK.endsWith('/') ? AR_EXPERIENCE_LINK.slice(0, -1) : AR_EXPERIENCE_LINK;
+        return `${base}/?templateId=${templateId}`;
+      }
+    };
+
     try {
       setDownloading(true);
       setSelectedTransaction(transaction);
-  
+
       const imagePath = transaction?.cardCustomizationId?.templateTextSS;
       const imageUrl = imagePath ? `${BASE_URL}/${imagePath.replace(/\\/g, '/')}` : null;
       if (!imageUrl) {
         toast.error('Image not found for download.');
         return;
       }
-  
-      // Fetch the image as a blob
-      const response = await fetch(imageUrl);
-      if (!response.ok) throw new Error('Failed to fetch image');
-  
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-  
-      // Create a temporary link to trigger download
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      const filename = imageUrl.split('/').pop() || 'card-image.png';
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  
-      // Revoke the blob URL after a short delay to free memory
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-  
-      toast.success('Image downloaded successfully!');
+
+      const baseBlob = await fetchBlob(imageUrl);
+      const baseImage = await loadImageFromBlob(baseBlob);
+      const cardFilename = `card-text-${transaction?.orderId || 'image'}.png`;
+
+      downloadBlob(baseBlob, cardFilename);
+
+      const templateId = transaction?.cardCustomizationId?._id;
+      const qrValue = buildQrUrl(templateId);
+
+      if (qrValue) {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?format=png&size=400x400&data=${encodeURIComponent(qrValue)}`;
+        const qrBlob = await fetchBlob(qrUrl);
+        const qrImage = await loadImageFromBlob(qrBlob);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = baseImage.width;
+        canvas.height = baseImage.height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const qrSize = Math.min(canvas.width * 0.32, 420);
+        const margin = Math.max(canvas.width * 0.035, 28);
+        const qrX = canvas.width - qrSize - margin;
+        const qrY = canvas.height - qrSize - margin;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(qrX - margin * 0.25, qrY - margin * 0.25, qrSize + margin * 0.5, qrSize + margin * 0.5);
+        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+
+        const qrCardBlob = await new Promise((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('Failed to generate QR card image.'));
+          }, 'image/png');
+        });
+
+        const qrCardFilename = `card-qr-${transaction?.orderId || templateId}.png`;
+        downloadBlob(qrCardBlob, qrCardFilename);
+        toast.success('Text image and QR card image downloaded successfully!');
+      } else {
+        toast.success('Text image downloaded successfully!');
+      }
     } catch (e) {
       console.error(e);
-      toast.error('Failed to download image. Please try again.');
+      toast.error('Failed to download assets. Please try again.');
     } finally {
       setDownloading(false);
       setSelectedTransaction(null);
