@@ -93,6 +93,9 @@ const printRef = React.useRef(null);
   const [trackingId, setTrackingId] = useState('');
   const [shippingCompany, setShippingCompany] = useState('');
   const [isProcessingShipping, setIsProcessingShipping] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleOpenCardDetails = (transaction) => {
     setSelectedCardDetails(transaction);
@@ -305,6 +308,64 @@ const printRef = React.useRef(null);
     setTrackingId('');
     setShippingCompany('');
     setIsProcessingShipping(false);
+  };
+
+  const handleOpenDeleteDialog = (transaction) => {
+    if (isDeleting) {
+      return;
+    }
+    setTransactionToDelete(transaction);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    if (isDeleting) {
+      return;
+    }
+    setDeleteDialogOpen(false);
+    setTransactionToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!transactionToDelete?._id || isDeleting) {
+      return;
+    }
+
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const token = window.localStorage.getItem('token');
+
+    if (!token) {
+      toast.error('Authentication token missing. Please log in again.');
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/api/transactions/delete-transaction/${transactionToDelete._id}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': token
+          }
+        }
+      );
+
+      setTransactions((prevTransactions) =>
+        prevTransactions.filter((transaction) => transaction._id !== transactionToDelete._id)
+      );
+
+      toast.success('Order deleted successfully');
+      setDeleteDialogOpen(false);
+      setTransactionToDelete(null);
+    } catch (error) {
+      console.log(error);
+      const message = error?.response?.data?.msg || 'Failed to delete order. Please try again.';
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getCard = async () => {
@@ -3522,7 +3583,6 @@ function buildPrintHTML_SameStyle(transaction) {
       }
 
       const baseBlob = await fetchBlob(imageUrl);
-      const baseImage = await loadImageFromBlob(baseBlob);
       const cardFilename = `card-text-${transaction?.orderId || 'image'}.png`;
 
       downloadBlob(baseBlob, cardFilename);
@@ -3536,20 +3596,12 @@ function buildPrintHTML_SameStyle(transaction) {
         const qrImage = await loadImageFromBlob(qrBlob);
 
         const canvas = document.createElement('canvas');
-        canvas.width = baseImage.width;
-        canvas.height = baseImage.height;
+        const qrOutputSize = 400;
+        canvas.width = qrOutputSize;
+        canvas.height = qrOutputSize;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const qrSize = Math.min(canvas.width * 0.32, 420);
-        const margin = Math.max(canvas.width * 0.035, 28);
-        const qrX = canvas.width - qrSize - margin;
-        const qrY = canvas.height - qrSize - margin;
-
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(qrX - margin * 0.25, qrY - margin * 0.25, qrSize + margin * 0.5, qrSize + margin * 0.5);
-        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(qrImage, 0, 0, canvas.width, canvas.height);
 
         const qrCardBlob = await new Promise((resolve, reject) => {
           canvas.toBlob((blob) => {
@@ -3560,7 +3612,7 @@ function buildPrintHTML_SameStyle(transaction) {
 
         const qrCardFilename = `card-qr-${transaction?.orderId || templateId}.png`;
         downloadBlob(qrCardBlob, qrCardFilename);
-        toast.success('Text image and QR card image downloaded successfully!');
+        toast.success('Text image and QR code downloaded successfully!');
       } else {
         toast.success('Text image downloaded successfully!');
       }
@@ -4029,6 +4081,21 @@ function buildPrintHTML_SameStyle(transaction) {
                                 ) : (
                                   <DownloadIcon onClick={() => handleDownloadPNG(data)}/>
                                 )}
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete Order">
+                              <IconButton
+                                onClick={() => handleOpenDeleteDialog(data)}
+                                sx={{
+                                  // color: theme.palette.primary.contrastText,
+                                  // backgroundColor: theme.palette.primary.main,
+                                  // '&:hover': {
+                                  //   backgroundColor: theme.palette.primary.main,
+                                  //   boxShadow: '0 4px 12px rgba(192, 155, 155, 0.35)'
+                                  // }
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
                           </Box>
@@ -6456,6 +6523,92 @@ function buildPrintHTML_SameStyle(transaction) {
                 ) : (
                   'Confirm Shipped'
                 )}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <Dialog
+            open={deleteDialogOpen}
+            onClose={handleCloseDeleteDialog}
+            maxWidth="xs"
+            fullWidth
+          >
+            <DialogTitle
+              sx={{
+                backgroundColor: '#f8fafc',
+                borderBottom: '1px solid #e5e7eb',
+                fontWeight: 600,
+                color: '#1f2937'
+              }}
+            >
+              Delete Order
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+              <Typography sx={{ mb: 2, color: '#374151', mt: 2 }}>
+                Are you sure you want to permanently delete this order?
+              </Typography>
+              {transactionToDelete && (
+                <Box
+                  sx={{
+                    p: 2,
+                    backgroundColor: '#f9fafb',
+                    borderRadius: 1,
+                    border: '1px solid #e5e7eb'
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    Order #{transactionToDelete.orderId || 'N/A'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                    {transactionToDelete?.cardCustomizationId?.userId?.firstName || 'Customer'}{' '}
+                    {transactionToDelete?.cardCustomizationId?.userId?.lastName || ''}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#6b7280' }}>
+                    {transactionToDelete?.cardCustomizationId?.userId?.email || ''}
+                  </Typography>
+                </Box>
+              )}
+            </DialogContent>
+            <DialogActions
+              sx={{
+                p: 3,
+                backgroundColor: '#ffffff',
+                borderTop: '1px solid #e5e7eb'
+              }}
+            >
+              <Button
+                onClick={handleCloseDeleteDialog}
+                variant="outlined"
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  fontWeight: 600,
+                  color: '#374151',
+                  borderColor: '#d1d5db'
+                }}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmDelete}
+                variant="contained"
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  backgroundColor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  fontWeight: 600,
+                  boxShadow: 'none',
+                  '&:hover': {
+                    backgroundColor: theme.palette.primary.main,
+                    boxShadow: '0 4px 12px rgba(192, 155, 155, 0.35)'
+                  }
+                }}
+                disabled={isDeleting}
+              >
+                {isDeleting ? <CircularProgress size={18} color="inherit" /> : 'Delete'}
               </Button>
             </DialogActions>
           </Dialog>
