@@ -71,10 +71,10 @@ const Page = () => {
       : `${sizeInKB.toFixed(2)} KB`;
 
 // Set maximum size to 1MB (in bytes)
-    const maxSizeInBytes = 1 * 1024 * 1024;
+    const maxSizeInBytes = 5 * 1024 * 1024;
 
     if (sizeInBytes > maxSizeInBytes) {
-      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 5 MB.`,
         {
           duration: 3000
         });
@@ -181,10 +181,10 @@ const Page = () => {
       : `${sizeInKB.toFixed(2)} KB`;
 
 // Set maximum size to 1MB (in bytes)
-    const maxSizeInBytes = 1 * 1024 * 1024;
+    const maxSizeInBytes = 5 * 1024 * 1024;
 
     if (sizeInBytes > maxSizeInBytes) {
-      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 5 MB.`,
         {
           duration: 3000
         });
@@ -290,10 +290,10 @@ const Page = () => {
       : `${sizeInKB.toFixed(2)} KB`;
 
 // Set maximum size to 1MB (in bytes)
-    const maxSizeInBytes = 1 * 1024 * 1024;
+    const maxSizeInBytes = 5 * 1024 * 1024;
 
     if (sizeInBytes > maxSizeInBytes) {
-      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 5 MB.`,
         {
           duration: 3000
         });
@@ -400,10 +400,10 @@ const Page = () => {
       : `${sizeInKB.toFixed(2)} KB`;
 
 // Set maximum size to 1MB (in bytes)
-    const maxSizeInBytes = 1 * 1024 * 1024;
+    const maxSizeInBytes = 5 * 1024 * 1024;
 
     if (sizeInBytes > maxSizeInBytes) {
-      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+      toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 5 MB.`,
         {
           duration: 3000
         });
@@ -510,10 +510,10 @@ const Page = () => {
       : `${sizeInKB.toFixed(2)} KB`;
 
     // Set maximum size to 1MB (in bytes)
-    const maxSizeInBytes = 1 * 1024 * 1024;
+    const maxSizeInBytes = 5 * 1024 * 1024;
 
     // if (sizeInBytes > maxSizeInBytes) {
-    //   toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 1 MB.`,
+    //   toast.error(`Image size is too large. Uploaded image size is: ${sizeString}. Max allowed: 5 MB.`,
     //     {
     //       duration: 3000
     //     });
@@ -704,7 +704,7 @@ const Page = () => {
                 borderRadius: 0
               }}>
                 <Box sx={{display:'flex', justifyContent:'flex-start', alignItems:'center',position:'absolute',cursor:'pointer', mt:{md:1, xs:0.2}, ml:{md:1, xs:0.5}}}>
-                  <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
+                  <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 5 MB." >
                     <ErrorOutlineIcon/>
                   </Tooltip>
                 </Box>
@@ -1065,7 +1065,7 @@ const Page = () => {
                 borderRadius: 0
               }}>
                 <Box sx={{display:'flex', justifyContent:'flex-start', alignItems:'center',position:'absolute',cursor:'pointer', mt:{md:1, xs:0.2}, ml:{md:1, xs:0.5}}}>
-                  {/* <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 1 MB." >
+                  {/* <Tooltip sx={{fontWeight:900}} title="Please upload an image with an A5 aspect ratio (approximately 1:1.414). The maximum allowed image size is 5 MB." >
                     <ErrorOutlineIcon/>
                   </Tooltip> */}
                 {/* </Box> */}
