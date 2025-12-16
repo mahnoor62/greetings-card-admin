@@ -4461,7 +4461,16 @@ function buildPrintHTML_SameStyle(transaction) {
                             fontWeight: 700,
                             color: '#111827'
                           }}>
-                            {selectedCardDetails?.cardCustomizationId?.cardId?.cardType?.join(', ') || 'Standard Card'}
+                            {(() => {
+                              const cardType = selectedCardDetails?.cardCustomizationId?.cardId?.cardType;
+                              if (Array.isArray(cardType)) {
+                                return cardType.join(', ');
+                              }
+                              if (typeof cardType === 'object' && cardType !== null) {
+                                return cardType.text || JSON.stringify(cardType);
+                              }
+                              return cardType || 'Standard Card';
+                            })()}
                           </Typography>
                         </Box>
                       </Grid>
@@ -4489,7 +4498,13 @@ function buildPrintHTML_SameStyle(transaction) {
                               fontWeight: 700,
                               color: '#111827'
                             }}>
-                              ${selectedCardDetails.cardCustomizationId.cardId.price}
+                              {(() => {
+                                const price = selectedCardDetails.cardCustomizationId.cardId.price;
+                                if (typeof price === 'object' && price !== null) {
+                                  return `$${price.value || price.amount || JSON.stringify(price)}`;
+                                }
+                                return `$${price}`;
+                              })()}
                             </Typography>
                           </Box>
                         </Grid>
@@ -4517,7 +4532,13 @@ function buildPrintHTML_SameStyle(transaction) {
                             fontWeight: 700,
                             color: '#111827'
                           }}>
-                            {selectedCardDetails?.quantity}
+                            {(() => {
+                              const quantity = selectedCardDetails?.quantity;
+                              if (typeof quantity === 'object' && quantity !== null) {
+                                return quantity.text || quantity.value || JSON.stringify(quantity);
+                              }
+                              return quantity ?? 'N/A';
+                            })()}
                           </Typography>
                         </Box>
                       </Grid>
@@ -4544,7 +4565,13 @@ function buildPrintHTML_SameStyle(transaction) {
                             fontWeight: 700,
                             color: '#111827'
                           }}>
-                            {selectedCardDetails?.cardCustomizationId?.cardId?.promotionCode || 'No Code'}
+                            {(() => {
+                              const promotionCode = selectedCardDetails?.cardCustomizationId?.cardId?.promotionCode;
+                              if (typeof promotionCode === 'object' && promotionCode !== null) {
+                                return promotionCode.text || promotionCode.code || JSON.stringify(promotionCode);
+                              }
+                              return promotionCode || 'No Code';
+                            })()}
                           </Typography>
                         </Box>
                       </Grid>
@@ -4592,8 +4619,13 @@ function buildPrintHTML_SameStyle(transaction) {
                                 fontWeight: 500,
                                 color: '#111827'
                               }}>
-                                {selectedCardDetails.cardCustomizationId.arTemplateData.mainHeading.text || 
-                                 selectedCardDetails.cardCustomizationId.arTemplateData.mainHeading}
+                                {(() => {
+                                  const mainHeading = selectedCardDetails.cardCustomizationId.arTemplateData.mainHeading;
+                                  if (typeof mainHeading === 'object' && mainHeading !== null) {
+                                    return mainHeading.text || mainHeading.value || JSON.stringify(mainHeading);
+                                  }
+                                  return mainHeading || 'N/A';
+                                })()}
                               </Typography>
                             </Box>
                           </Grid>
@@ -4624,8 +4656,13 @@ function buildPrintHTML_SameStyle(transaction) {
                                 lineHeight: 1.6,
                                 color: '#111827'
                               }}>
-                                {selectedCardDetails.cardCustomizationId.arTemplateData.paragraph1.text || 
-                                 selectedCardDetails.cardCustomizationId.arTemplateData.paragraph1}
+                                {(() => {
+                                  const paragraph1 = selectedCardDetails.cardCustomizationId.arTemplateData.paragraph1;
+                                  if (typeof paragraph1 === 'object' && paragraph1 !== null) {
+                                    return paragraph1.text || paragraph1.value || JSON.stringify(paragraph1);
+                                  }
+                                  return paragraph1 || 'N/A';
+                                })()}
                               </Typography>
                             </Box>
                           </Grid>
