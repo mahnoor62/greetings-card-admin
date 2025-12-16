@@ -4580,8 +4580,8 @@ function buildPrintHTML_SameStyle(transaction) {
 
                   <Divider />
 
-                  {/* Card Customization Details */}
-                  {selectedCardDetails?.cardCustomizationId?.arTemplateData && (
+                  {/* Card Customization Details - Hidden */}
+                  {/* {selectedCardDetails?.cardCustomizationId?.arTemplateData && (
                     <Box>
                       <Typography variant="h6" sx={{ 
                         fontWeight: 600, 
@@ -4667,7 +4667,7 @@ function buildPrintHTML_SameStyle(transaction) {
                             </Box>
                           </Grid>
                         )}
-                        {/* {selectedCardDetails.cardCustomizationId.arTemplateData.templateIndex && (
+                        {selectedCardDetails.cardCustomizationId.arTemplateData.templateIndex && (
                           <Grid item xs={12} sm={6}>
                             <Box sx={{ 
                               p: 2,
@@ -4691,10 +4691,10 @@ function buildPrintHTML_SameStyle(transaction) {
                               </Typography>
                             </Box>
                           </Grid>
-                        )} */}
+                        )}
                       </Grid>
                     </Box>
-                  )}
+                  )} */}
 
                   {/* Video Content */}
                   {selectedCardDetails?.cardCustomizationId?.templateVideo && (
